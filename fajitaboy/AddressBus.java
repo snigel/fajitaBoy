@@ -87,7 +87,7 @@ public class AddressBus implements MemoryInterface {
         raml = new RamLow(RAML_START, RAML_END);
         initialize(raml, RAML_START, RAML_END);
 
-        echo = new Echo(raml, RAML_START, ECHO_START);
+        echo = new Echo(this, RAML_START, ECHO_START);
         initialize(echo, ECHO_START, ECHO_END);
 
         vram = new Vram(VRAM_START, VRAM_END);
@@ -132,7 +132,6 @@ public class AddressBus implements MemoryInterface {
         }
         return module[address].read(address);
     }
-
 
 
     /**

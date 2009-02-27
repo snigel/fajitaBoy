@@ -4,18 +4,7 @@
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class Hram implements MemoryInterface {
-
-    /**
-     * This array holds the memory space of HRAM.
-     */
-    private int[] hram;
-    /**
-     * The offset value is used for subtracting the high incoming addresses to a
-     * value starting at zero. This way the class can start using the array from
-     * ram[0] instead of the offset value.
-     */
-    private int offset;
+public class Hram extends MemoryComponent {
 
     /**
      * @param start
@@ -26,29 +15,6 @@ public class Hram implements MemoryInterface {
      *            array and for setting the offset value
      */
     Hram(final int start, final int end) {
-        hram = new int[end - start]; // sets size of hram
-        offset = start; // set offset value for addressing
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public final int read(final int address) {
-        int addr = address - offset;
-        if (addr < 0 || addr > hram.length) {
-            throw new ArrayIndexOutOfBoundsException("hram.java");
-        }
-        return hram[addr];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public final void write(final int address, final int data) {
-        int addr = address - offset;
-        if (addr < 0 || addr > hram.length) {
-            throw new ArrayIndexOutOfBoundsException("hram.java");
-        }
-        hram[addr] = data;
+        super(start, end);
     }
 }

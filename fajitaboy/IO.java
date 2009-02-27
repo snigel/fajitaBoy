@@ -3,18 +3,7 @@
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class IO implements MemoryInterface {
-
-    /**
-     * This array holds the memory space of IO.
-     */
-    private int[] ram;
-    /**
-     * The offset value is used for subtracting the high incoming addresses to a
-     * value starting at zero. This way the class can start using the array from
-     * ram[0] instead of the offset value.
-     */
-    private int offset;
+public class IO extends MemoryComponent {
 
     /**
      * @param start
@@ -25,31 +14,7 @@ public class IO implements MemoryInterface {
      *            and for setting the offset value
      */
     IO(final int start, final int end) {
-        ram = new int[end - start]; // sets size of ram
-        offset = start; // set offset value for addressing
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public final int read(final int address) {
-        int addr = address - offset;
-        if (addr < 0 || addr > ram.length) {
-            throw new ArrayIndexOutOfBoundsException("IO.java");
-        }
-        return ram[addr];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public final void write(final int address, final int data) {
-        int addr = address - offset;
-        if (addr < 0 || addr > ram.length) {
-            throw new ArrayIndexOutOfBoundsException("IO.java");
-        }
-        ram[addr] = data;
-
+        super(start, end);
     }
 
 }
