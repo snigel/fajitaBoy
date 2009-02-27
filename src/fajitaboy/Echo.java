@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Reroutes echo references to another address. Needs echo address, original
  * address and object references to pass on to.

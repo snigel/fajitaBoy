@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Represent the interrupt enable register.
  *

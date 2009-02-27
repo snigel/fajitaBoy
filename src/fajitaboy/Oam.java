@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Represents the Sprite table part of the memory.
  * @author Adam Hulin, Johan Gustafsson

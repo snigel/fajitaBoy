@@ -1,6 +1,8 @@
+package fajitaboy;
+
 import java.io.*; //For debug pause and stepping
-import static constants.AddressConstants.*;
-import static constants.HardwareConstants.*;
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 
 /**
  * CPU class for emulating the Game Boy CPU.

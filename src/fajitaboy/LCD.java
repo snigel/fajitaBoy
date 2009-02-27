@@ -1,5 +1,7 @@
-import static constants.AddressConstants.*;
-import static constants.MessageConstants.*;
+package fajitaboy;
+
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.MessageConstants.*;
 
 /**
  * @author Tobias Svensson

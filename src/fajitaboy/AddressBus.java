@@ -1,4 +1,6 @@
-import static constants.AddressConstants.*;
+package fajitaboy;
+
+import static fajitaboy.constants.AddressConstants.*;
 
 /**
  * Addressbus class that handles the whole address space. Through it all the

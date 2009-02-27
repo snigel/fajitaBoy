@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * @author Arvid Jakobsson, Marcus Johansson
  *

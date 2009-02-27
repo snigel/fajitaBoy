@@ -1,6 +1,8 @@
-import static constants.HardwareConstants.*;
-import static constants.AddressConstants.*;
-import static constants.MessageConstants.*;
+package fajitaboy;
+
+import static fajitaboy.constants.HardwareConstants.*;
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.MessageConstants.*;
 
 /**
  * Oscillator emulates the clock frequency of the Game Boy and

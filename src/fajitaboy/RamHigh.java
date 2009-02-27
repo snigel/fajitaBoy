@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * RamHigh is the upper 4K of the Gameboy memory.
  * It may have different banks if it's designed

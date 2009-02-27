@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * External RAM that is located on the cartridge.
  * @author Adam Hulin, Johan Gustafsson

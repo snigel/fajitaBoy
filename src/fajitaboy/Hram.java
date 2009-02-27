@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Represents the High RAM part of the memory.
  *

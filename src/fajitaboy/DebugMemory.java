@@ -1,3 +1,4 @@
+package fajitaboy;
 
 /**
  * This class is for debugging purposes only. So that the memory

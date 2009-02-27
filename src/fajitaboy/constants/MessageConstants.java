@@ -1,4 +1,4 @@
-package constants;
+package fajitaboy.constants;
 
 public final class MessageConstants {
 	public static final int MSG_LCD_CHANGE_MODE = 0;

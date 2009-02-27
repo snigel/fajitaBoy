@@ -1,4 +1,4 @@
-package constants;
+package fajitaboy.constants;
 
 public final class AddressConstants {
 

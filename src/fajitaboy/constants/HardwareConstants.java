@@ -1,4 +1,4 @@
-package constants;
+package fajitaboy.constants;
 
 public final class HardwareConstants {
 	public static final int GB_CLOCK_FREQUENCY = 4194304; // MHz

@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Represents the graphic ram, also known as VRAM.
  *

@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * $Rev$ .
  *

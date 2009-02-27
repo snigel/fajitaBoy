@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Exception for then memory is accessed out of bounds.
  * @author Adam Hulin, Johan Gustafsson

@@ -1,3 +1,6 @@
+package fajitaboy;
+
+
 /**
  * @author Tobias Svensson
  * 

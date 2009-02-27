@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Represent the I/0 part of the memory.
  * @author Adam Hulin, Johan Gustafsson

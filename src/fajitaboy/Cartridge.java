@@ -1,3 +1,5 @@
+package fajitaboy;
+
 /**
  * Represents the memory which the cartridges ROM is saved.
  *
