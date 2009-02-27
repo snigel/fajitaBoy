@@ -1,0 +1,57 @@
+
+Detailed format:
+
+Titel: (verbaliserat) 
+Aktör: Användaren om inget annat anges
+Mål: Mål med usecaset
+Huvud flöde:
+Alternativa flöden:
+Efterhands/förhands-villkor:
+
+actionblock : input -> validation + computation -> result
+
+
+----------------------------------------------------------------------
+
+Titel: Starta ett enkelspelar spel
+Aktör: Användaren
+Mål: Att starta ett enkelspelar spel
+Beskrivning: Användaren väljer singleplayer läge. Användaren väljer en ROM och eventuellt en savestate. Användaren väljer att starta spelet.
+Huvudflöde: 
+1.  Applet laddas
+2.  Startskärm visas med kontroller samt val mellan en-eller flerspelarläge
+3.  Användaren väljer enspelarläge
+4.  Ett filuplladdningsinterface visas. Användaren ombeds att ladda upp ROM
+5.  Användaren väljer en ROM, och väljer att ladda
+6.  Systemet validerar att filen är en ROM och att den går att läsa
+7.  ROM laddas in (progressbar)
+8.  Systemet validerar att ROMen är korrekt
+9.  Systemet validerar ROMens kompabilitet
+10. Spelinterface visas
+11. ROMen börjar emularas
+
+Alternativa flöden:
+3a. 1. Användaren väljer flerspelarläge av misstag
+    2. Användaren trycker på backåtknappen
+    3. Gå till punkt 2
+6a. 1. Filen kan ej läsas in
+    2. Felmeddelande visas
+    3. Gå till punkt 4
+8a. 1. Inte en korrekt ROM
+    2. Felmeddelande visas
+    3. Gå till punkt 4
+9a. 1. ROMen är ej registrerad som kompatibel
+    2. Användaren varnas
+    3. Systemet presenterar valet att fortsätta eller gå till menyn
+    4. Användaren fortsätter
+    9a.3. 1. Användaren väljer att gå till menyn
+          2. Gå till punkt 4
+
+Efterhands/förhands-vilkor:
+
+----------------------------------------------------------------------
+
+Titel: Ladda state
+Aktör: Användaren
+Mål: Att återställa spelet till ett visst tidigare sparat tillstånd
+Beskrivning: Via någon meny eller snabbknapp får användaren upp en dialogruta där hon får välja vilken sparfil hon vill ladda. Spelet återupptas till det tillstånd som sparades

@@ -1,0 +1,304 @@
+Titel: Användare skall kunna chatta med andra spelare i multiplayerläget
+Beskrivning: I lobbyfunktionen, innan en användare startar ett flerspelarspel med en annan användare, skall användarna kunna chatta med varandra.
+Prioritet: 3
+Klassfiering: Interface, (F)
+
+Titel: Reglerbar ljudvolym.
+Beskrivning: Ljudvolymen skall vara reglerbar, på en skala från noll till ett maxvärde.
+Prioritet: 3
+Klassifiering: Emulator, (F)
+
+(
+Titel: Användare skall kunna kontrollera volymen genom användargränssnittet.
+Prioritet: 3
+Klassifiering: Interface, (U)
+)
+
+Titel: ROM skall gå att byta utan omladdning
+Beskrivning: Användren skall kunna ladda in en annan ROM under pågående spel, utan att behöva ladda om sidan.
+Prioritet: 3
+Klassifiering: Emulator, (F)
+
+(Kvantifiera)?
+Titel: Intuitivt gränssnitt.
+Beskrivning: Användargränssnittet skall vara intuitivt. Användare skall utan att behöva läsa manual eller annan dokumentation kunna använda emulatorn, via information som presenteras vi appleten.
+Prioritet: 1
+Klassifiering: Interfae, (U)
+
+Titel: Bra flerspelar-prestanda över TCP/IP
+Beskrivning: Under lagg som är mindre än 100 ms, skall två användare kunna spela flerspelarläge, med en framerate på 25 fps eller mer, och med acceptabel fördröjning av knapptryck (<150 ms från tryck till effekt, ~10 frames).
+Prioritet: 2
+Klassifiering: Emulator (F)
+
+Titel: Emulatorn skall stödja flerspelarläge för två spelare över TCP/IP
+Beskrivning: Två spelare som båda är anslutna till samma nätverk över TCP/IP, som känner till varandras IP adresser, skall kunna spela i flerspelarläge med varandra.
+Prioritet: 1
+Klassifiering: Emulator (F)
+
+Titel: Emulatorn skall vara spelbar i enspelarläge på en netbook
+Beskrivning: Emulator skall kunna använvdas på en dator med lägre prestanda. Lägre krav på datorn är 700 mhz processor, 256 mb ram.
+Prioritet: 2
+Klassifiering: Emulator (P)
+
+Titel:Lättstartad
+Beskrivning: 85% av användarna skall kunna starta emulatorn och komma igång med ett spel på ca 2-5min, förutsatt att Java är installerat och användaren har en ROM på hårddisken.
+Prioritet: 2
+Klassificering: Gränssnitt, emulator (UP)
+
+Titel: Grafiskt gränssnitt
+Kort beskrivning: Java-appleskall ett grafiskt gränssnitt presenteras, med vilket användaren kan kontrollera och använda emulatorns alla användarfunktioner.
+Prioritet: 2
+Klassifiering: änssnitt(U)
+
+Titel: Minimalistiskt gränssnitt
+Kort beskrivning: grafiska gränssnittet skall vara designat för att, med så få interaktionssteg som möjligt, ge användaren tillgång till emulatorns funktioner. 
+Prioritet:2
+Klassifiering:Gränssnitt (U)
+
+Titel: Enkel inladdning av ROM
+Kort beskrivning: Från det att användaren startat Java-appleten skall användaren med ett knapptryck kunna påbörja inladdning av en ROM i emulatorn.
+Prioritet: 2
+Klassifiering: Gränssnitt (U)
+
+Titel: Save states
+Kort beskrivning: Emulatorn skall ha stöd för save states i enspelarläge. Det innebär att användaren skall på sin hårddisk kunna spara sitt nuvarande läge i emulatorn (hur långt användaren har kommit i spelet till exempel), och vid ett senare tillfälle spelläge ladda från denna fil.
+Prioritet: 3
+Klassifiering:  Emulator, Funktionellt, (F)
+
+Titel: Kan nås via webbläsare
+Kort beskrivning: Programmet skall kunna nås med hjälp av endast en webbläsare.
+Prioritet: 1
+Klassifiering:  Gränssnitt. Funktionellt, Installability (FS)
+
+Titel: Liten filstorlek på Applet
+Kort beskrivning: Den applet som programmet består av skall ha en filstorlek på mindre än 1MB.
+Prioritet: 3
+Klassifiering: Emulator, Performance (P)
+
+(kvantifiera)
+Titel: Feltolerant
+Kort beskrivning: Emulatorn skall i den mån som är möjlig ignorera eventuella fel och fortsätta köra utan att krascha.
+Prioritet: 2
+Klassifiering:  Emulator, Reliability (R)
+
+Titel: Söka efter motspelare
+Kort beskrivning: Det skall finnas ett interface för att söka efter andra användare som vill starta ett multiplayerspel. Interfacet skall visa vart i världen de andra användarna befinner sig.
+Prioritet: 2
+Klassifiering: Gränssnitt (U)
+
+Titel: Multiplayer på samma dator
+Kort beskrivning: Det skall vara möjligt för två spelare att spela ett multiplayerspel på en och samma dator. Detta skall ske genom att två “Game Boy”-skärmar visas bredvid varandra på datorskärmen, och genom att användarna delar tangentbord.
+Prioritet: 3
+Klassifiering: Emulator, Funktionellt (F)
+
+Titel: Spelarnationalitet
+Kort beskrivning: I flerspelarlobbyn skall man kunna se spelarnas nationalitet.
+Prioritet: 3
+Klassifiering: Interface / Funktionellt krav
+
+Titel: Manual
+Kort beskrivning: En simpel användar manual skall finnas tillgänglig på hemsidan
+Prioritet 3
+Klassifiering: Webb / Usability
+
+Titel: Instruerande startskärm
+Kort beskrivning: När emulatorn startas skall en startskärm dyka upp med instruktioner för hur man använder emulatorn
+Prioritet: 2
+Klassifiering: Interface / Usability + Funktionellt
+
+Titel: Ändra kontroller
+Kort beskrivning: Användaren skall kunna mappa om spel-kontrollerna efter behag.
+Prioritet: 3
+Klassifiering: Emulator / Funktionellt
+
+Titel: ROM överföring mellan klienter
+Kort beskrivning: Den spelare som initerar ett nätverksspel skickar automatiskt över ROM filer till andra klienter som ansluter
+Prioritet: 3
+Klassifiering: Interface / Funktionellt krav
+
+Titel: Server lagrar inte ROM-filer
+Kort beskrivning: ROM filerna existerar bara hos klienterna, och aldrig på servern
+Prioritet: 1
+Klassifiering: Webb / Funktionellt krav
+
+Titel: Reset av ROM
+Kort beskrivning: System skall tillhandahålla funktionalitet för att starta om en ROM från början via interfacet.
+Prioritet: 2
+Klassifiering: Interface / Funktionellt krav
+
+Titel: GBC-liknande färgteman
+Kort beskrivning: Användaren kan byta ut gråskalan mot valfria färger i emulatorn
+Prioritet: 3
+Klassifiering: Emulator / Funktionellt krav
+
+Titel: Dold muspekare
+Kort beskrivning: Då muspekaren ligger still över emulatorn skall denna döljas efter 3 sekunder
+Prioritet: 3
+Klassifiering: Interface / Funktionellt krav
+
+Titel: Pause-funktion
+Kort beskrivning: Användaren skall kunna byta pausa och avpause emulationen med ett enkelt interaktionssteg
+Prioritet: 2
+Klassifiering: Emulator / Funktionellt krav
+
+Titel: Zoomnivå
+Kort beskrivning: Användaren kan bestämma storlek på emulatorn
+Prioritet: 3
+Klassifiering: Webb / Funktionellt krav
+
+Titel: Öppna Zip-filer
+Kort beskrivning: Användaren skall kunna ladda upp zip filer med ROMs i
+Prioritet: 3
+Klassifiering: Interface / Funktionellt krav
+
+Titel: Logginformation
+Kort beskrivning: Systemet laddar upp information om hur väl emulering av en ROM gick till servern, som skall spara detta i en databas. Man kan sedan se hur väl olika ROMs fungerar
+Prioritet: 3
+Klassifiering: Webb / Funktionellt krav
+
+Titel: Betygsättning av ROMs
+Kort beskrivning: Användarna skall kunna betygsätta hur väl en ROM emulerades med ett fåtal interaktionssteg
+Prioritet: 3
+Klassifiering: Interface / Usability
+
+Titel: Domän
+Kort beskrivning: Systemet skall finnas tillgänglig på en specifik domän på internet.
+Prioritet: 3
+Klassifiering: Webb / Usability
+
+Titel: Förståeliga felmeddelanden.
+Kort beskrivning: Om något går fel i programmet ska felmeddelandet vara förståeligt för oss utvecklare och helst även för användaren.
+Prioritet: 2
+Kassificering:  Emulator/Supportability
+Typ: Ickefunktionellt krav
+
+Titel: Automatisk felrapportering
+Kort beskrivning: En funktion som automatiskt skickar in felmeddelande tillsammans med en savestate och checksum på ROM
+Prioritet: 3
+Kassificering:  Emulator/Supportability
+Typ: Funktionellt krav
+
+Titel: Enkelt utseende
+Kort beskrivning: Utseendet ska göra att en ny användare inte tvekar på var de olika funktionerna finns att nå.
+Prioritet: 2
+Kassificering: Användargränssnitt
+Typ: Ickefunktionellt krav
+
+Titel: Teman för webbsidan
+Kort beskrivning: Möjlighet att växla bakgrund / färgschema på hemsidan som omger emulatorn
+Prioritet: 3
+Kassificering: webbsida/Userinterface
+Typ: Funktionellt krav
+
+Titel: Inaktivering av ljudmodul ska inte påverka emulatorns övriga funktionalitet
+Kort beskrivning: Möjlighet att inaktivera ljudmodulen för att öka prestandan eller kunna testköra emulatorn utan ljuddelen.
+Prioritet: 1
+Kassificering: Emulator/Performance
+Typ: Funktionellt krav
+
+Titel:  Laddningstid under 1 minut på ett referenssystem motsvarande en enklare hemdator med 0.5mbit
+Kort beskrivning: Från att användaren väljer att öppna hemsidan med emulatorn ska det inte ta mer än en minut innan spelet är igång.
+Prioritet: 2
+Kassificering: Emulator/Webbsida/Performance
+Typ: Ickefunktionellt krav
+
+Titel: Spelbart nätverksspel med upp till 100ms fördröjning mellan spelarna.
+Kort beskrivning: Nätverksspelet ska vara så pass spelbart att spelglädjen överstiger nätverkskomplikationerna.
+Prioritet: 3
+Kassificering: Nätverk/Performance
+Typ: Ickefunktionellt krav
+
+Titel: Möjighet att kontakta utvecklarna
+Kort beskrivning: Användaren ska ha möjlighet att kontakta utvecklarna, antingen via emulatorn eller webbsidan.
+Prioritet: 1
+Kassificering: Webbsidan/Supportability
+Typ: Funktionellt krav
+
+Titel: Användarmanual
+Kort beskrivning: En användarmanual i storleksordning upp till 1st A4 ska finnas tillgänglig via hemsidan
+Prioritet: 2
+Kassificering: Webbsidan/Supportability
+Typ: Funktionellt krav
+
+Titel: Game Boyens systemlänk ska fungera tillfredställande i lokalt nätverk
+Kort beskrivning: Nätverksspel ska fungera näst intill problemfritt under låglatensförhållanden
+Prioritet: 2
+Kassificering: Nätverk/Performance
+Typ: Ickefunktionellt krav
+
+Titel: Emulatorn ska vara säker att använda.
+Kort beskrivning: Emulatorn ska inte vara någon säkerhetsrisk för användaren att exekvera. Ska inte ha rättigheter att exempelvis ta bort systemfiler. Ska inte skada datorn.
+Prioritet:  2
+Kassificering: Användargränssnitt/Reliability
+Typ: Ickefunktionellt krav
+
+Titel:  Konsekvent användargränssnitt med avseende på flashspel
+Kort beskrivning: Att använda emulatorn ska påminna om de olika flashspel som finns tillgängliga på internet.
+Prioritet: 2
+Kassificering: Användargränssnitt
+Typ: Ickefunktionellt krav
+
+Titel: Konsekvent användargränssnitt med avseende på andra emulatorer.
+Kort beskrivning: Att använda emulatorn ska påminna om de andra emulatorer som finns tillgängliga.
+Prioritet: 2
+Kassificering: Användargränssnitt
+Typ: Ickefunktionellt krav
+
+Titel: Konsekvent utseende på hemsida, lobby och emulator
+Kort beskrivning: Knappar, menyer och liknande ska hålla en konsekvent stil mellan projektets olika delar för att göra systemet som helhet mer lättförståeligt.
+Prioritet: 1
+Kassificering: Användargränssnitt
+Typ: Ickefunktionellt krav
+
+
+Titel: Inaktivera ljudmodul  
+Kort beskrivning: Möjlighet att stänga av ljudet helt, så att det inte genereras alls.
+Prioritet: 1
+Klassifiering: Emulatorn (F)
+
+Titel: Frameskip  
+Kort beskrivning: Emulatorn hoppar över att rita ett antal frames och möjliggöra att spelets hastighet ökar. 
+Prioritet: 1
+Klassifiering: Emulatorn (F)
+
+Titel: Grafiskfilter   
+Kort beskrivning: Filtret förbättrar det visuella intrycket vid utsträckt bild. 
+Prioritet: 1
+Klassifiering: Emulatorn (F)
+
+Titel: Ljudfilter    
+Kort beskrivning: Filtret skall förbättra original ljudet, tillbehagligare en upplevelse.
+Prioritet: 1
+Klassifiering: Emulatorn (F)
+
+Titel: Responsivitet     
+Kort beskrivning: Responsiviteten vid input från användaren skall upplevas som omedelbar. 
+Prioritet: 3
+Klassifiering: Emulatorn (R)
+
+Titel: Modulerad kod för enkel testning     
+Kort beskrivning: Koden skall följa GRASP mönstret, för att möjliggöra testning av enskilda moduler.
+Prioritet: 3 
+Klassifiering: Emulatorn (S)
+
+Titel: Prestanda krav hos hårdvaran     
+Kort beskrivning: Emulatorn skall kunna spelas på en low-end dator. Med prestandan av en 700 Mhz processor och 256 MB ram. 
+Prioritet: 2
+Klassifiering: Emulatorn (S)
+
+Titel: Språkstöd     
+Kort beskrivning: Språket som används i emulatorn och hemsidan skall kunna bytas till ett annat språk än engelska.  
+Prioritet: 1
+Klassifiering: Webb (U)
+
+Titel: Installationskrav     
+Kort beskrivning: Man skall inte behöva installera något annat än en webbläsare och java.
+Prioritet: 3
+Klassifiering: Webb (S)
+
+Titel: Game Boy Color stöd 
+Kort beskrivning: Emulatorn skall kunna emulera Game Boy Color spel.
+Prioritet: 2
+Klassifiering: Emulatorn (F)
+
+

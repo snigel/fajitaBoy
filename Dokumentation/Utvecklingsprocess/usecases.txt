@@ -1,0 +1,116 @@
+Brief format:
+
+Titel: Starta ett enkelspelar spel
+Aktör: Användaren
+Mål: Att starta ett enkelspelar spel
+Beskrivning: Användaren väljer singleplayer läge. Användaren väljer en ROM och eventuellt en savestate. Användaren väljer att starta spelet.
+Prioritet: 1
+
+
+Titel: Ladda state
+Aktör: Användaren
+Mål: Att återställa spelet till ett visst tidigare sparat tillstånd
+Beskrivning: Via någon meny eller snabbknapp får användaren upp en dialogruta där hon får välja vilken sparfil hon vill ladda. Spelet återupptas till det tillstånd som sparades
+Prioritet: 1
+
+Titel: Spara state
+Aktör: Användaren
+Mål: Spara spelets tillstånd för att vid senare tillfälle kunna fortsätta.
+Beskrivning: Via någon meny eller snabbknapp får användaren upp en dialogruta där hon får välja vart hon vill lägga sin sparfil.
+Prioritet: 1
+
+Titel: Ladda ROM
+Aktör: Användaren
+Mål: Att ladda ett spel från en ROM-fil
+Beskrivning: Via någon meny eller snabbknapp får användaren upp en dialogruta där hon får välja vilken ROM-fil hon vill ladda. 
+Prioritet: 1
+
+Titel: Ladda ROM från webb
+Aktör: Användaren
+Mål: Att ladda ett spel från en ROM-fil från internet
+Beskrivning: Via någon meny eller snabbknapp får användaren upp en dialogruta där hon får välja vilken ROM-fil hon vill ladda. 
+Prioritet: ???
+
+Titel: Avsluta enspelarspel
+Aktör: Användaren
+Mål: Att återgå till huvudmenyn när man har spelat klart ett spel
+Beskrivning: Via någon meny eller snabbknapp väljer användaren att avsluta spelet. Spelet avslutas och huvudmenyn visas.
+Prioritet: ???
+
+Titel: Avsluta flerspelarspel
+Aktör: Användaren
+Mål: Att återgå till huvudmenyn när man har spelat klart ett flerspelarspel
+Beskrivning: Via nångon meny eller snabbknapp väljer användaren att avsluta spelet. Spelet avslutas och motspelaren meddelas, huvudmenyn visas.
+Prioritet: ???
+
+Titel: Kompabilitetsdatabas
+Aktör: ???
+Mål: ???
+Beskrivning: ???
+
+
+Titel: Starta om en ROM
+Aktör: Användaren
+Mål: Att starta om den aktuella ROMen utan att behöva manuellt ladda in den igen.
+Beskrivning: Via antingen tangentbordsgenväg eller någon meny kan användaren starta om spelet
+Prioritet: 2
+
+Titel: Pausa ett spel
+Aktör: Användaren
+Mål: Att pausa emuleringen
+Beskrivning: Användaren trycker en snabbknapp och emuleringen pausar.
+Prioritet: 2
+
+Titel: Återstarta pausat spel
+Aktör: Användaren
+Mål: Att återstarta ett pausat spel
+Beskrivning: Med samma snabbknapp som användes för att pausa emuleringen kan användaren återstarta det
+Prioritet: 2
+
+Titel: Kontakta utvecklarna med ett allmänt ärende.
+Mål: För användaren att kommunicera med utvecklarna
+Beskrivning: Under något tillfälle då användaren använder webbsidan, eller använder emulatorn för att spela, vill användaren kontakta utvecklarna, för att be om hjälp med något eller ge kritik. På webbsidan finns en länk med titeln Kontakt, vilken användaren klickar på. Ett kontakt-formulär presenteras, som ger användaren möjlighet att fylla i ärende, sin epost och ett meddelande. Då användaren klickar på en knapp med en titel i stil med "Sänd", skickas informationen till utvecklarna.
+(via epost)
+(Stängs emulatorn? På samma sida? AJAX?)
+Prioritet: 2
+
+Titel: Skapa ett multiplayer spel
+Aktör: Användaren
+Mål: Att skapa ett mutiplayer spel som andra användare kan ansluta till.
+Beskrivning: Användaren väljer multiplayer läge och att skapa ett mutiplayer spel. Användaren väljer en ROM att spela och ett namn på sitt spel. Ett mutiplayer spel skapas och dyker upp i lobbyn. När en annan spelare ansluter startar spelet.
+Prioritet: 2
+
+Titel: Ansluta till någon ett multiplayer spel
+Aktör: Användaren
+Mål: Att ansluta till en annan användares multiplayer spel 
+Beskrivning: Användaren väljer mulitplayer läge. I lobbyn kan hon se en lista över vilka spel som finns tillgängliga och kan klicka på det hon vill ansluta till
+Prioritet: 2
+
+
+Titel: Ändra key bindings
+Aktör: Användaren
+Mål: Att ändra vilken funktion olika knappar har
+Beskrivning: Via någon meny når användaren en knappändringsmeny. Där får hon en lista med alla Game Boys knappar och vilka tangentbordsknappar dessa är länkade till. Hon kan sedan ändra bindningarna.
+Prioritet: 3
+
+Titel: Ändra volym
+Aktör: Användaren
+Mål: Att ändra ljudnivån
+Beskrivning: Via antingen tangentbordsgenvägar eller ljudstapel ökar eller minskar användaren volymen
+Prioritet: 3
+
+Titel:  Läsa manualen
+Mål: Användaren vill komma åt och läsa manualen
+Beskrivning: Under något tillfälle då användaren använder webbsidan, eller använder emulatorn för att spela, vill användaren läsa manualen. På webbsidan finns en länk med titeln Hjälp/Manual, vilken användaren klickar på. Då öppnas manualen.
+(Stängs emulatorn? På samma sida? AJAX?)
+Prioritet: 3
+
+Titel: Skicka en automatisk felrapport
+Mål: En felrapport skickad till utvecklarna
+Beskrivning: Under något tillfälle, då användaren använder emulatorn för enspelarläge, vill användaren skicka in ett automatisk felrapport, för att belysa någon brist i emulatorn. Via en meny, eller en knapp i GUIt, eller via en knapptryckning startas "automatisk felrapport"-läget. Emulatorn pausas och dess state, aktuell ROMs hash, sparas undan. Användaren ges möjlighet att skriva en kort beskrivning av problemet och ge kontaktinformation. Sedan skickas rapporten in till utvecklarna.
+Prioritet: 3
+
+Titel: Betygsätta ROM-kompabilitet
+Mål: Att ge ett betyg på en ROMS kompabilitet med emulatorn
+Beskrivning: Under något tillfälle, då användaren spelar i enspelarläge, kan användaren betygsätta hur väl en ROM emuleras. Hon kan då via  en meny, eller en knapp i GUIt, eller genom en knapptryckning starta betygsättarläge. Användaren kan då genom att välja ett antal stjärnor (eller via liknande metod) välja hur väl på någon skala hon upplever att emulering kändes. Detta betyg sparas i nån sorts databas på serversidan.
+Prioritet: 3
