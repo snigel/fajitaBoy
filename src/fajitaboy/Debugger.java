@@ -89,7 +89,7 @@ public final class Debugger {
             scLine.toLowerCase();
 
             if (scLine.equals("t")) {
-                if (in.hasNextInt()) {
+                if (in.hasNextInt(argRadix)) {
                     debugStep(in.nextInt(argRadix));
                 } else {
                     debugStep(1);
@@ -403,8 +403,18 @@ public final class Debugger {
      * Steps the program until a breakpoint is reached.
      */
     private void runForever() {
+        int c = 0;
+        int lenLast = 0;
         while (true) {
-            cpu.step();
+            c += cpu.step();
+            
+            String outStr = Integer.toString(c);
+            for (int i = 0; i < lenLast; i++) {
+                outStr = '\b' + outStr;
+            }
+            lenLast = Integer.toString(c).length();
+            System.out.print(outStr);
+            
             if (getBreakpoint(cpu.getPC())) {
                 System.out.println(
                         "Breakpoint at " + cpu.getPC() + " reached.");
@@ -414,7 +424,6 @@ public final class Debugger {
                 break;
             }
         }
-
     }
 
     private void disassemble(final int len) {
@@ -447,8 +456,9 @@ public final class Debugger {
      *            Number of steps.
      */
     private void debugStep(final int steps) {
+        int c = 0;
         for (int i = 0; i < steps; i++) {
-            cpu.step();
+            c += cpu.step();
             if (getBreakpoint(cpu.getPC())) {
                 System.out
                         .println("Breakpoint at " + cpu.getPC() + " reached.");
@@ -459,7 +469,7 @@ public final class Debugger {
                 break;
             }
         }
-
+        System.out.println("Cycles run: " + c);
     }
 
     /**
