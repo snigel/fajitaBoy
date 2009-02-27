@@ -16,6 +16,7 @@ public final class AddressConstants {
 	public static final int ADDRESS_TMA = 0xFF06;
 	public static final int ADDRESS_TAC = 0xFF07;
 	
+	public static final int ADDRESS_STAT = 0xFF41;
 	public static final int ADDRESS_SCY = 0xFF42;
 	public static final int ADDRESS_SCX = 0xFF43;
 	public static final int ADDRESS_LY = 0xFF44;
