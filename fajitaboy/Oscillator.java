@@ -11,7 +11,7 @@ import static constants.MessageConstants.*;
  */
 public class Oscillator {
 	int cycles; // Cycles since init
-	int nextVBlank, nextLineInc, nextModeChange, prevTimerInc, nextDividerInc;
+	int nextLineInc, nextModeChange, prevTimerInc, nextDividerInc;
 	Cpu cpu;
 	AddressBus ram;
 	LCD lcd;
@@ -24,8 +24,8 @@ public class Oscillator {
 
 	public void reset() {
 		cycles = 0;
-		nextVBlank = GB_CYCLES_PER_FRAME;
 		nextLineInc = GB_CYCLES_PER_LINE;
+		nextModeChange = GB_CYCLES_PER_LINE;
 		prevTimerInc = 0;
 		nextDividerInc = 0;
 		
@@ -74,13 +74,37 @@ public class Oscillator {
 		}
 		
 		// Check for LCD register status change
-		// (Inte ens i närheten av klart....)
-		if ( cycles > nextModeChange ) {
-			lcd.oscillatorMessage( MSG_LCD_CHANGE_MODE );
+		int ly;
+		if ( cycles > nextLineInc ) {
+			lcd.oscillatorMessage( MSG_LCD_NEXT_LINE );
+			nextLineInc += GB_CYCLES_PER_LINE;
 			
-			int ly = ram.read(ADDRESS_LY);
+			// Check line # for VBlank and reset to 0
+			ly = ram.read(ADDRESS_LY);
 			if ( ly == 144 ) {
 				lcd.oscillatorMessage( MSG_LCD_VBLANK );
+			} else if ( ly >= 154 ) {
+				ram.write(ADDRESS_LY, 0);
+			}
+		}
+		
+		if ( cycles > nextModeChange ) {
+			ly = ram.read(ADDRESS_LY);
+			if ( ly < 144 ) {
+			    lcd.oscillatorMessage( MSG_LCD_CHANGE_MODE );
+			    
+			    // Read current mode and determine wait time from that
+			    int mode = ram.read( ADDRESS_STAT ) & 0x03;
+			    if ( mode == 0 ) {
+			    	nextModeChange += GB_HBLANK_PERIOD;
+			    } else if ( mode == 2 ) {
+			    	nextModeChange += GB_LCD_OAMSEARCH_PERIOD;
+			    } else if ( mode == 3 ) {
+			    	nextModeChange += GB_LCD_TRANSFER_PERIOD;
+			    }
+			} else {
+				// This line nothing happens, see what happens next line...
+				nextModeChange += GB_CYCLES_PER_LINE;
 			}
 		}
 	}
