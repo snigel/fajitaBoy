@@ -11,6 +11,11 @@ public final class AddressConstants {
 	public static final int ADDRESS_INT_SERIAL = 0x0058;
 	public static final int ADDRESS_INT_JOYPAD = 0x0060;
 	
+	public static final int ADDRESS_DIV = 0xFF04;
+	public static final int ADDRESS_TIMA = 0xFF05;
+	public static final int ADDRESS_TMA = 0xFF06;
+	public static final int ADDRESS_TAC = 0xFF07;
+	
 	public static final int DEBUG_START = 0x0000;
 	public static final int DEBUG_END = 0x10000;
 	public static final int CARTRIDGE_START = 0x0000;

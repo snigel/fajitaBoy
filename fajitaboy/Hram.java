@@ -30,7 +30,9 @@ public class Hram implements MemoryInterface {
         offset = start; // set offset value for addressing
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > hram.length) {
@@ -39,7 +41,9 @@ public class Hram implements MemoryInterface {
         return hram[addr];
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > hram.length) {

@@ -7,12 +7,16 @@
  */
 public class DebugMemory implements MemoryInterface {
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
             return 0;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         //This one does nothing. Data should always be zero.
     }

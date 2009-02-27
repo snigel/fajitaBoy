@@ -1,5 +1,6 @@
 import java.io.*; //For debug pause and stepping
 import static constants.AddressConstants.*;
+import static constants.HardwareConstants.*;
 
 /**
  * CPU class for emulating the Game Boy CPU
@@ -37,6 +38,7 @@ public class Cpu {
 
 	// Internal variables
 	int t1, t2; // temp variables to use in step().
+	int nextVBlank, prevTimerInc, nextDividerInc;
 
 	public Cpu(AddressBus ram) {
 		this.ram = ram;
@@ -59,6 +61,7 @@ public class Cpu {
         sp = 0xfffe;
         cycles = 0;
         ime = false;
+        nextVBlank = GB_CYCLES_PER_FRAME;
 	}
 
 	public void step() {
@@ -116,56 +119,56 @@ public class Cpu {
 		
 		// Perform processor operation
 		int inst = ram.read(pc);
-		System.out.print("OP: 0x" + Integer.toHexString(inst) + " ");
+		log("PC: " + Integer.toHexString(pc) + " OP: 0x" + Integer.toHexString(inst) + " ");
 		runInstruction(inst);
 	}
 
 	private void runInstruction(int instruction) {
 		switch (instruction) {
 		case 0x00:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0x01:
-			System.out.println("LD BC,nn");
+			logln("LD BC,nn");
 			setBC(readnn());
 			pc += 3;
 			addCycles(12);
 			break;
 		case 0x02:
-			System.out.println("LD (BC), A");
+			logln("LD (BC), A");
 			ram.write(getBC(), a);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x03:
-			System.out.println("INC BC");
+			logln("INC BC");
 			setBC(getBC() + 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x04:
-			System.out.println("INC B");
+			logln("INC B");
 			b = inc(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x05:
-			System.out.println("DEC B");
+			logln("DEC B");
 			b = dec(b);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0x06:
-			System.out.println("LD B, n");
+			logln("LD B, n");
 			b = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x07:
-			System.out.println("RLCA");
+			logln("RLCA");
 			setZ(0);
 			setN(0);
 			setH(0);
@@ -180,13 +183,13 @@ public class Cpu {
 			addCycles(4);
 			break;
 		case 0x08:
-			System.out.println("LD (nn),SP");
+			logln("LD (nn),SP");
 			dblwrite(readnn(), sp);
 			pc += 3;
 			addCycles(20);
 			break;
 		case 0x09:
-			System.out.println("ADD HL,BC");
+			logln("ADD HL,BC");
 			t1 = getHL() + getBC();
 			setH(((getHL() & 0x0F) + (getBC() & 0x0F)) > 0x0F);
 			setHL(t1);
@@ -196,37 +199,37 @@ public class Cpu {
 			addCycles(8);
 			break;
 		case 0x0a:
-			System.out.println("LD A,(BC)");
+			logln("LD A,(BC)");
 			a = ram.read(getBC());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x0b:
-			System.out.println("DEC BC");
+			logln("DEC BC");
 			setBC(getBC() - 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x0c:
-			System.out.println("INC C");
+			logln("INC C");
 			c = inc(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x0d:
-			System.out.println("DEC C");
+			logln("DEC C");
 			c = dec(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x0e:
-			System.out.println("LD C,n");
+			logln("LD C,n");
 			c = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x0f:
-			System.out.println("RRCA");
+			logln("RRCA");
 			setC((a & 0x01) == 1);
 			a = a >>> 1;
 			if (getC() == 1) {
@@ -238,45 +241,45 @@ public class Cpu {
 			pc++;
 			addCycles(4);
 			break;
-		//case 0x10:System.out.println("STOP");break;
+		//case 0x10:logln("STOP");break;
 		case 0x11:
-			System.out.println("LD DE,nn");
+			logln("LD DE,nn");
 			setDE(readnn());
 			pc += 3;
 			addCycles(12);
 			break;
 		case 0x12:
-			System.out.println("LD (DE),A");
+			logln("LD (DE),A");
 			ram.write(getDE(), a);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x13:
-			System.out.println("INC DE");
+			logln("INC DE");
 			setDE(getDE() + 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x14:
-			System.out.println("INC D");
+			logln("INC D");
 			d = inc(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x15:
-			System.out.println("DEC D");
+			logln("DEC D");
 			d = dec(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x16:
-			System.out.println("LD D,n");
+			logln("LD D,n");
 			d = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x17:
-			System.out.println("RLA");
+			logln("RLA");
 			setZ(0);
 			setN(0);
 			setH(0);
@@ -294,12 +297,12 @@ public class Cpu {
 			addCycles(4);
 			break;
 		case 0x18:
-			System.out.println("JR d");
+			logln("JR d");
 			pc = pc + (byte) ram.read(pc + 1) + 2;
 			addCycles(12);
 			break;
 		case 0x19:
-			System.out.println("ADD HL,DE");
+			logln("ADD HL,DE");
 			t1 = getHL() + getDE();
 			setH(((getHL() & 0x0F) + (getDE() & 0x0F)) > 0x0F);
 			setHL(t1);
@@ -309,37 +312,37 @@ public class Cpu {
 			addCycles(8);
 			break;
 		case 0x1a:
-			System.out.println("LD A,(DE)");
+			logln("LD A,(DE)");
 			a = ram.read(getDE());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x1b:
-			System.out.println("DEC DE");
+			logln("DEC DE");
 			setDE(getDE() - 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x1c:
-			System.out.println("INC e");
+			logln("INC e");
 			e = inc(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x1d:
-			System.out.println("DEC e");
+			logln("DEC e");
 			e = dec(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x1e:
-			System.out.println("LD E,n");
+			logln("LD E,n");
 			e = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x1f:
-			System.out.println("RRA");
+			logln("RRA");
 			setZ(0);
 			setN(0);
 			setH(0);
@@ -353,7 +356,7 @@ public class Cpu {
 			break;
 
 		case 0x20:
-			System.out.println("JR NZ+e");
+			logln("JR NZ+e");
 			if (getZ() == 0) {
 				pc += (byte) readn() + 2;
 				addCycles(12);
@@ -363,44 +366,44 @@ public class Cpu {
 			}
 			break;
 		case 0x21:
-			System.out.println("LD HL,nn");
+			logln("LD HL,nn");
 			setHL(readnn());
 			pc += 3;
 			addCycles(12);
 			break;
 		case 0x22:
-			System.out.println("LDI (HL),A");
+			logln("LDI (HL),A");
 			ram.write(getHL(), a);
 			setHL(getHL() + 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x23:
-			System.out.println("INC HL");
+			logln("INC HL");
 			setHL(getHL() + 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x24:
-			System.out.println("INC H");
+			logln("INC H");
 			h = inc(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x25:
-			System.out.println("DEC H");
+			logln("DEC H");
 			h = dec(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x26:
-			System.out.println("LD H,n");
+			logln("LD H,n");
 			h = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x27: // algorithm found at http://www.worldofspectrum.org/faq/reference/z80reference.htm#DAA
-			System.out.println("DAA");
+			logln("DAA");
 			int correctionFactor;
 			if (a > 0x99 || getC() == 1) {
 				correctionFactor = 0x60;
@@ -424,7 +427,7 @@ public class Cpu {
 			addCycles(4);
 			break;
 		case 0x28:
-			System.out.println("JR Z,d (Jump+n if Z=1)");
+			logln("JR Z,d (Jump+n if Z=1)");
 			if (getZ() == 1) {
 				pc = pc + (byte) readn() + 2;
 				addCycles(12);
@@ -435,7 +438,7 @@ public class Cpu {
 			break;
 
 		case 0x29:
-			System.out.println("ADD HL,HL");
+			logln("ADD HL,HL");
 			t1 = getHL() * 2;
 			calcH(getHL(), getHL());
 			setN(0);
@@ -445,38 +448,38 @@ public class Cpu {
 			addCycles(8);
 			break;
 		case 0x2a:
-			System.out.println("LDI A,(HL)");
+			logln("LDI A,(HL)");
 			a = ram.read(getHL());
 			setHL(getHL() + 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x2b:
-			System.out.println("DEC HL");
+			logln("DEC HL");
 			setHL(getHL() - 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x2c:
-			System.out.println("INC L");
+			logln("INC L");
 			l = inc(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x2d:
-			System.out.println("DEC L");
+			logln("DEC L");
 			l = dec(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x2e:
-			System.out.println("LD l,n");
+			logln("LD l,n");
 			l = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x2f:
-			System.out.println("CPL");
+			logln("CPL");
 			a = ~a & 0xff;
 			setN(1);
 			setH(1);
@@ -485,7 +488,7 @@ public class Cpu {
 			break;
 
 		case 0x30:
-			System.out.println("JR NC,d");
+			logln("JR NC,d");
 			if (getC() == 0) {
 				pc = pc + (byte) readn() + 2;
 				addCycles(12);
@@ -495,51 +498,51 @@ public class Cpu {
 			}
 			break;
 		case 0x31:
-			System.out.println("LD SP,nn");
+			logln("LD SP,nn");
 			sp = readnn();
 			pc += 3;
 			addCycles(12);
 			break;
 		case 0x32:
-			System.out.println("LDD (HL),A; HL-");
+			logln("LDD (HL),A; HL-");
 			ram.write(getHL(), a);
 			setHL(getHL() - 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x33:
-			System.out.println("INC SP");
+			logln("INC SP");
 			sp = (sp + 1) & 0xFFFF;
 			pc++;
 			addCycles(8);
 			break;
 		case 0x34:
-			System.out.println("INC (HL)");
+			logln("INC (HL)");
 			ram.write(getHL(), inc(ram.read(getHL())));
 			pc++;
 			addCycles(12);
 			break;
 		case 0x35:
-			System.out.println("DEC (HL)");
+			logln("DEC (HL)");
 			ram.write(getHL(), dec(ram.read(getHL())));
 			pc++;
 			addCycles(12);
 			break;
 		case 0x36:
-			System.out.println("LD (HL),n");
+			logln("LD (HL),n");
 			ram.write(getHL(), readn());
 			pc++;
 			addCycles(12);
 			break;
 		case 0x37:
-			System.out.println("SCF");
+			logln("SCF");
 			setC(1);
 			setN(0);
 			setH(0);
 			addCycles(4);
 			break;
 		case 0x38:
-			System.out.println("JR C,d");
+			logln("JR C,d");
 			if (getC() == 1) {
 				pc = pc + (byte) readn() + 2;
 				addCycles(12);
@@ -549,7 +552,7 @@ public class Cpu {
 			}			
 			break;
 		case 0x39:
-			System.out.println("ADD HL,SP");
+			logln("ADD HL,SP");
 			t1 = getHL() + sp;
 			calcH(getHL(), sp);
 			setHL(t1);
@@ -559,32 +562,32 @@ public class Cpu {
 			addCycles(8);
 			break;
 		case 0x3a:
-			System.out.println("LDD A,(HL)");
+			logln("LDD A,(HL)");
 			a = ram.read(getHL());
 			setHL(getHL() - 1);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x3b:
-			System.out.println("DEC SP");
+			logln("DEC SP");
 			sp = (sp - 1) & 0xFFFF;
 			pc++;
 			addCycles(8);
 			break;
 		case 0x3c:
-			System.out.println("INC A");
+			logln("INC A");
 			a = inc(a);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x3e:
-			System.out.println("LD A, n");
+			logln("LD A, n");
 			a = readn();
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0x3f:
-			System.out.println("CCF");
+			logln("CCF");
 			setC(getC() == 0);
 			setN(0);
 			setH(0);
@@ -592,778 +595,778 @@ public class Cpu {
 			addCycles(4);
 			break;
 		case 0x40:
-			System.out.println("LD B,B");
+			logln("LD B,B");
 			//b = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x41:
-			System.out.println("LD B,C");
+			logln("LD B,C");
 			b = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x42:
-			System.out.println("LD B,D");
+			logln("LD B,D");
 			b = d;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x43:
-			System.out.println("LD B,E");
+			logln("LD B,E");
 			b = e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x44:
-			System.out.println("LD B,H");
+			logln("LD B,H");
 			b = h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x45:
-			System.out.println("LD B,L");
+			logln("LD B,L");
 			b = l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x46:
-			System.out.println("LD B,(HL)");
+			logln("LD B,(HL)");
 			b = ram.read(getHL());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x47:
-			System.out.println("LD B,A");
+			logln("LD B,A");
 			b = a;
 			pc++;
 			break;
 		case 0x48:
-			System.out.println("LD C,B");
+			logln("LD C,B");
 			c = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x49:
-			System.out.println("LD C,C");
+			logln("LD C,C");
 			//c=c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x4a:
-			System.out.println("LD C,D");
+			logln("LD C,D");
 			c = d;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x4b:
-			System.out.println("LD C,E");
+			logln("LD C,E");
 			c = e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x4c:
-			System.out.println("LD C,H");
+			logln("LD C,H");
 			c = h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x4d:
-			System.out.println("LD C,L");
+			logln("LD C,L");
 			c = l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x4e:
-			System.out.println("LD C,(HL)");
+			logln("LD C,(HL)");
 			c = ram.read(getHL());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x4f:
-			System.out.println("LD C,A");
+			logln("LD C,A");
 			c = a;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x50:
-			System.out.println("LD D,B");
+			logln("LD D,B");
 			d = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x51:
-			System.out.println("LD D,C");
+			logln("LD D,C");
 			d = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x52:
-			System.out.println("LD D,D");
+			logln("LD D,D");
 			//d=d;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x53:
-			System.out.println("LD D,E");
+			logln("LD D,E");
 			d = e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x54:
-			System.out.println("LD D,H");
+			logln("LD D,H");
 			d = h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x55:
-			System.out.println("LD D,L");
+			logln("LD D,L");
 			d = l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x56:
-			System.out.println("LD D,(HL)");
+			logln("LD D,(HL)");
 			d = ram.read(getHL());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x57:
-			System.out.println("LD D,A");
+			logln("LD D,A");
 			d = a;
 			pc++;
 			break;
 		case 0x58:
-			System.out.println("LD E,B");
+			logln("LD E,B");
 			e = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x59:
-			System.out.println("LD E,C");
+			logln("LD E,C");
 			e = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x5A:
-			System.out.println("LD E,D");
+			logln("LD E,D");
 			e = d;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x5b:
-			System.out.println("LD E,E");
+			logln("LD E,E");
 			//e=e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x5c:
-			System.out.println("LD E,H");
+			logln("LD E,H");
 			e = h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x5d:
-			System.out.println("LD E,L");
+			logln("LD E,L");
 			e = l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x5e:
-			System.out.println("LD E,(HL)");
+			logln("LD E,(HL)");
 			e = ram.read(getHL());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x5f:
-			System.out.println("LD E,A");
+			logln("LD E,A");
 			e = a;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x60:
-			System.out.println("LD H,B");
+			logln("LD H,B");
 			h = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x61:
-			System.out.println("LD H,C");
+			logln("LD H,C");
 			h = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x62:
-			System.out.println("LD H,D");
+			logln("LD H,D");
 			d = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x63:
-			System.out.println("LD H,E");
+			logln("LD H,E");
 			h = e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x64:
-			System.out.println("LD H,H");
+			logln("LD H,H");
 			//h=h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x65:
-			System.out.println("LD H,L");
+			logln("LD H,L");
 			h = l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x66:
-			System.out.println("LD H,(HL)");
+			logln("LD H,(HL)");
 			h = ram.read(getHL());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x67:
-			System.out.println("LD H,A");
+			logln("LD H,A");
 			h = a;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x68:
-			System.out.println("LD L,B");
+			logln("LD L,B");
 			l = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x69:
-			System.out.println("LD L,C");
+			logln("LD L,C");
 			l = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x6a:
-			System.out.println("LD L,D");
+			logln("LD L,D");
 			l = d;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x6b:
-			System.out.println("LD L,E");
+			logln("LD L,E");
 			l = e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x6c:
-			System.out.println("LD L,H");
+			logln("LD L,H");
 			l = h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x6d:
-			System.out.println("LD L,L");
+			logln("LD L,L");
 			//l=l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x6e:
-			System.out.println("LD L,(HL)");
+			logln("LD L,(HL)");
 			l = ram.read(getHL());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x6f:
-			System.out.println("LD L,A");
+			logln("LD L,A");
 			l = a;
 			pc++;
 			addCycles(4);
 			break;
 			
 		case 0x70:
-			System.out.println("LD (HL),B");
+			logln("LD (HL),B");
 			ram.write(getHL(), b);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x71:
-			System.out.println("LD (HL),C");
+			logln("LD (HL),C");
 			ram.write(getHL(), c);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x72:
-			System.out.println("LD (HL),D");
+			logln("LD (HL),D");
 			ram.write(getHL(), d);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x73:
-			System.out.println("LD (HL),E");
+			logln("LD (HL),E");
 			ram.write(getHL(), e);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x74:
-			System.out.println("LD (HL),H");
+			logln("LD (HL),H");
 			ram.write(getHL(), h);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x75:
-			System.out.println("LD (HL),L");
+			logln("LD (HL),L");
 			ram.write(getHL(), l);
 			pc++;
 			addCycles(8);
 			break;
-		//case 0x76: System.out.println("HALT"); break;
+		//case 0x76: logln("HALT"); break;
 		case 0x77:
-			System.out.println("LD (HL),A");
+			logln("LD (HL),A");
 			ram.write(getHL(), a);
 			pc++;
 			addCycles(8);
 			break;
 		case 0x78:
-			System.out.println("LD A,B");
+			logln("LD A,B");
 			a = b;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x79:
-			System.out.println("LD A,C");
+			logln("LD A,C");
 			a = c;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x7A:
-			System.out.println("LD A,D");
+			logln("LD A,D");
 			a = d;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x7B:
-			System.out.println("LD A,E");
+			logln("LD A,E");
 			a = e;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x7c:
-			System.out.println("LD A,H");
+			logln("LD A,H");
 			a = h;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x7d:
-			System.out.println("LD A,L");
+			logln("LD A,L");
 			a = l;
 			pc++;
 			addCycles(4);
 			break;
 		case 0x7e:
-			System.out.println("LD A,(HL)");
+			logln("LD A,(HL)");
 			a = ram.read(getHL());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x7f:
-			System.out.println("LD A,A");
+			logln("LD A,A");
 			//a=a;
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0x80:
-			System.out.println("ADD A,B");
+			logln("ADD A,B");
 			add(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x81:
-			System.out.println("ADD A,C");
+			logln("ADD A,C");
 			add(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x82:
-			System.out.println("ADD A,D");
+			logln("ADD A,D");
 			add(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x83:
-			System.out.println("ADD A,E");
+			logln("ADD A,E");
 			add(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x84:
-			System.out.println("ADD A,H");
+			logln("ADD A,H");
 			add(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x85:
-			System.out.println("ADD A,L");
+			logln("ADD A,L");
 			add(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x86:
-			System.out.println("ADD A,(HL)");
+			logln("ADD A,(HL)");
 			add(ram.read(getHL()));
 			pc++;
 			addCycles(8);
 			break;
 		case 0x87:
-			System.out.println("ADD A,A");
+			logln("ADD A,A");
 			add(a);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0x88:
-			System.out.println("ADC A,B");
+			logln("ADC A,B");
 			add(b + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x89:
-			System.out.println("ADC A,C");
+			logln("ADC A,C");
 			add(c + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x8a:
-			System.out.println("ADC A,D");
+			logln("ADC A,D");
 			add(d + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x8b:
-			System.out.println("ADC A,E");
+			logln("ADC A,E");
 			add(e + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x8c:
-			System.out.println("ADC A,H");
+			logln("ADC A,H");
 			add(h + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x8d:
-			System.out.println("ADC A,L");
+			logln("ADC A,L");
 			add(l + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x8e:
-			System.out.println("ADC A,(HL)");
+			logln("ADC A,(HL)");
 			add(ram.read(getHL()) + getC());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x8f:
-			System.out.println("ADC A,A");
+			logln("ADC A,A");
 			add(a + getC());
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0x90:
-			System.out.println("SUB B");
+			logln("SUB B");
 			sub(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x91:
-			System.out.println("SUB C");
+			logln("SUB C");
 			sub(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x92:
-			System.out.println("SUB D");
+			logln("SUB D");
 			sub(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x93:
-			System.out.println("SUB E");
+			logln("SUB E");
 			sub(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x94:
-			System.out.println("SUB H");
+			logln("SUB H");
 			sub(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x95:
-			System.out.println("SUB L");
+			logln("SUB L");
 			sub(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0x96:
-			System.out.println("SUB (HL)");
+			logln("SUB (HL)");
 			sub(ram.read(getHL()));
 			pc++;
 			addCycles(8);
 			break;
 		case 0x97:
-			System.out.println("SUB A");
+			logln("SUB A");
 			sub(a);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0x98:
-			System.out.println("SBC A,B");
+			logln("SBC A,B");
 			sub(b + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x99:
-			System.out.println("SBC A,C");
+			logln("SBC A,C");
 			sub(c + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x9A:
-			System.out.println("SBC A,D");
+			logln("SBC A,D");
 			sub(d + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x9B:
-			System.out.println("SBC A,E");
+			logln("SBC A,E");
 			sub(e + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x9C:
-			System.out.println("SBC A,H");
+			logln("SBC A,H");
 			sub(h + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x9D:
-			System.out.println("SBC A,L");
+			logln("SBC A,L");
 			sub(l + getC());
 			pc++;
 			addCycles(4);
 			break;
 		case 0x9e:
-			System.out.println("SBC A,(HL)");
+			logln("SBC A,(HL)");
 			sub(ram.read(getHL()) + getC());
 			pc++;
 			addCycles(8);
 			break;
 		case 0x9f:
-			System.out.println("SBC A,A");
+			logln("SBC A,A");
 			sub(a + getC());
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0xa0:
-			System.out.println("AND B");
+			logln("AND B");
 			and(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa1:
-			System.out.println("AND C");
+			logln("AND C");
 			and(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa2:
-			System.out.println("AND D");
+			logln("AND D");
 			and(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa3:
-			System.out.println("AND E");
+			logln("AND E");
 			and(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa4:
-			System.out.println("AND H");
+			logln("AND H");
 			and(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa5:
-			System.out.println("AND L");
+			logln("AND L");
 			and(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa6:
-			System.out.println("AND (HL)");
+			logln("AND (HL)");
 			and(ram.read(getHL()));
 			pc++;
 			addCycles(8);
 			break;
 		case 0xa7:
-			System.out.println("AND A");
+			logln("AND A");
 			and(a);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0xa8:
-			System.out.println("XOR B");
+			logln("XOR B");
 			xor(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xa9:
-			System.out.println("XOR C");
+			logln("XOR C");
 			xor(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xaa:
-			System.out.println("XOR D");
+			logln("XOR D");
 			xor(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xab:
-			System.out.println("XOR E");
+			logln("XOR E");
 			xor(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xac:
-			System.out.println("XOR H");
+			logln("XOR H");
 			xor(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xad:
-			System.out.println("XOR L");
+			logln("XOR L");
 			xor(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xAE:
-			System.out.println("XOR (HL)");
+			logln("XOR (HL)");
 			xor(ram.read(getHL()));
 			pc++;
 			addCycles(8);
 			break;
 		case 0xAF:
-			System.out.println("XOR A");
+			logln("XOR A");
 			xor(a);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0xB0:
-			System.out.println("OR B");
+			logln("OR B");
 			or(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xB1:
-			System.out.println("OR C");
+			logln("OR C");
 			or(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xB2:
-			System.out.println("OR D");
+			logln("OR D");
 			or(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xb3:
-			System.out.println("OR E");
+			logln("OR E");
 			or(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xb4:
-			System.out.println("OR H");
+			logln("OR H");
 			or(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xb5:
-			System.out.println("OR L");
+			logln("OR L");
 			or(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xb6:
-			System.out.println("OR (HL)");
+			logln("OR (HL)");
 			or(ram.read(getHL()));
 			pc++;
 			addCycles(8);
 			break;
 		case 0xb7:
-			System.out.println("OR A");
+			logln("OR A");
 			or(a);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0xb8:
-			System.out.println("CP B");
+			logln("CP B");
 			cp(b);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xb9:
-			System.out.println("CP C");
+			logln("CP C");
 			cp(c);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xba:
-			System.out.println("CP D");
+			logln("CP D");
 			cp(d);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xbb:
-			System.out.println("CP E");
+			logln("CP E");
 			cp(e);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xbc:
-			System.out.println("CP H");
+			logln("CP H");
 			cp(h);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xbd:
-			System.out.println("CP L");
+			logln("CP L");
 			cp(l);
 			pc++;
 			addCycles(4);
 			break;
 		case 0xbe:
-			System.out.println("CP (HL)");
+			logln("CP (HL)");
 			cp(ram.read(getHL()));
 			pc++;
 			addCycles(8);
 			break;
 		case 0xbf:
-			System.out.println("CP A");
+			logln("CP A");
 			cp(a);
 			pc++;
 			addCycles(4);
 			break;
 
 		case 0xc0:
-			System.out.println("RET NZ");
+			logln("RET NZ");
 			if (getZ() == 0) {
 				ret();
 				addCycles(20);
@@ -1373,13 +1376,13 @@ public class Cpu {
 			}
 			break;
 		case 0xc1:
-			System.out.println("POP BC");
+			logln("POP BC");
 			setBC(pop());
 			pc++;
 			addCycles(12);
 			break;
 		case 0xc2:
-			System.out.println("JP NZ,nn");
+			logln("JP NZ,nn");
 			if (getZ() == 0) {
 				pc = readnn();
 				addCycles(16);
@@ -1389,12 +1392,12 @@ public class Cpu {
 			}
 			break;
 		case 0xc3:
-			System.out.println("JP nn");
+			logln("JP nn");
 			pc = readnn();
 			addCycles(16);
 			break;
 		case 0xc4:
-			System.out.println("CALL NZ,nn");
+			logln("CALL NZ,nn");
 			if (getZ() == 0) {
 				call();
 				addCycles(24);
@@ -1404,25 +1407,25 @@ public class Cpu {
 			}
 			break;
 		case 0xc5:
-			System.out.println("PUSH BC");
+			logln("PUSH BC");
 			push(getBC());
 			pc++;
 			addCycles(16);
 			break;
 		case 0xc6:
-			System.out.println("ADD A,n");
+			logln("ADD A,n");
 			add(readn());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xc7:
-			System.out.println("RST 0");
+			logln("RST 0");
 			push(pc + 1);
 			pc = 0;
 			addCycles(16);
 			break;
 		case 0xc8:
-			System.out.println("RET Z");
+			logln("RET Z");
 			if (getZ() == 1) {
 				ret();
 				addCycles(20);
@@ -1432,12 +1435,12 @@ public class Cpu {
 			}
 			break;
 		case 0xc9:
-			System.out.println("RET");
+			logln("RET");
 			ret();
 			addCycles(16);
 			break;
 		case 0xca:
-			System.out.println("JP Z,nn");
+			logln("JP Z,nn");
 			if (getZ() == 1) {
 				pc = readnn();
 				addCycles(16);
@@ -1447,38 +1450,38 @@ public class Cpu {
 			}
 			break;
 		case 0xcb:
-			System.out.print("[CB Prefix]");
+			log("[CB Prefix]");
 			int cbOp = readn();
 			switch (cbOp & 0x07) {
 			case 0:
 				b = prefixCB(cbOp, b);
 				addCycles(8);
-				System.out.println(" B");
+				logln(" B");
 				break;
 			case 1:
 				c = prefixCB(cbOp, c);
 				addCycles(8);
-				System.out.println(" C");
+				logln(" C");
 				break;
 			case 2:
 				d = prefixCB(cbOp, d);
 				addCycles(8);
-				System.out.println(" D");
+				logln(" D");
 				break;
 			case 3:
 				e = prefixCB(cbOp, e);
 				addCycles(8);
-				System.out.println(" E");
+				logln(" E");
 				break;
 			case 4:
 				h = prefixCB(cbOp, h);
 				addCycles(8);
-				System.out.println(" H");
+				logln(" H");
 				break;
 			case 5:
 				l = prefixCB(cbOp, l);
 				addCycles(8);
-				System.out.println(" L");
+				logln(" L");
 				break;
 			case 6:
 				ram.write(getHL(), prefixCB(cbOp, ram.read(getHL())));
@@ -1491,18 +1494,18 @@ public class Cpu {
 					addCycles(16);
 				}
 				
-				System.out.println(" (HL)");
+				logln(" (HL)");
 				break;
 			case 7:
 				a = prefixCB(cbOp, a);
 				addCycles(8);
-				System.out.println(" A");
+				logln(" A");
 				break;
 			}
 			pc += 2;
 			break;
 		case 0xcc:
-			System.out.println("CALL Z,nn");
+			logln("CALL Z,nn");
 			if (getZ() == 1) {
 				call();
 				addCycles(24);
@@ -1512,24 +1515,24 @@ public class Cpu {
 			}
 			break;
 		case 0xcd:
-			System.out.println("CALL nn");
+			logln("CALL nn");
 			call();
 			addCycles(24);
 			break;
 		case 0xce:
-			System.out.println("ADC A,n");
+			logln("ADC A,n");
 			add(readn() + getC());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xcf:
-			System.out.println("RST 8");
+			logln("RST 8");
 			push(pc + 1);
 			pc = 8;
 			addCycles(16);
 			break;
 		case 0xd0:
-			System.out.println("RET NC");
+			logln("RET NC");
 			if (getC() == 0) {
 				ret();
 				addCycles(20);
@@ -1539,13 +1542,13 @@ public class Cpu {
 			}
 			break;
 		case 0xd1:
-			System.out.println("POP DE");
+			logln("POP DE");
 			setDE(pop());
 			pc++;
 			addCycles(12);
 			break;
 		case 0xd2:
-			System.out.println("JP NC,nn");
+			logln("JP NC,nn");
 			if (getC() == 0) {
 				pc = readnn();
 				addCycles(16);
@@ -1555,12 +1558,12 @@ public class Cpu {
 			}
 			break;
 		case 0xd3:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xd4:
-			System.out.println("CALL NC,nn");
+			logln("CALL NC,nn");
 			if (getC() == 0) {
 				call();
 				addCycles(24);
@@ -1570,25 +1573,25 @@ public class Cpu {
 			}
 			break;
 		case 0xd5:
-			System.out.println("PUSH DE");
+			logln("PUSH DE");
 			push(getDE());
 			pc++;
 			addCycles(16);
 			break;
 		case 0xd6:
-			System.out.println("SUB n");
+			logln("SUB n");
 			sub(readn());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xd7:
-			System.out.println("RST 10H");
+			logln("RST 10H");
 			push(pc + 1);
 			pc = 0x10;
 			addCycles(16);
 			break;
 		case 0xd8:
-			System.out.println("RET C");
+			logln("RET C");
 			if (getC() == 1) {
 				ret();
 				addCycles(20);
@@ -1598,13 +1601,13 @@ public class Cpu {
 			}
 			break;
 		case 0xd9:
-			System.out.println("RETI");
+			logln("RETI");
 			ret();
 			ime = true;
 			addCycles(16);
 			break;
 		case 0xda:
-			System.out.println("JP C,nn");
+			logln("JP C,nn");
 			if (getC() == 1) {
 				pc = readnn();
 				addCycles(16);
@@ -1614,12 +1617,12 @@ public class Cpu {
 			}
 			break;
 		case 0xdb:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xdc:
-			System.out.println("CALL C,nn");
+			logln("CALL C,nn");
 			if (getC() == 1) {
 				call();
 				addCycles(24);
@@ -1629,70 +1632,70 @@ public class Cpu {
 			}
 			break;
 		case 0xdd:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xde:
-			System.out.println("SBC A,n");
+			logln("SBC A,n");
 			sub(readn() + getC());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xDF:
-			System.out.println("RST 18H");
+			logln("RST 18H");
 			push(pc + 1);
 			pc = 0x18;
 			addCycles(16);
 			break;
 		case 0xE0:
-			System.out.println("LD (FF00+n),A");
+			logln("LD (FF00+n),A");
 			ram.write((0xFF00 + readn()), a);
 			pc += 2;
 			addCycles(12);
 			break;
 		case 0xE1:
-			System.out.println("POP HL");
+			logln("POP HL");
 			setHL(pop());
 			pc++;
 			addCycles(12);
 			break;
 		case 0xe2:
-			System.out.println("LD (FF00+C),A");
+			logln("LD (FF00+C),A");
 			ram.write((0xFF00 + c), a);
 			pc++;
 			addCycles(8);
 			break;
 		case 0xE3:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xE4:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xe5:
-			System.out.println("PUSH HL");
+			logln("PUSH HL");
 			push(getHL());
 			pc++;
 			addCycles(16);
 			break;
 		case 0xE6:
-			System.out.println("AND n");
+			logln("AND n");
 			and(readn());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xe7:
-			System.out.println("RST 20H");
+			logln("RST 20H");
 			push(pc + 1);
 			pc = 0x20;
 			addCycles(16);
 			break;
 		case 0xe8:
-			System.out.println("ADD SP,dd");
+			logln("ADD SP,dd");
 			t1 = (byte) readn();
 			setZ(0);
 			setN(0);
@@ -1709,93 +1712,93 @@ public class Cpu {
 			addCycles(16);
 			break;
 		case 0xe9:
-			System.out.println("JP (HL)");
+			logln("JP (HL)");
 			pc = ram.read(getHL());
 			addCycles(4);
 			break;
 		case 0xEA:
-			System.out.println("LD (nn),A");
+			logln("LD (nn),A");
 			ram.write(readnn(), a);
 			pc += 3;
 			addCycles(16);
 			break;
 		case 0xEB:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xEC:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xed:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xee:
-			System.out.println("XOR n");
+			logln("XOR n");
 			xor(readn());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xef:
-			System.out.println("RST 28H");
+			logln("RST 28H");
 			push(pc + 1);
 			pc = 0x28;
 			addCycles(16);
 			break;
 
 		case 0xF0:
-			System.out.println("LD A,(FF00+n)");
+			logln("LD A,(FF00+n)");
 			a = ram.read(0xFF00 + readn());
 			pc += 2;
 			addCycles(12);
 			break;
 		case 0xF1:
-			System.out.println("POP AF");
+			logln("POP AF");
 			setAF(pop());
 			pc++;
 			addCycles(12);
 			break;
 		case 0xF2:
-			System.out.println("LD A,(FF00+C)");
+			logln("LD A,(FF00+C)");
 			a = ram.read(0xFF00 + c);
 			pc++;
 			addCycles(8);
 			break;
 		case 0xf3:
-			System.out.println("DI");
+			logln("DI");
 			ime = false;
 			pc++;
 			addCycles(4);
 			break;
 		case 0xF4:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xf5:
-			System.out.println("PUSH AF");
+			logln("PUSH AF");
 			push(getAF());
 			pc++;
 			addCycles(16);
 			break;
 		case 0xf6:
-			System.out.println("OR n");
+			logln("OR n");
 			or(readn());
 			pc += 2;
 			addCycles(8);
 			break;
 		case 0xf7:
-			System.out.println("RST 30H");
+			logln("RST 30H");
 			push(pc + 1);
 			pc = 0x30;
 			addCycles(16);
 			break;
 		case 0xf8:
-			System.out.println("LD HL,SP+dd"); //Testat och ska fungera enligt dokumentation ;)
+			logln("LD HL,SP+dd"); //Testat och ska fungera enligt dokumentation ;)
 			t1 = (byte) readn();
 			setZ(0);
 			setN(0);
@@ -1812,35 +1815,35 @@ public class Cpu {
 			addCycles(12);
 			break;
 		case 0xf9:
-			System.out.println("LD SP,HL");
+			logln("LD SP,HL");
 			sp = getHL();
 			pc++;
 			addCycles(8);
 			break;
 		case 0xfa:
-			System.out.println("LD A,(nn)");
+			logln("LD A,(nn)");
 			a = ram.read(readnn());
 			pc += 3;
 			addCycles(16);
 			break;
 		case 0xfb:
-			System.out.println("EI");
+			logln("EI");
 			ime = true;
 			pc++;
 			addCycles(4);
 			break;
 		case 0xFC:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xFD:
-			System.out.println("NOP");
+			logln("NOP");
 			pc++;
 			addCycles(4);
 			break;
 		case 0xFE:
-			System.out.println("CP, n");
+			logln("CP, n");
 			int cpa = a - readn();
 			setN(1);
 			setZ(cpa == 0);
@@ -1850,14 +1853,14 @@ public class Cpu {
 			addCycles(8);
 			break;
 		case 0xff:
-			System.out.println("RST 38h");
+			logln("RST 38h");
 			push(pc + 1);
 			pc = 0x38;
 			addCycles(16);
 			break;
 
 		default:
-			System.out.println("implement step "
+			logln("implement step "
 					+ Integer.toHexString(ram.read(pc)));
 			while (true)
 				; //Debug
@@ -1980,16 +1983,16 @@ public class Cpu {
 	}
 
 	public void debugInfo() { //debug
-		//System.out.println("PC: "+Integer.toHexString(pc)+" SP: "+Integer.toHexString(sp)+" Mem: "+Integer.toHexString(ram.read(dblreg(h,l))));
-		//System.out.println("C: "+getC()+" Z: "+getZ());
-		//System.out.println("A: "+a+" B: "+b+" C: "+c+" D: "+d+" H: "+h+" L: "+l);
-		System.out.println("A = " + Integer.toHexString(a) + "    BC = "
+		//logln("PC: "+Integer.toHexString(pc)+" SP: "+Integer.toHexString(sp)+" Mem: "+Integer.toHexString(ram.read(dblreg(h,l))));
+		//logln("C: "+getC()+" Z: "+getZ());
+		//logln("A: "+a+" B: "+b+" C: "+c+" D: "+d+" H: "+h+" L: "+l);
+		logln("A = " + Integer.toHexString(a) + "    BC = "
 				+ Integer.toHexString(b * 256 + c) + "    DE = "
 				+ Integer.toHexString(d * 256 + e) + "    HL = "
 				+ Integer.toHexString(h * 256 + l) + "    PC =  "
 				+ Integer.toHexString(pc) + "    SP = "
 				+ Integer.toHexString(sp));
-		System.out.println("F = " + Integer.toHexString(cc));
+		logln("F = " + Integer.toHexString(cc));
 	}
 
 	private int readn() {
@@ -2298,6 +2301,41 @@ public class Cpu {
 	
 	private void addCycles(int cycl) {
 		cycles += cycl;
+		if ( cycles >= nextVBlank ) {
+		    // Set V-Blank interrupt flag
+			ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01);
+			
+			nextVBlank += GB_CYCLES_PER_FRAME;
+		}
+		
+		int tac = ram.read(ADDRESS_TAC);
+		int timerFreq = 0;
+		switch(tac & 0x03) {
+			case 0:
+				timerFreq = GB_TIMER_CLOCK_0;
+				break;
+			case 1:
+				timerFreq = GB_TIMER_CLOCK_1;
+				break;
+			case 2:
+				timerFreq = GB_TIMER_CLOCK_2;
+				break;
+			case 3:
+				timerFreq = GB_TIMER_CLOCK_3;
+				break;
+		}
+		if (cycles >= prevTimerInc + timerFreq) {
+			if ((tac & 0x04) == 0) {
+				int tima = ram.read(ADDRESS_TIMA);
+				if(tima == 0xFF) {
+					ram.write(ADDRESS_TIMA, ram.read(ADDRESS_TMA));
+					ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x04);
+				} else {
+					ram.write(ADDRESS_TIMA, tima + 1);
+				}
+			}
+			prevTimerInc += timerFreq;
+		}
 	}
 	
 	// Temporary logging functions
@@ -2338,12 +2376,12 @@ public class Cpu {
 
 		while (true) {
 			//debugpause();
-			System.out.println();
-			System.out.println(pc);
-			System.out.println("PC: " + Integer.toHexString(pc));
+			//logln();
+			//logln(pc);
+			logln("PC: " + Integer.toHexString(pc));
 			step();
 			debugInfo();
-			System.out.println("Counter: " + (cnt) + " ("
+			logln("Counter: " + (cnt) + " ("
 					+ Integer.toHexString(cnt) + ")");
 			cnt++; //debugr�knare
 

@@ -29,7 +29,9 @@ public class Oam implements MemoryInterface {
         offset = start; // set offset value for addressing
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > oam.length) {
@@ -38,7 +40,9 @@ public class Oam implements MemoryInterface {
         return oam[addr];
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > oam.length) {

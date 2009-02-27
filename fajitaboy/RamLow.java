@@ -32,7 +32,9 @@ public class RamLow implements MemoryInterface {
         offset = start; // set offset value for addressing
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
@@ -41,7 +43,9 @@ public class RamLow implements MemoryInterface {
         return ram[addr];
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {

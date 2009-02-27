@@ -31,7 +31,9 @@ public class Cartridge implements MemoryInterface {
         readRom(romPath);
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > cartridge.length) {
@@ -40,7 +42,9 @@ public class Cartridge implements MemoryInterface {
         return cartridge[addr];
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         throw new RomWriteException("Cartridge.java, address:" + address);
     }

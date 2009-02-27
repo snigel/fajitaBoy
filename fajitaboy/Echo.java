@@ -31,12 +31,16 @@ public class Echo implements MemoryInterface {
         mem = object;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         return mem.read(address - diff);
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         mem.write(address - diff, data);
     }

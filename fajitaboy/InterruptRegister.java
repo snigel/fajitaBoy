@@ -18,12 +18,16 @@ public class InterruptRegister implements MemoryInterface {
         register = 0;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         return register;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         register = data;
     }

@@ -123,7 +123,9 @@ public class AddressBus implements MemoryInterface {
         }
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final int read(final int address) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");
@@ -133,7 +135,9 @@ public class AddressBus implements MemoryInterface {
 
 
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final void write(final int address, final int data) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("AddressBus.java");

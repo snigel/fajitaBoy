@@ -7,7 +7,7 @@ import java.util.LinkedList;
  */
 public class InstructionSet {
     public static enum InstructionArgument {
-        VALUE ('%', 1), DOUBLE_VALUE ('#', 2), ADDRESS ('&', 2), SIGNED_OFFSET ('¤', 2);
+        VALUE ('%', 1), DOUBLE_VALUE ('#', 2), ADDRESS ('&', 2), SIGNED_OFFSET ('$', 2);
         
         private final char fChar; 
         private final int size;
