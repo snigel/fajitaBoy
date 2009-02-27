@@ -39,6 +39,7 @@ public class Cpu {
 	// Internal variables
 	int t1, t2; // temp variables to use in step().
 	int nextVBlank, prevTimerInc, nextDividerInc;
+	boolean executeInterrupt;
 
 	public Cpu(AddressBus ram) {
 		this.ram = ram;
@@ -62,11 +63,12 @@ public class Cpu {
         cycles = 0;
         ime = false;
         nextVBlank = GB_CYCLES_PER_FRAME;
+        executeInterrupt = false;
 	}
 
 	public void step() {
 		// Interrupt handler
-		boolean performInterrupt = false;
+		executeInterrupt = false;
 		int jumpAddress = 0x0000;
 		if ( ime ) {
 			// Look for interrupts
@@ -76,51 +78,51 @@ public class Cpu {
 			if ((ie_reg & 0x01) != 0 && (if_reg & 0x01) != 0)
 			{
 				// V-Blank interrupt
-				performInterrupt = true;
+				executeInterrupt = true;
 				jumpAddress = ADDRESS_INT_VBLANK;
 				ram.write(ADDRESS_IF, if_reg & 0xFE);
 			}
 			else if ((ie_reg & 0x02) != 0 && (if_reg & 0x02) != 0)
 			{
 				// LCD Status interrupt
-				performInterrupt = true;
+				executeInterrupt = true;
 				jumpAddress = ADDRESS_INT_LCDSTAT;
 				ram.write(ADDRESS_IF, if_reg & 0xFD);
 			}
 			else if ((ie_reg & 0x04) != 0 && (if_reg & 0x04) != 0)
 			{
 				// Timer interrupt
-				performInterrupt = true;
+				executeInterrupt = true;
 				jumpAddress = ADDRESS_INT_TIMER;
 				ram.write(ADDRESS_IF, if_reg & 0xFB);
 			}
 			else if ((ie_reg & 0x08) != 0 && (if_reg & 0x08) != 0)
 			{
 				// Serial interrupt
-				performInterrupt = true;
+				executeInterrupt = true;
 				jumpAddress = ADDRESS_INT_SERIAL;
 				ram.write(ADDRESS_IF, if_reg & 0xF7);
 			}
 			else if ((ie_reg & 0x10) != 0 && (if_reg & 0x10) != 0)
 			{
 				// Joypad interrupt
-				performInterrupt = true;
+				executeInterrupt = true;
 				jumpAddress = ADDRESS_INT_JOYPAD;
 				ram.write(ADDRESS_IF, if_reg & 0xEF);
 			}
 		}
 		
-		if ( performInterrupt ) {
+		if ( executeInterrupt ) {
 			ime = false;
 			sp -= 2;
 			dblwrite(sp, pc);
 			pc = jumpAddress;
+		} else {
+		    // Perform processor operation
+		    int inst = ram.read(pc);
+		    log("PC: " + Integer.toHexString(pc) + " OP: 0x" + Integer.toHexString(inst) + " ");
+		    runInstruction(inst);
 		}
-		
-		// Perform processor operation
-		int inst = ram.read(pc);
-		log("PC: " + Integer.toHexString(pc) + " OP: 0x" + Integer.toHexString(inst) + " ");
-		runInstruction(inst);
 	}
 
 	private void runInstruction(int instruction) {
@@ -2283,6 +2285,10 @@ public class Cpu {
     
     public boolean getIME() {
     	return ime;
+    }
+    
+    public boolean getExecuteInterrupt() {
+    	return executeInterrupt;
     }
 
 	public void debugpause() { //debug
