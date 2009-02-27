@@ -6,6 +6,7 @@ import java.util.Scanner;
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
  * lets the user input debugging commands to the emulator.
+ * 
  * @author Arvid Jakobsson, Marcus Johansson
  */
 public final class Debugger {
@@ -32,7 +33,13 @@ public final class Debugger {
     private HashSet<Integer> breakPoints;
 
     /**
+     * Stops debugging on interrupts.
+     */
+    private boolean interruptEnabled = false;
+
+    /**
      * Creates a debugger, and loads a ROM-file.
+     * 
      * @param path
      *            ROM-file to load into the CPU.
      */
@@ -152,9 +159,28 @@ public final class Debugger {
                     } else {
                         disassemble(lenOrAddr);
                     }
-                    
+
                 } else {
                     showDebugError("p expects one or two arguments");
+                }
+            } else if (scLine.equals("n")) {
+                if (in.hasNextInt(argRadix)) {
+                    int i = in.nextInt(argRadix);
+                    if (i == 0) {
+                        interruptEnabled = false;
+                        System.out.println("Not pausing on interrupts");
+                    } else if (i == 1) {
+                        interruptEnabled = true;
+                        System.out.println("Pausing on interrupts");
+                    } else {
+                        showDebugError("n expects either no arguments or 0/1");
+                    }
+
+                } else {
+                    System.out.println("Interrupt: "
+                            + cpu.getExecuteInterrupt()
+                            + "\tPause on interrupts: "
+                            + interruptEnabled);
                 }
             } else if (scLine.equals("g")) {
                 runForever();
@@ -162,6 +188,8 @@ public final class Debugger {
                 showHelp();
             } else if (scLine.equals("q")) {
                 System.exit(0);
+            } else {
+                showDebugError("Invalid command!");
             }
         }
     }
@@ -172,17 +200,18 @@ public final class Debugger {
     private void switchRadix() {
         if (argRadix == 16) {
             argRadix = 10;
-            System.out
-                    .println("Arguments will now be read as decimal numbers.");
+            System.out.println(
+                    "Arguments will now be read as decimal numbers.");
         } else {
             argRadix = 16;
-            System.out
-                    .println("Arguments will now be read as hexadecimal numbers.");
+            System.out.println(
+                    "Arguments will now be read as hexadecimal numbers.");
         }
     }
 
     /**
      * Dumps one line of memory, at specified address.
+     * 
      * @param addr
      *            Where to dump memory.
      */
@@ -193,6 +222,7 @@ public final class Debugger {
     /**
      * Prints a hexdump starting at specified adress, rounded down to closest
      * 0xFFF0, writing for len bytes, rounded up in a similar way.
+     * 
      * @param addr
      *            Address to start writing out, rounded down.
      * @param len
@@ -204,27 +234,32 @@ public final class Debugger {
         int size = addrE - addrS;
         int[] mem = new int[size];
 
-        if (addrE > 0xFFFF || addrS > 0xFFFF) {
-            System.out
-                    .println("Address overflow detected! Wrapping around! Silly you!");
+        if (addrS > 0xFFFF) {
+            System.out.println(
+                    "Address overflow detected! Wrapping around! Silly you!");
             addrE &= 0xFFFF;
             addrS &= 0xFFFF;
+        } if (addrE > 0xFFFF) {
+            size = 0xFFFF - addrS +1;
+            for (int i = 0; i < (addrE & 0xFFFF); i++) {
+                mem[size +i] = addressBus.read(i);
+            }
         }
 
         for (int i = 0; i < size; i++) {
             mem[i] = addressBus.read((i + addrS) & 0xFFFF);
         }
 
-        for (int i = 0; i < size / 16; i++) {
+        for (int i = 0; i < (addrE-addrS) / 16; i++) {
             String out = String.format("%04x ", (addrS + i * 16) & 0xFFFF);
             for (int j = 0; j < 16; j++) {
                 int inArr = i * 16 + j;
-                String before = " ", after = " ";
+                String before = "", after = " ";
                 if (inArr == addr - addrS) {
                     before = "[";
                 }
                 if (inArr == addr - addrS + (len - 1)) {
-                    after = "]";
+                    after = "] ";
                 }
                 out += String.format(before + "%02x" + after, mem[inArr]);
             }
@@ -242,6 +277,7 @@ public final class Debugger {
 
     /**
      * Writes a list of data to an address on the memorybus.
+     * 
      * @param addr
      *            Address where data should be written.
      * @param toWrite
@@ -251,12 +287,12 @@ public final class Debugger {
         int curAddr = addr;
         for (Integer d : toWrite) {
             if (d > MAXBYTE) {
-                System.out
-                        .println("Byte overflow detected! Ignoring! Silly you!");
+                System.out.println(
+                        "Byte overflow detected! Ignoring! Silly you!");
             }
             if (curAddr > 0xFFFF) {
-                System.out
-                        .println("Address overflow detected! Wrapping around! Silly you!");
+                System.out.println(
+                        "Address overflow detected! Wrapping! Silly you!");
             }
             addressBus.write(curAddr & 0xFFFF, d & 0xFF);
             curAddr++;
@@ -275,6 +311,7 @@ public final class Debugger {
 
     /**
      * Sets a register to a value.
+     * 
      * @param reg
      *            Register to write set value on.
      * @param value
@@ -300,6 +337,7 @@ public final class Debugger {
 
     /**
      * Toggles a breakpoint at the specified address.
+     * 
      * @param addr
      *            Address to toggle breakpoint at.
      */
@@ -313,6 +351,7 @@ public final class Debugger {
 
     /**
      * Checks whether a breakpoint is set on a specific address.
+     * 
      * @param addr
      *            Address to check breakpoint on.
      * @return Returns true if a breakpoint is set on that adress, false
@@ -331,19 +370,19 @@ public final class Debugger {
                 + "[Unimplemented] c [script]\t\t"
                 + "Execute _c_ommands from script file [default.scp]\n"
                 + "s\t\tRe_s_et CPU\n" + "r\t\tShow current register values\n"
-                + "r reg val\t\t" + "Set value of register reg to value val\n"
-                + "e addr val [val] ...\t\t"
+                + "r reg val\t" + "Set value of register reg to value val\n"
+                + "e addr val [val]"
                 + "Write values to RAM / ROM starting at address addr\n"
-                + "d addr len\t\tHex _D_ump len bytes starting at addr\n"
-                + "[Unimplemented] i addr len\t\t"
+                + "d addr len\tHex _D_ump len bytes starting at addr\n"
+                + "i addr len\t"
                 + "D_i_sassemble len instructions starting at addr\n"
-                + "[Unimplemented] p len\t\t"
+                + "p len\t\t"
                 + "Disassemble len instructions starting at current PC\n"
-                + "[Unimplemented] n\t\t" + "Show interrupt state\n"
-                + "[Unimplemented] n 1|0\t\t" + "Enable/disable interrupts\n"
+                + "n\t\t" + "Show interrupt state\n"
+                + "n 1|0\t\t" + "Enable/disable interrupts\n"
                 + "t [len]\t\t"
                 + "Execute len instructions starting at current PC [1]\n"
-                + "[Unimplemented] g\t\t" + "Execute forever\n"
+                + "g\t\t" + "Execute forever\n"
                 + "[Unimplemented] o\t\t"
                 + "Output Gameboy screen to applet window\n" + "b addr\t\t"
                 + "Set breakpoint at addr\n"
@@ -362,24 +401,35 @@ public final class Debugger {
      * Steps the program until a breakpoint is reached.
      */
     private void runForever() {
-        do {
+        while (true) {
             cpu.step();
-        } while (!getBreakpoint(cpu.getPC()));
-        System.out.println("Breakpoint at " + cpu.getPC() + " reached.");
+            if (getBreakpoint(cpu.getPC())) {
+                System.out.println(
+                        "Breakpoint at " + cpu.getPC() + " reached.");
+                break;
+            } else if (interruptEnabled && cpu.getExecuteInterrupt()) {
+                System.out.println("Cpu interrupt");
+                break;
+            }
+        }
+
     }
 
     private void disassemble(final int len) {
         disassemble(cpu.getPC(), len);
     }
+
     private void disassemble(final int addr, final int len) {
-        List<Disassembler.DisassembledInstruction> dInstructs = Disassembler.disassemble(addressBus, addr, len);
+        List<Disassembler.DisassembledInstruction> dInstructs = Disassembler
+                .disassemble(addressBus, addr, len);
         for (Disassembler.DisassembledInstruction di : dInstructs) {
             System.out.println(di);
         }
     }
-    
+
     /**
      * Show an error message followed by a help message.
+     * 
      * @param str
      *            Error message to show.
      */
@@ -390,6 +440,7 @@ public final class Debugger {
 
     /**
      * Steps the program a specified number of steps, and stops on breakpoints.
+     * 
      * @param steps
      *            Number of steps.
      */
@@ -401,12 +452,17 @@ public final class Debugger {
                         .println("Breakpoint at " + cpu.getPC() + " reached.");
                 break;
             }
+            if (interruptEnabled && cpu.getExecuteInterrupt()) {
+                System.out.println("Cpu interrupt");
+                break;
+            }
         }
 
     }
 
     /**
      * Starts the debugger with a specified ROM-filepath.
+     * 
      * @param args
      *            Standard input arguments.
      */
