@@ -3,7 +3,9 @@ import static constants.AddressConstants.*;
 import static constants.HardwareConstants.*;
 
 /**
- * CPU class for emulating the Game Boy CPU
+ * CPU class for emulating the Game Boy CPU.
+ * 
+ * @author Tobias S, Peter O
  */
 public class Cpu {
 
@@ -16,8 +18,6 @@ public class Cpu {
 	int cc; //ZNHC0000	(cc is often called the F)
 
 	int sp;
-
-	int cycles; // Processor cycles since init
 
 	boolean ime; // Interrupt Master Enable
 
@@ -38,8 +38,8 @@ public class Cpu {
 
 	// Internal variables
 	int t1, t2; // temp variables to use in step().
-	int nextVBlank, prevTimerInc, nextDividerInc;
 	boolean executeInterrupt;
+	int cycleTime;
 
 	public Cpu(AddressBus ram) {
 		this.ram = ram;
@@ -50,7 +50,7 @@ public class Cpu {
 	 * Sets CPU to start state
 	 */
 	public void reset() {
-	    pc = 0x100;
+		pc = 0x0100;
         cc = 0xB0;
         a = 0x01;
         b = 0x00;
@@ -60,16 +60,18 @@ public class Cpu {
         h = 0x01;
         l = 0x4D;
         sp = 0xfffe;
-        cycles = 0;
-        ime = false;
-        nextVBlank = GB_CYCLES_PER_FRAME;
+        cycleTime = 0;
+        ime = true;
         executeInterrupt = false;
 	}
 
-	public void step() {
-		// Interrupt handler
+	public int step() {
+		// Initialize vars
+		cycleTime = 0;
 		executeInterrupt = false;
 		int jumpAddress = 0x0000;
+		
+		// Interrupt handler
 		if ( ime ) {
 			// Look for interrupts
 			int ie_reg = ram.read(ADDRESS_IE);
@@ -123,6 +125,8 @@ public class Cpu {
 		    log("PC: " + Integer.toHexString(pc) + " OP: 0x" + Integer.toHexString(inst) + " ");
 		    runInstruction(inst);
 		}
+		
+		return cycleTime;
 	}
 
 	private void runInstruction(int instruction) {
@@ -2287,6 +2291,10 @@ public class Cpu {
     	return ime;
     }
     
+    public void setIME(boolean ime) {
+    	this.ime = ime;
+    }
+    
     public boolean getExecuteInterrupt() {
     	return executeInterrupt;
     }
@@ -2305,43 +2313,8 @@ public class Cpu {
 		//cpu.mainLoop();
 	}
 	
-	private void addCycles(int cycl) {
-		cycles += cycl;
-		if ( cycles >= nextVBlank ) {
-		    // Set V-Blank interrupt flag
-			ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01);
-			
-			nextVBlank += GB_CYCLES_PER_FRAME;
-		}
-		
-		int tac = ram.read(ADDRESS_TAC);
-		int timerFreq = 0;
-		switch(tac & 0x03) {
-			case 0:
-				timerFreq = GB_TIMER_CLOCK_0;
-				break;
-			case 1:
-				timerFreq = GB_TIMER_CLOCK_1;
-				break;
-			case 2:
-				timerFreq = GB_TIMER_CLOCK_2;
-				break;
-			case 3:
-				timerFreq = GB_TIMER_CLOCK_3;
-				break;
-		}
-		if (cycles >= prevTimerInc + timerFreq) {
-			if ((tac & 0x04) == 0) {
-				int tima = ram.read(ADDRESS_TIMA);
-				if(tima == 0xFF) {
-					ram.write(ADDRESS_TIMA, ram.read(ADDRESS_TMA));
-					ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x04);
-				} else {
-					ram.write(ADDRESS_TIMA, tima + 1);
-				}
-			}
-			prevTimerInc += timerFreq;
-		}
+	private void addCycles(int cycles) {
+		cycleTime += cycles;
 	}
 	
 	// Temporary logging functions
