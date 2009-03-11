@@ -12,37 +12,84 @@ import static fajitaboy.constants.MessageConstants.*;
  * @author Tobias S
  */
 public class Oscillator {
+	
+	/**
+	 * Cycles since Oscillator initialization.
+	 */
 	int cycles; // Cycles since init
-	int nextLineInc, nextModeChange, prevTimerInc, nextDividerInc;
+	
+	/**
+	 * Next cycle at which the LCD will proceed to next line.
+	 */
+	int nextLineInc;
+	
+	/**
+	 * Next cycle at which the LCD will change its mode.
+	 */
+	int nextModeChange;
+	
+	/**
+	 * Previous cycle at which the Timer was incremented.
+	 */
+	int prevTimerInc;
+	
+	/**
+	 * Next cycle at which the Divider will be incremented.
+	 */
+	int nextDividerInc;
+	
+	boolean lycHit;
+	
+	/**
+	 * Pointer to CPU instance.
+	 */
 	Cpu cpu;
+	
+	/**
+	 * Pointer to AddressBus instance.
+	 */
 	AddressBus ram;
+	
+	/**
+	 * Pointer to LCD instance.
+	 */
 	LCD lcd;
 
+	/**
+	 * Creates a new Oscillator with default values.
+	 * 
+	 * @param cpu Pointer to CPU instance.
+	 * @param ram Pointer to AddressBus instance.
+	 */
 	public Oscillator(Cpu cpu, AddressBus ram) {
 		this.cpu = cpu;
 		this.ram = ram;
+		lcd = new LCD(ram);
 		reset();
 	}
 
+	/**
+	 * Resets the Oscillator to default values.
+	 */
 	public void reset() {
 		cycles = 0;
 		nextLineInc = GB_CYCLES_PER_LINE;
 		nextModeChange = GB_CYCLES_PER_LINE;
 		prevTimerInc = 0;
 		nextDividerInc = 0;
-		
+		lycHit = false;
 	}
 
-	public void step() {
+	/**
+	 * Step the Oscillator once. The Oscillator causes the CPU to step
+	 * once, and sends messages to other components at certain cycles.
+	 * 
+	 * @return Returns step time in cycles.
+	 */
+	public int step() {
 		// Step CPU
-		cycles += cpu.step();
-
-		
-		/*if ( cycles >= nextVBlank ) {
-			// Set V-Blank interrupt flag
-			ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01);
-			nextVBlank += GB_CYCLES_PER_FRAME;
-		}*/
+		int cycleInc = cpu.step(); 
+		cycles += cycleInc;
 
 		// Increment Timer
 		int tac = ram.read(ADDRESS_TAC);
@@ -78,8 +125,13 @@ public class Oscillator {
 		// Check for LCD register status change
 		int ly;
 		if ( cycles > nextLineInc ) {
-			lcd.oscillatorMessage( MSG_LCD_NEXT_LINE );
+			int returnMsg = lcd.oscillatorMessage( MSG_LCD_NEXT_LINE );
 			nextLineInc += GB_CYCLES_PER_LINE;
+			if ( (returnMsg & MSG_LCD_LYC_HIT) != 0 ) {
+				lycHit = true;
+			} else {
+				lycHit = false;
+			}
 			
 			// Check line # for VBlank and reset to 0
 			ly = ram.read(ADDRESS_LY);
@@ -109,5 +161,16 @@ public class Oscillator {
 				nextModeChange += GB_CYCLES_PER_LINE;
 			}
 		}
+		
+		// Handle LYC hit
+		if ( lycHit ) {
+//			Trigger LCDSTAT interrupt if LYC=LY Coincidence Interrupt is enabled
+			int stat = ram.read(ADDRESS_STAT);
+			if ( (stat & 0x80) != 0 ) {
+				ram.write( ADDRESS_IF, ram.read( ADDRESS_IF ) | 0x02 );
+			}
+		}
+		
+		return cycleInc;
 	}
 }
