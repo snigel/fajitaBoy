@@ -1771,6 +1771,14 @@ public final class Cpu {
     }
 
     /**
+	 * Add Cycles after an instruction. 
+	 * @param cycles Number of cycles.
+	 */
+	private void addCycles(int cycles) {
+	    cycleTime += cycles;
+	}
+
+	/**
      * Reads the byte after pc.
      * @return the byte after pc.
      */
@@ -1794,7 +1802,11 @@ public final class Cpu {
         return (ram.read(sp) + ram.read(sp + 1) * 0x100);
     }
 
-    // inc and dec should only be used on 8bit register
+    /**
+     * The 8bit INC operation (s <- s + 1).
+     * @param i the register value to increment
+     * @return new value of the register
+     */
     private int inc(int i) {
         i = (i + 1) & 0xFF;
         setZ(i == 0);
@@ -1803,6 +1815,11 @@ public final class Cpu {
         return i;
     }
 
+    /**
+     * The 8bit DEC operation (s <- s - 1).
+     * @param i register value to decrement
+     * @return new value of the register
+     */
     private int dec(int i) {
         i = (i - 1) & 0xFF;
         setZ(i == 0);
@@ -1811,7 +1828,10 @@ public final class Cpu {
         return i;
     }
 
-    // add is for operation ADD A,s (s is a 8bit value)
+    /**
+     * Operation ADD A,s (s is a 8bit value) (A <- A + s).
+     * @param s The register value to add
+     */
     private void add(int s) {
         setN(0);
         calcH(a, s);
@@ -1825,7 +1845,10 @@ public final class Cpu {
         setZ(a == 0);
     }
 
-    // sub is for operation SUB s (s is a 8bit value)
+    /**
+     * Operation SUB s (s is a 8bit value) (A <- A - s).
+     * @param s The register value to subtract
+     */
     private void sub(int s) {
         setN(1);
         calcHsub(a, s);
@@ -1840,7 +1863,10 @@ public final class Cpu {
 
     }
 
-    // and is only for operation AND s (s is a 8bit value)
+    /**
+     * Operation AND s (s is a 8bit value) (A <- A & s).
+     * @param s The register value.
+     */
     private void and(int s) {
         setN(0);
         setH(1);
@@ -1849,6 +1875,10 @@ public final class Cpu {
         setZ(a == 0);
     }
 
+    /**
+     * 8bit XOR instruction (A <- A XOR s).
+     * @param s Register value.
+     */
     private void xor(int s) {
         a = (a ^ s) & 0xFF;
         setZ(a == 0);
@@ -1857,6 +1887,10 @@ public final class Cpu {
         setC(0);
     }
 
+    /**
+     * 8bit OR instruction (A <- A | s).
+     * @param s Register value.
+     */
     private void or(int s) {
         a = a | s;
         setZ(a == 0);
@@ -1865,6 +1899,10 @@ public final class Cpu {
         setC(0);
     }
 
+    /**
+     * Compares a value with register A (A - s).
+     * @param s 
+     */
     private void cp(int s) {
         int t = a - s;
         setN(1);
@@ -1873,47 +1911,79 @@ public final class Cpu {
         setZ(t == 0);
     }
 
-    // RET instruction
+    /**
+     * RET instruction. get (PC <- (SP), SP <- SP + 2)
+     */
     private void ret() {
         pc = readSP();
         sp += 2;
     }
 
-    // push dblreg s on stack
+    /**
+     * PUSH instruction.
+     * @param s Value to push to the stack.
+     */
     private void push(int s) {
         sp -= 2;
         dblwrite(sp, s);
     }
 
+    /**
+     * POP instruction.
+     * @return Value popped from stack.
+     */
     private int pop() {
         int s = readSP();
         sp += 2;
         return s;
     }
 
+    /**
+     * CALL instruction.
+     */
     private void call() {
         push(pc + 3);
         pc = readnn();
     }
 
+    /**
+     * BIT instruction. The Z flag is set to the same 
+     * value as bit at position b in s.  (Z <- /sb).
+     * @param b bit number
+     * @param s register value
+     */
     private void bit(int b, int s) {
         setN(0);
         setH(1);
         setZ((s >>> b) & 0x01);
     }
 
+    /**
+     * RES instruction. Sets bit b in s to 0.
+     * @param b bit number
+     * @param s register value
+     * @return new value of s.
+     */
     private int res(int b, int s) {
         return s & (~(1 << b));
     }
 
+    /**
+     * SET instruction. Sets bit b in s to 1.
+     * @param b bit number
+     * @param s register value
+     * @return new value of s.
+     */
     private int set(int b, int s) {
         return s | (1 << b);
     }
 
-    /*
-     * Set and get methods for the cc register (F)
-     */
     // Z
+    /**
+     * Changes the Z flag.
+     * @param b If true the flag is set to 1, 
+     *          else the flag is set to 0.
+     */
     private void setZ(boolean b) {
         if (b)
             cc = cc | 0x80;
@@ -1921,31 +1991,59 @@ public final class Cpu {
             cc = cc & 0x7F;
     }
 
+    /**
+     * Changes the Z flag.
+     * @param i If 0 the flag is set to 0, 
+     *          else the flag is set to 1.
+     */
     private void setZ(int i) {
         setZ(i != 0);
     }
 
+    /**
+     * Get value of flag Z.
+     * @return the value of Z.
+     */
     private int getZ() {
         return (cc >>> 7) & 0x01;
     }
 
     // N
+    /**
+     * Changes the N flag.
+     * @param b If true the flag is set to 1, 
+     *          else the flag is set to 0.
+     */
     private void setN(boolean b) {
         if (b)
             cc = cc | 0x40;
         else
             cc = cc & 0xBF;
     }
-
+    
+    /**
+     * Changes the N flag.
+     * @param i If 0 the flag is set to 0, 
+     *          else the flag is set to 1.
+     */
     private void setN(int i) {
         setN(i != 0);
     }
-
+    
+    /**
+     * Get value of flag N.
+     * @return the value of N.
+     */
     private int getN() {
         return (cc >>> 6) & 0x01;
     }
 
     // H
+    /**
+     * Changes the H flag.
+     * @param b If true the flag is set to 1, 
+     *          else the flag is set to 0.
+     */
     private void setH(boolean b) {
         if (b)
             cc = cc | 0x20;
@@ -1953,25 +2051,47 @@ public final class Cpu {
             cc = cc & 0xDF;
     }
 
+    /**
+     * Changes the H flag.
+     * @param i If 0 the flag is set to 0, 
+     *          else the flag is set to 1.
+     */
     private void setH(int i) {
         setH(i != 0);
     }
 
+    /**
+     * Get value of flag H.
+     * @return the value of H.
+     */
     private int getH() {
         return (cc >>> 5) & 0x01;
     }
 
-    // calcH can be used to calculate the H flag for addition: v1 + v2
+    /**
+     * Calculates the H flag for addition: v1 + v2. 
+     * @param v1 value
+     * @param v2 another value
+     */
     private void calcH(int v1, int v2) {
         setH(((v1 & 0x0F) + (v2 & 0x0F)) > 0x0F);
     }
 
-    // calcHsub is the same as calcH but for subtraction: v1 - v2
+    /**
+     * Calculates the H flag for subtraction: v1 - v2. 
+     * @param v1 value to subtract from
+     * @param v2 value to subtract
+     */
     private void calcHsub(int v1, int v2) {
         setH(((v1 & 0x0F) - (v2 & 0x0F)) < 0x00);
     }
 
     // C
+    /**
+     * Changes the C flag.
+     * @param b If true the flag is set to 1, 
+     *          else the flag is set to 0.
+     */
     private void setC(boolean b) {
         if (b)
             cc = cc | 0x10;
@@ -1979,20 +2099,39 @@ public final class Cpu {
             cc = cc & 0xEF;
     }
 
+    /**
+     * Changes the C flag.
+     * @param i If 0 the flag is set to 0, 
+     *          else the flag is set to 1.
+     */
     private void setC(int i) {
         setC(i != 0);
     }
 
+    /**
+     * Get value of flag C.
+     * @return the value of C.
+     */
     private int getC() {
         return (cc >>> 4) & 0x01;
     }
 
-    // writes 16bit values to memory
+    /**
+     * Writes a 16bit value to memory. 
+     * @param address Address to write to
+     * @param data16bit 16bit value to be written.
+     */
     private void dblwrite(int address, int data16bit) {
         ram.write(address, data16bit & 0xFF);
         ram.write(address + 1, (data16bit >>> 8) & 0xFF);
     }
 
+    /**
+     * Calculates the double register of two registers.
+     * @param a the left part of the double register.
+     * @param b the right part of the double register.
+     * @return the value of the double register.
+     */
     private int dblreg(int a, int b) {
         return a * 0x100 + b;
     }
@@ -2000,88 +2139,163 @@ public final class Cpu {
     /*
      * Get and set methods for double registers
      */
+    /**
+     * Returns the value of the 16bit HL register.
+     * @return The value of the HL register.
+     */
     public int getHL() {
         return dblreg(h, l);
     }
 
+    /**
+     * Change the value of the double register HL.
+     * @param largeInt The new 16bit value of HL. 
+     */
     public void setHL(int largeInt) {
         h = (largeInt >> 8) & 0xFF;
         l = largeInt & 0xFF;
     }
 
+    /**
+     * Returns the value of the 16bit BC register.
+     * @return The value of the BC register.
+     */
     public int getBC() {
         return dblreg(b, c);
     }
 
+    /**
+     * Change the value of the double register BC.
+     * @param largeInt The new 16bit value of BC. 
+     */
     public void setBC(int largeInt) {
         b = (largeInt >> 8) & 0xFF;
         c = largeInt & 0xFF;
     }
 
+    /**
+     * Returns the value of the 16bit DE register.
+     * @return The value of the DE register.
+     */
     public int getDE() {
         return dblreg(d, e);
     }
 
+    /**
+     * Change the value of the double register DE.
+     * @param largeInt The new 16bit value of DE. 
+     */
     public void setDE(int largeInt) {
         d = (largeInt >> 8) & 0xFF;
         e = largeInt & 0xFF;
     }
 
-    // AF is the the register a and cc
+
+    /**
+     * Change the value of the double register AF.
+     * Note that F is the same as register cc.
+     * @param largeInt The new 16bit value of AF. 
+     */
     private void setAF(int largeInt) {
         a = (largeInt >> 8) & 0xFF;
         cc = largeInt & 0xFF;
     }
 
+    /**
+     * Returns the value of the 16bit AF register.
+     * Note that F is the same as register cc.
+     * @return The value of the AF register.
+     */
     private int getAF() {
         return dblreg(a, cc);
     }
 
+    /**
+     * Sets the A register.
+     * @param smallInt New 8bit value of A
+     */
     public void setA(int smallInt) {
         a = smallInt;
     }
 
+    /**
+     * Returns the value of register A.
+     * @return Value of register A.
+     */
     public int getA() {
         return a;
     }
 
+    /**
+     * Sets the F (cc) register.
+     * @param smallInt New 8bit value of F
+     */
     public void setF(int smallInt) {
         cc = smallInt;
     }
 
+    /**
+     * Returns the value of register F.
+     * @return Value of register F.
+     */
     public int getF() {
         return cc;
     }
 
+    /**
+     * Sets the SP register.
+     * @param smallInt New 16bit value of SP.
+     */
     public void setSP(int largeInt) {
         sp = largeInt;
     }
 
+    /**
+     * Returns the value of SP.
+     * @return Value of SP.
+     */
     public int getSP() {
         return sp;
     }
 
+    /**
+     * Returns the value of PC.
+     * @return Value of PC.
+     */
     public int getPC() {
         return pc;
     }
 
+    /**
+     * Sets the PC register.
+     * @param smallInt New 16bit value of PC.
+     */
     public void setPC(int smallInt) {
         pc = smallInt;
     }
 
+    /**
+     * Returns the state of the IME flag.
+     * @return true if the IME flag is active,
+     *         otherwise false.
+     */
     public boolean getIME() {
         return ime;
     }
 
+    /**
+     * Changes the IME flag.
+     * @param ime New value of the IME flag.
+     */
     public void setIME(boolean ime) {
         this.ime = ime;
     }
 
+    /**
+     * Returns executeInterrupt.
+     * @return executeInterrupt.
+     */
     public boolean getExecuteInterrupt() {
         return executeInterrupt;
-    }
-
-    private void addCycles(int cycles) {
-        cycleTime += cycles;
     }
 }
