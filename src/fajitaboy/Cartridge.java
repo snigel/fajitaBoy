@@ -20,6 +20,12 @@ public class Cartridge extends MemoryComponent {
     public void write(int address, int data) {
         throw new RomWriteException("Catridge.java, adress:" + address);
     }
+    
+    public final void reset() {
+    	//do nothing. 
+    	//reloading the cartridge is not needed
+    	//reset MBC if it will be implemented
+    }
 }
 /*
  * Some code for reading out title or type testread(0x134, 16,

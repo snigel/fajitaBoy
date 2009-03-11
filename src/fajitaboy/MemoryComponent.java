@@ -11,6 +11,11 @@ import java.io.FileInputStream;
  *
  */
 public class MemoryComponent implements MemoryInterface, ForceMemory {
+	
+	/**
+	 * The size of the ram array
+	 */
+	protected int length;
 
     /**
      * This array holds the memory space of RAM.
@@ -33,7 +38,8 @@ public class MemoryComponent implements MemoryInterface, ForceMemory {
      *            memorycomponent array and for setting the offset value.
      */
     MemoryComponent(final int start, final int end) {
-        ram = new int[end - start]; // sets size of ram
+    	this.length=length=end-start;
+        reset();
         offset = start; // set offset value for addressing
     }
 
@@ -64,6 +70,10 @@ public class MemoryComponent implements MemoryInterface, ForceMemory {
         ram[addr] = data;
     }
 
+    public void reset() {
+    	ram = new int[length];
+    }
+    
     /**
      * This function reads a rom from a file into the ram array.
      *

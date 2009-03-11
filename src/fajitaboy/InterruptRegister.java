@@ -33,5 +33,4 @@ public class InterruptRegister implements MemoryInterface {
     public final void write(final int address, final int data) {
         register = data;
     }
-
 }

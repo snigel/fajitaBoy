@@ -150,9 +150,17 @@ public class AddressBus implements MemoryInterface {
      * Resets the memory to zero. The ROM is left untouched.
      */
     public final void reset() {
-        for (int i = VRAM_START; i <= INTERRUPT_ADDRESS; i++) {
-            module[i].write(i, 0);
-        }
+    	interruptRegister.reset();
+    	debug.reset();
+        raml.reset();
+        echo.reset();
+        ramh.reset();
+        cartridge.reset();
+        vram.reset();
+        oam.reset();
+        hram.reset();
+        eram.reset();
+        io.reset();
     }
 
 }

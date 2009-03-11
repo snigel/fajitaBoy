@@ -22,4 +22,9 @@ public interface MemoryInterface {
      *            The data we want to write to the specified address
      */
     void write(int address, int data);
+    
+    /**
+     * Resets memory and initializes any values if required
+     */
+    void reset();
 }
