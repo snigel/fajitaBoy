@@ -579,6 +579,11 @@ public final class Cpu {
             pc++;
             addCycles(4);
             break;
+        case 0x3d: // DEC A
+            a = dec(a);
+            pc++;
+            addCycles(4);
+            break;
         case 0x3e: // LD A, n
             a = readn();
             pc += 2;
