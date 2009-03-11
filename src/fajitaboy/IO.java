@@ -22,24 +22,24 @@ public class IO extends MemoryComponent {
 
 	public void reset() {
 			ram = new int[length];  
-			write(FF10, 0x80);   
-			write(FF11, 0xBF);   
-			write(FF12, 0xF3);   
-			write(FF14, 0xBF);   
-			write(FF16, 0x3F);   
-			write(FF19, 0xBF);   
-			write(FF1A, 0x7F); 
-			write(FF1B, 0xFF);
-			write(FF1C, 0x9F);
-			write(FF1E, 0xBF);
-			write(FF20, 0xFF);
-			write(FF23, 0xBF);
-			write(FF24, 0x77);
-			write(FF25, 0xF3);
-			write(FF26, 0xF1); //SGB uses F0 instead.
-			write(FF40, 0x91);
-			write(FF47, 0xFC)   
-			write(FF48, 0xFF)   
-			write(FF49, 0xFF)    
+			write(0xFF10, 0x80);   
+			write(0xFF11, 0xBF);   
+			write(0xFF12, 0xF3);   
+			write(0xFF14, 0xBF);   
+			write(0xFF16, 0x3F);   
+			write(0xFF19, 0xBF);   
+			write(0xFF1A, 0x7F); 
+			write(0xFF1B, 0xFF);
+			write(0xFF1C, 0x9F);
+			write(0xFF1E, 0xBF);
+			write(0xFF20, 0xFF);
+			write(0xFF23, 0xBF);
+			write(0xFF24, 0x77);
+			write(0xFF25, 0xF3);
+			write(0xFF26, 0xF1); //SGB uses F0 instead.
+			write(0xFF40, 0x91);
+			write(0xFF47, 0xFC);   
+			write(0xFF48, 0xFF);   
+			write(0xFF49, 0xFF);    
     }
 }

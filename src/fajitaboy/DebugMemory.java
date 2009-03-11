@@ -6,13 +6,17 @@ package fajitaboy;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class DebugMemory implements MemoryInterface {
+public class DebugMemory implements MemoryInterface, ForceMemory {
 
     /**
      * {@inheritDoc}
      */
     public final int read(final int address) {
             return 0;
+    }
+    
+    public final int forceRead(final int address) {
+    return 	this.read(address);
     }
 
     /**
@@ -21,5 +25,13 @@ public class DebugMemory implements MemoryInterface {
     public final void write(final int address, final int data) {
         //This one does nothing. Data should always be zero.
     }
+    public final void forceWrite(final int address, final int data) {
+    	//same as write();
+    }
+
+	public void reset() {
+		//Do nothing since we don't have any data structures
+		
+	}
 
 }

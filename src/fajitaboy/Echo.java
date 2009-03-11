@@ -7,7 +7,7 @@ package fajitaboy;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class Echo implements MemoryInterface {
+public class Echo implements MemoryInterface, ForceMemory {
     /**
      * The difference between the low ram and echo addresses.
      */
@@ -39,6 +39,9 @@ public class Echo implements MemoryInterface {
     public final int read(final int address) {
         return mem.read(address - diff);
     }
+    public final int forceRead(final int address){
+    	return ((ForceMemory)mem).forceRead(address - diff);
+    }
 
     /**
      * {@inheritDoc}
@@ -46,5 +49,14 @@ public class Echo implements MemoryInterface {
     public final void write(final int address, final int data) {
         mem.write(address - diff, data);
     }
+    public final void forceWrite(final int address, final int data) {
+    	((ForceMemory)mem).forceWrite(address - diff, data);
+    }
+
+	public void reset() {
+		mem.reset();
+		//this should not need to be used. Use reset on the real object.
+		
+	}
 
 }
