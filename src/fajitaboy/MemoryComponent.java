@@ -11,7 +11,7 @@ import java.io.FileInputStream;
  *
  */
 public class MemoryComponent implements MemoryInterface, ForceMemory {
-	
+
 	/**
 	 * The size of the ram array
 	 */
@@ -38,14 +38,16 @@ public class MemoryComponent implements MemoryInterface, ForceMemory {
      *            memorycomponent array and for setting the offset value.
      */
     MemoryComponent(final int start, final int end) {
-    	this.length=length=end-start;
-        reset();
+    	this.length = end-start;
         offset = start; // set offset value for addressing
+        reset();
     }
 
-    MemoryComponent(final int start, final String romPath) {
-        this.offset = start;
-        readRom(romPath);
+    /**
+     * Default constuctor
+     */
+    MemoryComponent(){
+        //Do nothing
     }
 
     /**
@@ -73,31 +75,7 @@ public class MemoryComponent implements MemoryInterface, ForceMemory {
     public void reset() {
     	ram = new int[length];
     }
-    
-    /**
-     * This function reads a rom from a file into the ram array.
-     *
-     * @param romPath
-     *            is a text string containing the path to a gameboy rom, located
-     *            in file system.
-     */
-    private void readRom(final String romPath) {
-        try {
 
-            File romFile = new File(romPath);
-            ram = new int[(int) romFile.length()];
-            FileInputStream fis = new FileInputStream(romFile);
-            DataInputStream dis = new DataInputStream(fis);
-
-            for (int i = 0; i < ram.length; i++) {
-                ram[i] = dis.readUnsignedByte();
-            }
-
-            fis.close();
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-    }
 
     /**
      * {@inheritDoc}
