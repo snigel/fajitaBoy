@@ -8,7 +8,7 @@ import java.util.Scanner;
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
  * lets the user input debugging commands to the emulator.
- * 
+ *
  * @author Arvid Jakobsson, Marcus Johansson
  */
 public final class Debugger {
@@ -41,7 +41,7 @@ public final class Debugger {
 
     /**
      * Creates a debugger, and loads a ROM-file.
-     * 
+     *
      * @param path
      *            ROM-file to load into the CPU.
      */
@@ -72,39 +72,40 @@ public final class Debugger {
         // Commands: reset, step n, regs x, mem adr adr, bp, bp n, exit
         while (running) {
             System.out.print(String.format("%04x", cpu.getPC()) + " :> ");
-
             String line = inputScanner.nextLine();
             Scanner in = new Scanner(line);
+
+            // No input
             if (!in.hasNext()) {
                 if (prevLine.equals("")) {
-                    continue;
+                    continue; // No previous command, skip
                 }
-                in = new Scanner(prevLine);
+                in = new Scanner(prevLine); // Else: Read prev line again
             } else {
                 prevLine = line;
             }
-
             scLine = in.next();
             scLine.trim();
             scLine.toLowerCase();
 
+            // Step
             if (scLine.equals("t")) {
                 if (in.hasNextInt(argRadix)) {
                     debugStep(in.nextInt(argRadix));
                 } else {
                     debugStep(1);
                 }
+
+            // Switch hex/dec input
             } else if (scLine.equals("hex")) {
                 switchRadix();
+
+            // Reset
             } else if (scLine.equals("s")) {
                 cpu.reset();
+                addressBus.reset();
 
-                /*
-                 * Please note that GameBoy internal RAM on power up contains
-                 * random data. All of the GameBoy emulators tend to set all RAM
-                 * to value $00 on entry.
-                 */
-                // addressBus.reset();
+            // Show/Set registers
             } else if (scLine.equals("r")) {
                 if (in.hasNext()) {
                     String reg = in.next();
@@ -117,6 +118,8 @@ public final class Debugger {
                 } else {
                     showRegs();
                 }
+
+            // Write to memory
             } else if (scLine.equals("e")) {
                 if (in.hasNextInt(argRadix)) {
 
@@ -130,6 +133,8 @@ public final class Debugger {
                 } else {
                     showDebugError("e expects two or more arguments");
                 }
+
+            // Hexdump
             } else if (scLine.equals("d")) {
                 if (in.hasNextInt(argRadix)) {
                     int addr = in.nextInt(argRadix);
@@ -138,13 +143,12 @@ public final class Debugger {
                         hexDump(addr, len);
                     } else {
                         hexDump(addr);
-                        /*
-                         * Could have been: hexDump (cpu.getPC, addr) instead.
-                         */
                     }
                 } else {
                     showDebugError("d expects one or two arguments");
                 }
+
+            // Show/modify breakpoints
             } else if (scLine.equals("b")) {
                 if (in.hasNextInt(argRadix)) {
                     int addr = in.nextInt(argRadix);
@@ -152,6 +156,8 @@ public final class Debugger {
                 } else {
                     System.out.println("Current breakpoints: " + breakPoints);
                 }
+
+            // Disassemble instructions
             } else if (scLine.equals("p") || scLine.equals("i")) {
                 if (in.hasNextInt(argRadix)) {
                     int lenOrAddr = in.nextInt(argRadix);
@@ -165,6 +171,8 @@ public final class Debugger {
                 } else {
                     showDebugError("p expects one or two arguments");
                 }
+
+            // Pause on interrupts on/off
             } else if (scLine.equals("n")) {
                 if (in.hasNextInt(argRadix)) {
                     int i = in.nextInt(argRadix);
@@ -184,12 +192,20 @@ public final class Debugger {
                             + "\tPause on interrupts: "
                             + interruptEnabled);
                 }
+
+            // Run forever
             } else if (scLine.equals("g")) {
                 runForever();
+
+            // Show help
             } else if (scLine.equals("?")) {
                 showHelp();
+
+            // Quit
             } else if (scLine.equals("q")) {
                 System.exit(0);
+
+            // No valid parse
             } else {
                 showDebugError("Invalid command!");
             }
@@ -213,7 +229,7 @@ public final class Debugger {
 
     /**
      * Dumps one line of memory, at specified address.
-     * 
+     *
      * @param addr
      *            Where to dump memory.
      */
@@ -224,7 +240,7 @@ public final class Debugger {
     /**
      * Prints a hexdump starting at specified adress, rounded down to closest
      * 0xFFF0, writing for len bytes, rounded up in a similar way.
-     * 
+     *
      * @param addr
      *            Address to start writing out, rounded down.
      * @param len
@@ -241,10 +257,11 @@ public final class Debugger {
                     "Address overflow detected! Wrapping around! Silly you!");
             addrE &= 0xFFFF;
             addrS &= 0xFFFF;
-        } if (addrE > 0xFFFF) {
-            size = 0xFFFF - addrS +1;
+        }
+        if (addrE > 0xFFFF) {
+            size = 0xFFFF - addrS + 1;
             for (int i = 0; i < (addrE & 0xFFFF); i++) {
-                mem[size +i] = addressBus.read(i);
+                mem[size + i] = addressBus.read(i);
             }
         }
 
@@ -252,7 +269,7 @@ public final class Debugger {
             mem[i] = addressBus.read((i + addrS) & 0xFFFF);
         }
 
-        for (int i = 0; i < (addrE-addrS) / 16; i++) {
+        for (int i = 0; i < (addrE - addrS) / 16; i++) {
             String out = String.format("%04x ", (addrS + i * 16) & 0xFFFF);
             for (int j = 0; j < 16; j++) {
                 int inArr = i * 16 + j;
@@ -279,7 +296,7 @@ public final class Debugger {
 
     /**
      * Writes a list of data to an address on the memorybus.
-     * 
+     *
      * @param addr
      *            Address where data should be written.
      * @param toWrite
@@ -313,7 +330,7 @@ public final class Debugger {
 
     /**
      * Sets a register to a value.
-     * 
+     *
      * @param reg
      *            Register to write set value on.
      * @param value
@@ -339,7 +356,7 @@ public final class Debugger {
 
     /**
      * Toggles a breakpoint at the specified address.
-     * 
+     *
      * @param addr
      *            Address to toggle breakpoint at.
      */
@@ -353,7 +370,7 @@ public final class Debugger {
 
     /**
      * Checks whether a breakpoint is set on a specific address.
-     * 
+     *
      * @param addr
      *            Address to check breakpoint on.
      * @return Returns true if a breakpoint is set on that adress, false
@@ -407,18 +424,22 @@ public final class Debugger {
         int lenLast = 0;
         while (true) {
             c += cpu.step();
-            
             String outStr = Integer.toString(c);
+
+            // Remove previous output
             for (int i = 0; i < lenLast; i++) {
                 outStr = '\b' + outStr;
             }
             lenLast = Integer.toString(c).length();
             System.out.print(outStr);
-            
+
+            // Check if there's a breakpoint on PC
             if (getBreakpoint(cpu.getPC())) {
                 System.out.println(
                         "Breakpoint at " + cpu.getPC() + " reached.");
                 break;
+
+            // Check for cpu interrupts
             } else if (interruptEnabled && cpu.getExecuteInterrupt()) {
                 System.out.println("Cpu interrupt");
                 break;
@@ -426,10 +447,22 @@ public final class Debugger {
         }
     }
 
+    /**
+     * Disassembles a series of instructions from
+     * PC.
+     * @param len number of instructions
+     */
     private void disassemble(final int len) {
         disassemble(cpu.getPC(), len);
     }
 
+    /**
+     * Disassembles a series of instructions from
+     * a given address.
+     *
+     * @param addr startaddress
+     * @param len number of instructions
+     */
     private void disassemble(final int addr, final int len) {
         List<Disassembler.DisassembledInstruction> dInstructs = Disassembler
                 .disassemble(addressBus, addr, len);
@@ -440,9 +473,8 @@ public final class Debugger {
 
     /**
      * Show an error message followed by a help message.
-     * 
-     * @param str
-     *            Error message to show.
+     *
+     * @param str Error message to show.
      */
     private void showDebugError(final String str) {
         System.out.println(str);
@@ -451,7 +483,7 @@ public final class Debugger {
 
     /**
      * Steps the program a specified number of steps, and stops on breakpoints.
-     * 
+     *
      * @param steps
      *            Number of steps.
      */
@@ -460,8 +492,8 @@ public final class Debugger {
         for (int i = 0; i < steps; i++) {
             c += cpu.step();
             if (getBreakpoint(cpu.getPC())) {
-                System.out
-                        .println("Breakpoint at " + cpu.getPC() + " reached.");
+                System.out.println(
+                        "Breakpoint at " + cpu.getPC() + " reached.");
                 break;
             }
             if (interruptEnabled && cpu.getExecuteInterrupt()) {
@@ -474,7 +506,7 @@ public final class Debugger {
 
     /**
      * Starts the debugger with a specified ROM-filepath.
-     * 
+     *
      * @param args
      *            Standard input arguments.
      */

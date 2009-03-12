@@ -8,26 +8,50 @@ import java.util.LinkedList;
  * @author arvid
  */
 public class InstructionSet {
+    /**
+     * Enum for types of instructions.
+     * Used for parsing.
+     */
     public static enum InstructionArgument {
+        /** Types of instructions. */
         VALUE ('%', 1), DOUBLE_VALUE ('#', 2), ADDRESS ('&', 2), SIGNED_OFFSET ('$', 2);
-        
-        private final char fChar; 
+
+        /** Representation. */
+        private final char fChar;
+        /** Size. */
         private final int size;
-        
+
+        /**
+         * Constructor.
+         * @param c Representation
+         * @param s Size
+         */
         InstructionArgument(final char c, final int s) {
             this.fChar = c;
             this.size  = s;
         }
-        
+
+        /**
+         * Get representation.
+         * @return representation
+         */
         public char getFChar() {
             return this.fChar;
         }
-        
+
+        /**
+         * Get size.
+         * @return size
+         */
         public int getSize() {
             return this.size;
         }
     }
-    
+    /**
+     * Returns the instruction with given opcode.
+     * @param opcode opcode-number
+     * @return instruction
+     */
     public static Instruction getInstruction(final int opcode) {
         //return instructions[opcode];
         return instructions[opcode];
@@ -37,29 +61,50 @@ public class InstructionSet {
      * @author arvid
      */
     static public class Instruction {
+        /** Name. */
         private String instructionName;
+        /** Operation code. */
         private int opCode;
+        /** Pretty output name. */
         private String prettyName;
+        /** List of arguemnts taken by this instruction. */
         private List<InstructionArgument> arguments;
 
         // public void Instruction(final String name, final String pretty, final
         // String args) {
-        private Instruction(final int opCode, final String name,
+        /**
+         * Constructor.
+         * @param opCodez opCode
+         * @param name Instruction name
+         * @param pretty Instruction pretty name
+         */
+        private Instruction(final int opCodez, final String name,
                 final String pretty) {
             this.instructionName = name;
             this.prettyName = pretty;
             //this.arguments = args;
         }
 
+        /**
+         * Returns the pretty name of an instruction.
+         * @return pretty name
+         */
         public String getPrettyName() {
             return prettyName;
         }
+        /**
+         * Get the arguements to the instruction.
+         * @return arguments
+         */
         public List<InstructionArgument> getArguments() {
             return arguments;
         }
     }
-    
-    private static Instruction[] instructions = { 
+
+    /**
+     * THE list of instructions. Ugh. :)
+     */
+    private static Instruction[] instructions = {
         new Instruction(0x0, "NOP", "NOP"),
         new Instruction(0x1, "LD   BC,nn", "LD   BC,#"),
         new Instruction(0x2, "LD   (BC),A", "LD   (BC),A"),
