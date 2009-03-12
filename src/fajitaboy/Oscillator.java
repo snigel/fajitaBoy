@@ -78,7 +78,7 @@ public class Oscillator {
         nextLineInc = GB_CYCLES_PER_LINE;
         nextModeChange = GB_CYCLES_PER_LINE;
         prevTimerInc = 0;
-        nextDividerInc = 0;
+        nextDividerInc = GB_DIV_CLOCK;
         lycHit = false;
     }
 
@@ -91,14 +91,24 @@ public class Oscillator {
         // Step CPU
         int cycleInc = cpu.step();
         cycles += cycleInc;
-
+        
+        updateDiv();
         updateTimer();
-
         updateLCD();
 
         return cycleInc;
     }
 
+    /**
+     * Increment Divider register.
+     */
+    private void updateDiv() {
+    	if ( cycles >= nextDividerInc ) {
+    		ram.forceWrite( ADDRESS_DIV, (ram.read(ADDRESS_DIV) + 1) & 0xFF );
+    		nextDividerInc += GB_DIV_CLOCK;
+    	}
+    }
+    
     /**
      * Increment Timer.
      */

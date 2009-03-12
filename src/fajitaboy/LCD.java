@@ -47,7 +47,7 @@ public class LCD implements ClockPulseReceiver {
 			if ( (stat & 0x010) != 0 ) {
 				ram.write( ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01 );
 			}
-			ram.write( ADDRESS_STAT, (ram.read( ADDRESS_STAT ) & 0xFC) + 1 ); // Replace with forcedWrite
+			ram.forceWrite( ADDRESS_STAT, (ram.read( ADDRESS_STAT ) & 0xFC) + 1 ); // Replace with forcedWrite
 		}
 		
 		if ( message == MSG_LCD_CHANGE_MODE ) {
@@ -76,7 +76,7 @@ public class LCD implements ClockPulseReceiver {
 				break;
 			}
 			
-			ram.write( ADDRESS_STAT, stat ); // Replace with forcedWrite
+			ram.forceWrite( ADDRESS_STAT, stat );
 		}
 		
 		if ( message == MSG_LCD_NEXT_LINE ) {
@@ -84,14 +84,14 @@ public class LCD implements ClockPulseReceiver {
 			int ly = ram.read( ADDRESS_LY ) + 0x01;
 			int lyc = ram.read( ADDRESS_LYC );
 			int stat = ram.read( ADDRESS_STAT );
-			ram.write( ADDRESS_LY, ly );
+			ram.forceWrite( ADDRESS_LY, ly );
 			if ( ly == lyc ) {
 // 				Coincidence bit on
-				ram.write( ADDRESS_STAT, stat | 0x04 );
+				ram.forceWrite( ADDRESS_STAT, stat | 0x04 );
 				return MSG_LCD_LYC_HIT;
 			} else {
 // 				Coincidence bit off
-				ram.write( ADDRESS_STAT, stat & 0xFB );
+				ram.forceWrite( ADDRESS_STAT, stat & 0xFB );
 			}
 		}
 		
