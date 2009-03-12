@@ -19,6 +19,21 @@ public class IO extends MemoryComponent {
 	IO(final int start, final int end) {
 		super(start, end);
 	}
+	
+	public void write(final int address, final int data) {
+	        int addr = address - offset;
+	        if (addr < 0 || addr > ram.length) {
+	            throw new ArrayIndexOutOfBoundsException("RamHigh.java");
+	        }
+	        if(address==0xFF04){ //DIV Register
+	        	ram[addr] = 0;
+	        }
+	        else if(address==0xFF44){
+	        	//Read only register, do nothing
+	        }
+	        else
+	        ram[addr] = data;
+	}
 
 	public void reset() {
 			ram = new int[length];  
