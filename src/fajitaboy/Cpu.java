@@ -84,11 +84,6 @@ public final class Cpu {
     private boolean executeInterrupt;
 
     /**
-     * CPU cycle counter.
-     */
-    private int cycleTime;
-
-    /**
      * Creates a new CPU with default values.
      * 
      * @param ram
@@ -113,7 +108,6 @@ public final class Cpu {
         h = 0x01;
         l = 0x4D;
         sp = 0xfffe;
-        cycleTime = 0;
         ime = true;
         executeInterrupt = false;
     }
@@ -125,7 +119,7 @@ public final class Cpu {
      */
     public int step() {
         // Initialize vars
-        cycleTime = 0;
+        int cycleTime = 0;
         executeInterrupt = false;
         int jumpAddress = 0x0000;
 
@@ -171,7 +165,7 @@ public final class Cpu {
         } else {
             // Perform processor operation
             int inst = ram.read(pc);
-            runInstruction(inst);
+            cycleTime = runInstruction(inst);
         }
 
         return cycleTime;
@@ -181,42 +175,43 @@ public final class Cpu {
      * Runs specified instruction.
      * @param instruction The opcode of the instruction to run.
      */
-    private void runInstruction(final int instruction) {
+    private int runInstruction(final int instruction) {
+        int cycleTime = 0;
         switch (instruction) {
         case 0x00: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x01: // LD BC,nn
             setBC(readnn());
             pc += 3;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x02: // LD (BC), A
             ram.write(getBC(), a);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x03: // INC BC
             setBC(getBC() + 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x04: // INC B
             b = inc(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x05: // DEC B
             b = dec(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x06: // LD B, n
             b = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x07: // RLCA
             setZ(0);
@@ -230,12 +225,12 @@ public final class Cpu {
                 setC(0);
             }
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x08: // LD (nn),SP
             dblwrite(readnn(), sp);
             pc += 3;
-            addCycles(20);
+            cycleTime += 20;
             break;
         case 0x09: // ADD HL,BC
             t1 = getHL() + getBC();
@@ -244,32 +239,32 @@ public final class Cpu {
             setN(0);
             setC(t1 > 0xFFFF);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x0a: // LD A,(BC)
             a = ram.read(getBC());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x0b: // DEC BC
             setBC(getBC() - 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x0c: // INC C
             c = inc(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x0d: // DEC C
             c = dec(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x0e: // LD C,n
             c = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x0f: // RRCA
             setC((a & 0x01) == 1);
@@ -281,38 +276,38 @@ public final class Cpu {
             setN(0);
             setH(0);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         // case 0x10:logln("STOP");break;
         case 0x11: // LD DE,nn
             setDE(readnn());
             pc += 3;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x12: // LD (DE),A
             ram.write(getDE(), a);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x13: // INC DE
             setDE(getDE() + 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x14: // INC D
             d = inc(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x15: // DEC D
             d = dec(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x16: // LD D,n
             d = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x17: // RLA
             setZ(0);
@@ -329,11 +324,11 @@ public final class Cpu {
                 setC(0);
             }
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x18: // JR d
             pc = pc + (byte) ram.read(pc + 1) + 2;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x19: // ADD HL,DE
             t1 = getHL() + getDE();
@@ -342,32 +337,32 @@ public final class Cpu {
             setN(0);
             setC(t1 > 0xFFFF);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x1a: // LD A,(DE)
             a = ram.read(getDE());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x1b: // DEC DE
             setDE(getDE() - 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x1c: // INC e
             e = inc(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x1d: // DEC e
             e = dec(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x1e: // LD E,n
             e = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x1f: // RRA
             setZ(0);
@@ -379,48 +374,48 @@ public final class Cpu {
             setC((a & 0x01) == 1);
             a = a >>> 1;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x20: // JR NZ+e
             if (getZ() == 0) {
                 pc += (byte) readn() + 2;
-                addCycles(12);
+                cycleTime += 12;
             } else {
                 pc += 2;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0x21: // LD HL,nn
             setHL(readnn());
             pc += 3;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x22: // LDI (HL),A
             ram.write(getHL(), a);
             setHL(getHL() + 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x23: // INC HL
             setHL(getHL() + 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x24: // INC H
             h = inc(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x25: // DEC H
             h = dec(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x26: // LD H,n
             h = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x27: // DAA - algorithm found at
             // http://www.worldofspectrum.org/faq/reference/z80reference.htm#DAA
@@ -444,15 +439,15 @@ public final class Cpu {
             }
             setZ(a == 0);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x28: // JR Z,d (Jump+n if Z=1)
             if (getZ() == 1) {
                 pc = pc + (byte) readn() + 2;
-                addCycles(12);
+                cycleTime += 12;
             } else {
                 pc += 2;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
 
@@ -463,95 +458,96 @@ public final class Cpu {
             setC(t1 > 0xFFFF);
             setHL(t1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x2a: // LDI A,(HL)
             a = ram.read(getHL());
             setHL(getHL() + 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x2b: // DEC HL
             setHL(getHL() - 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x2c: // INC L
             l = inc(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x2d: // DEC L
             l = dec(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x2e: // LD l,n
             l = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x2f: // CPL
             a = ~a & 0xff;
             setN(1);
             setH(1);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x30: // JR NC,d
             if (getC() == 0) {
                 pc = pc + (byte) readn() + 2;
-                addCycles(12);
+                cycleTime += 12;
             } else {
                 pc += 2;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0x31: // LD SP,nn
             sp = readnn();
             pc += 3;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x32: // LDD (HL),A; HL-
             ram.write(getHL(), a);
             setHL(getHL() - 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x33: // INC SP
             sp = (sp + 1) & 0xFFFF;
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x34: // INC (HL)
             ram.write(getHL(), inc(ram.read(getHL())));
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x35: // DEC (HL)
             ram.write(getHL(), dec(ram.read(getHL())));
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x36: // LD (HL),n
             ram.write(getHL(), readn());
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0x37: // SCF
             setC(1);
             setN(0);
             setH(0);
-            addCycles(4);
+            pc++;
+            cycleTime += 4;
             break;
         case 0x38: // JR C,d
             if (getC() == 1) {
                 pc = pc + (byte) readn() + 2;
-                addCycles(12);
+                cycleTime += 12;
             } else {
                 pc += 2;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0x39: // ADD HL,SP
@@ -561,75 +557,75 @@ public final class Cpu {
             setN(0);
             setC(t1 > 0xFFFF);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x3a: // LDD A,(HL)
             a = ram.read(getHL());
             setHL(getHL() - 1);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x3b: // DEC SP
             sp = (sp - 1) & 0xFFFF;
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x3c: // INC A
             a = inc(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x3d: // DEC A
             a = dec(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x3e: // LD A, n
             a = readn();
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x3f: // CCF
             setC(getC() == 0);
             setN(0);
             setH(0);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x40: // LD B,B
             // b = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x41: // LD B,C
             b = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x42: // LD B,D
             b = d;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x43: // LD B,E
             b = e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x44: // LD B,H
             b = h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x45: // LD B,L
             b = l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x46: // LD B,(HL)
             b = ram.read(getHL());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x47: // LD B,A
             b = a;
@@ -638,77 +634,77 @@ public final class Cpu {
         case 0x48: // LD C,B
             c = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x49: // LD C,C
             // c=c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x4a: // LD C,D
             c = d;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x4b: // LD C,E
             c = e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x4c: // LD C,H
             c = h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x4d: // LD C,L
             c = l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x4e: // LD C,(HL)
             c = ram.read(getHL());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x4f: // LD C,A
             c = a;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x50: // LD D,B
             d = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x51: // LD D,C
             d = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x52: // LD D,D
             // d=d;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x53: // LD D,E
             d = e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x54: // LD D,H
             d = h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x55: // LD D,L
             d = l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x56: // LD D,(HL)
             d = ram.read(getHL());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x57: // LD D,A
             d = a;
@@ -717,600 +713,600 @@ public final class Cpu {
         case 0x58: // LD E,B
             e = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x59: // LD E,C
             e = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x5A: // LD E,D
             e = d;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x5b: // LD E,E
             // e=e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x5c: // LD E,H
             e = h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x5d: // LD E,L
             e = l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x5e: // LD E,(HL)
             e = ram.read(getHL());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x5f: // LD E,A
             e = a;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x60: // LD H,B
             h = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x61: // LD H,C
             h = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x62: // LD H,D
             d = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x63: // LD H,E
             h = e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x64: // LD H,H
             // h=h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x65: // LD H,L
             h = l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x66: // LD H,(HL)
             h = ram.read(getHL());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x67: // LD H,A
             h = a;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x68: // LD L,B
             l = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x69: // LD L,C
             l = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x6a: // LD L,D
             l = d;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x6b: // LD L,E
             l = e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x6c: // LD L,H
             l = h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x6d: // LD L,L
             // l=l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x6e: // LD L,(HL)
             l = ram.read(getHL());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x6f: // LD L,A
             l = a;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x70: // LD (HL),B
             ram.write(getHL(), b);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x71: // LD (HL),C
             ram.write(getHL(), c);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x72: // LD (HL),D
             ram.write(getHL(), d);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x73: // LD (HL),E
             ram.write(getHL(), e);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x74: // LD (HL),H
             ram.write(getHL(), h);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x75: // LD (HL),L
             ram.write(getHL(), l);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         // case 0x76: logln("HALT"); break;
         case 0x77: // LD (HL),A
             ram.write(getHL(), a);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x78: // LD A,B
             a = b;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x79: // LD A,C
             a = c;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x7A: // LD A,D
             a = d;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x7B: // LD A,E
             a = e;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x7c: // LD A,H
             a = h;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x7d: // LD A,L
             a = l;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x7e: // LD A,(HL)
             a = ram.read(getHL());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x7f: // LD A,A
             // a=a;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x80: // ADD A,B
             add(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x81: // ADD A,C
             add(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x82: // ADD A,D
             add(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x83: // ADD A,E
             add(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x84: // ADD A,H
             add(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x85: // ADD A,L
             add(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x86: // ADD A,(HL)
             add(ram.read(getHL()));
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x87: // ADD A,A
             add(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x88: // ADC A,B
             add(b + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x89: // ADC A,C
             add(c + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x8a: // ADC A,D
             add(d + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x8b: // ADC A,E
             add(e + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x8c: // ADC A,H
             add(h + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x8d: // ADC A,L
             add(l + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x8e: // ADC A,(HL)
             add(ram.read(getHL()) + getC());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x8f: // ADC A,A
             add(a + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x90: // SUB B
             sub(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x91: // SUB C
             sub(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x92: // SUB D
             sub(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x93: // SUB E
             sub(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x94: // SUB H
             sub(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x95: // SUB L
             sub(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x96: // SUB (HL)
             sub(ram.read(getHL()));
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x97: // SUB A
             sub(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0x98: // SBC A,B
             sub(b + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x99: // SBC A,C
             sub(c + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x9A: // SBC A,D
             sub(d + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x9B: // SBC A,E
             sub(e + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x9C: // SBC A,H
             sub(h + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x9D: // SBC A,L
             sub(l + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0x9e: // SBC A,(HL)
             sub(ram.read(getHL()) + getC());
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0x9f: // SBC A,A
             sub(a + getC());
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0xa0: // AND B
             and(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa1: // AND C
             and(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa2: // AND D
             and(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa3: // AND E
             and(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa4: // AND H
             and(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa5: // AND L
             and(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa6: // AND (HL)
             and(ram.read(getHL()));
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xa7: // AND A
             and(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0xa8: // XOR B
             xor(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xa9: // XOR C
             xor(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xaa: // XOR D
             xor(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xab: // XOR E
             xor(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xac: // XOR H
             xor(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xad: // XOR L
             xor(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xAE: // XOR (HL)
             xor(ram.read(getHL()));
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xAF: // XOR A
             xor(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0xB0: // OR B
             or(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xB1: // OR C
             or(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xB2: // OR D
             or(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xb3: // OR E
             or(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xb4: // OR H
             or(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xb5: // OR L
             or(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xb6: // OR (HL)
             or(ram.read(getHL()));
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xb7: // OR A
             or(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0xb8: // CP B
             cp(b);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xb9: // CP C
             cp(c);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xba: // CP D
             cp(d);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xbb: // CP E
             cp(e);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xbc: // CP H
             cp(h);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xbd: // CP L
             cp(l);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xbe: // CP (HL)
             cp(ram.read(getHL()));
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xbf: // CP A
             cp(a);
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
 
         case 0xc0: // RET NZ
             if (getZ() == 0) {
                 ret();
-                addCycles(20);
+                cycleTime += 20;
             } else {
                 pc++;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0xc1: // POP BC
             setBC(pop());
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xc2: // JP NZ,nn
             if (getZ() == 0) {
                 pc = readnn();
-                addCycles(16);
+                cycleTime += 16;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xc3: // JP nn
             pc = readnn();
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xc4: // CALL NZ,nn
             if (getZ() == 0) {
                 call();
-                addCycles(24);
+                cycleTime += 24;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xc5: // PUSH BC
             push(getBC());
             pc++;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xc6: // ADD A,n
             add(readn());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xc7: // RST 0
             push(pc + 1);
             pc = 0;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xc8: // RET Z
             if (getZ() == 1) {
                 ret();
-                addCycles(20);
+                cycleTime += 20;
             } else {
                 pc++;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0xc9: // RET
             ret();
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xca: // JP Z,nn
             if (getZ() == 1) {
                 pc = readnn();
-                addCycles(16);
+                cycleTime += 16;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xcb: // CB Prefix
@@ -1318,42 +1314,42 @@ public final class Cpu {
             switch (cbOp & 0x07) {
             case 0: // B
                 b = prefixCB(cbOp, b);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             case 1: // C
                 c = prefixCB(cbOp, c);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             case 2: // D
                 d = prefixCB(cbOp, d);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             case 3: // E
                 e = prefixCB(cbOp, e);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             case 4: // H
                 h = prefixCB(cbOp, h);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             case 5: // L
                 l = prefixCB(cbOp, l);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             case 6: // (HL)
                 ram.write(getHL(), prefixCB(cbOp, ram.read(getHL())));
 
                 if (cbOp > 0x3f && cbOp < 0x80) {
                     // instruction is BIT
-                    addCycles(12);
+                    cycleTime += 12;
                 } else {
                     // instruction is SET or RES
-                    addCycles(16);
+                    cycleTime += 16;
                 }
                 break;
             case 7: // A
                 a = prefixCB(cbOp, a);
-                addCycles(8);
+                cycleTime += 8;
                 break;
             }
             pc += 2;
@@ -1361,164 +1357,164 @@ public final class Cpu {
         case 0xcc: // CALL Z,nn
             if (getZ() == 1) {
                 call();
-                addCycles(24);
+                cycleTime += 24;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xcd: // CALL nn
             call();
-            addCycles(24);
+            cycleTime += 24;
             break;
         case 0xce: // ADC A,n
             add(readn() + getC());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xcf: // RST 8
             push(pc + 1);
             pc = 8;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xd0: // RET NC
             if (getC() == 0) {
                 ret();
-                addCycles(20);
+                cycleTime += 20;
             } else {
                 pc++;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0xd1: // POP DE
             setDE(pop());
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xd2: // JP NC,nn
             if (getC() == 0) {
                 pc = readnn();
-                addCycles(16);
+                cycleTime += 16;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xd3: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xd4: // CALL NC,nn
             if (getC() == 0) {
                 call();
-                addCycles(24);
+                cycleTime += 24;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xd5: // PUSH DE
             push(getDE());
             pc++;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xd6: // SUB n
             sub(readn());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xd7: // RST 10H
             push(pc + 1);
             pc = 0x10;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xd8: // RET C
             if (getC() == 1) {
                 ret();
-                addCycles(20);
+                cycleTime += 20;
             } else {
                 pc++;
-                addCycles(8);
+                cycleTime += 8;
             }
             break;
         case 0xd9: // RETI
             ret();
             ime = true;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xda: // JP C,nn
             if (getC() == 1) {
                 pc = readnn();
-                addCycles(16);
+                cycleTime += 16;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xdb: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xdc: // CALL C,nn
             if (getC() == 1) {
                 call();
-                addCycles(24);
+                cycleTime += 24;
             } else {
                 pc += 3;
-                addCycles(12);
+                cycleTime += 12;
             }
             break;
         case 0xdd: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xde: // SBC A,n
             sub(readn() + getC());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xDF: // RST 18H
             push(pc + 1);
             pc = 0x18;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xE0: // LD (FF00+n),A
             ram.write((0xFF00 + readn()), a);
             pc += 2;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xE1: // POP HL
             setHL(pop());
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xe2: // LD (FF00+C),A
             ram.write((0xFF00 + c), a);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xE3: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xE4: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xe5: // PUSH HL
             push(getHL());
             pc++;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xE6: // AND n
             and(readn());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xe7: // RST 20H
             push(pc + 1);
             pc = 0x20;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xe8: // ADD SP,dd
             t1 = (byte) readn();
@@ -1534,78 +1530,78 @@ public final class Cpu {
             }
             sp = sp + t1;
             pc += 2;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xe9: // JP (HL)
             pc = ram.read(getHL());
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xEA: // LD (nn),A
             ram.write(readnn(), a);
             pc += 3;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xEB: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xEC: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xed: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xee: // XOR n
             xor(readn());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xef: // RST 28H
             push(pc + 1);
             pc = 0x28;
-            addCycles(16);
+            cycleTime += 16;
             break;
 
         case 0xF0: // LD A,(FF00+n)
             a = ram.read(0xFF00 + readn());
             pc += 2;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xF1: // POP AF
             setAF(pop());
             pc++;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xF2: // LD A,(FF00+C)
             a = ram.read(0xFF00 + c);
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xf3: // DI
             ime = false;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xF4: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xf5: // PUSH AF
             push(getAF());
             pc++;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xf6: // OR n
             or(readn());
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xf7: // RST 30H
             push(pc + 1);
             pc = 0x30;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xf8: // LD HL,SP+dd
             t1 = (byte) readn();
@@ -1621,30 +1617,30 @@ public final class Cpu {
                 calcH(sp, t1);
             }
             pc += 2;
-            addCycles(12);
+            cycleTime += 12;
             break;
         case 0xf9: // LD SP,HL
             sp = getHL();
             pc++;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xfa: // LD A,(nn)
             a = ram.read(readnn());
             pc += 3;
-            addCycles(16);
+            cycleTime += 16;
             break;
         case 0xfb: // EI
             ime = true;
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xFC: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xFD: // NOP
             pc++;
-            addCycles(4);
+            cycleTime += 4;
             break;
         case 0xFE: // CP, n
             int cpa = a - readn();
@@ -1653,12 +1649,12 @@ public final class Cpu {
             setC(cpa < 0);
             setH((cpa & 0xF0) != (a & 0xF0));
             pc += 2;
-            addCycles(8);
+            cycleTime += 8;
             break;
         case 0xff: // RST 38h
             push(pc + 1);
             pc = 0x38;
-            addCycles(16);
+            cycleTime += 16;
             break;
 
         default:
@@ -1666,6 +1662,7 @@ public final class Cpu {
                     + Integer.toHexString(ram.read(pc)));
             while (true); // Debug
         }
+        return cycleTime;
     }
 
     /**
@@ -1776,14 +1773,6 @@ public final class Cpu {
     }
 
     /**
-	 * Add Cycles after an instruction. 
-	 * @param cycles Number of cycles.
-	 */
-	private void addCycles(int cycles) {
-	    cycleTime += cycles;
-	}
-
-	/**
      * Reads the byte after pc.
      * @return the byte after pc.
      */
