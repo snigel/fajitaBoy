@@ -69,6 +69,9 @@ public class MemoryComponent implements MemoryInterface {
         ram[addr] = data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void reset() {
     	ram = new int[length];
     }

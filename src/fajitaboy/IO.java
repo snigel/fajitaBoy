@@ -20,6 +20,9 @@ public class IO extends MemoryComponent {
 		super(start, end);
 	}
 
+    /**
+     * {@inheritDoc}
+     */
 	public void write(final int address, final int data) {
 	        int addr = address - offset;
 	        if (addr < 0 || addr > ram.length) {
@@ -35,6 +38,9 @@ public class IO extends MemoryComponent {
 	        ram[addr] = data;
 	}
 
+	/**
+     * Writes the initial values to some addresses in I/0. 
+     */
 	public void reset() {
 			ram = new int[length];
 			write(0xFF10, 0x80);

@@ -22,10 +22,16 @@ public class Cartridge extends MemoryComponent {
         readRom(romPath);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void write(int address, int data) {
         throw new RomWriteException("Catridge.java, adress:" + address);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     public final void reset() {
     	//do nothing.
     	//reloading the cartridge is not needed

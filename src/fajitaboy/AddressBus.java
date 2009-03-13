@@ -146,6 +146,9 @@ public class AddressBus implements MemoryInterface {
         module[address].write(address, data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int forceRead(int address){
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");
@@ -153,6 +156,9 @@ public class AddressBus implements MemoryInterface {
         return module[address].forceRead(address);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void forceWrite(int address, int data){
     	if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("AddressBus.java");

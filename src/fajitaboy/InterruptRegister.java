@@ -26,6 +26,10 @@ public class InterruptRegister implements MemoryInterface {
     public final int read(final int address) {
         return register;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
     public final int forceRead(final int address) {
     	return this.read(address);
     }
@@ -37,10 +41,16 @@ public class InterruptRegister implements MemoryInterface {
         register = data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public final void forceWrite(final int address, final int data) {
     	this.write(address, data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
 	public void reset() {
 		register=0;
 	}

@@ -39,6 +39,10 @@ public class Echo implements MemoryInterface {
     public final int read(final int address) {
         return mem.read(address - diff);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
     public final int forceRead(final int address){
     	return mem.forceRead(address - diff);
     }
@@ -49,10 +53,17 @@ public class Echo implements MemoryInterface {
     public final void write(final int address, final int data) {
         mem.write(address - diff, data);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
     public final void forceWrite(final int address, final int data) {
     	mem.forceWrite(address - diff, data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
 	public void reset() {
 		mem.reset();
 		//this should not need to be used. Use reset on the real object.

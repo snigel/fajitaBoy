@@ -15,8 +15,11 @@ public class DebugMemory implements MemoryInterface {
             return 0;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public final int forceRead(final int address) {
-    return 	this.read(address);
+        return 	this.read(address);
     }
 
     /**
@@ -25,10 +28,16 @@ public class DebugMemory implements MemoryInterface {
     public final void write(final int address, final int data) {
         //This one does nothing. Data should always be zero.
     }
+    
+    /**
+     * {@inheritDoc}
+     */
     public final void forceWrite(final int address, final int data) {
     	//same as write();
     }
-
+    /**
+     * {@inheritDoc}
+     */
 	public void reset() {
 		//Do nothing since we don't have any data structures
 		
