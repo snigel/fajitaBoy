@@ -1,8 +1,5 @@
 package fajitaboy;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * Parentclass for all memory components.
@@ -10,7 +7,7 @@ import java.io.FileInputStream;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class MemoryComponent implements MemoryInterface, ForceMemory {
+public class MemoryComponent implements MemoryInterface {
 
 	/**
 	 * The size of the ram array

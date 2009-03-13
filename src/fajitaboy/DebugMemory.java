@@ -6,7 +6,7 @@ package fajitaboy;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class DebugMemory implements MemoryInterface, ForceMemory {
+public class DebugMemory implements MemoryInterface {
 
     /**
      * {@inheritDoc}

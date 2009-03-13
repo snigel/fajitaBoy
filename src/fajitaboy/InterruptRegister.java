@@ -6,7 +6,7 @@ package fajitaboy;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class InterruptRegister implements MemoryInterface, ForceMemory {
+public class InterruptRegister implements MemoryInterface {
     /**
      * This single variable represents the memory space of
      * the InterruptRegister.
@@ -36,7 +36,7 @@ public class InterruptRegister implements MemoryInterface, ForceMemory {
     public final void write(final int address, final int data) {
         register = data;
     }
-    
+
     public final void forceWrite(final int address, final int data) {
     	this.write(address, data);
     }

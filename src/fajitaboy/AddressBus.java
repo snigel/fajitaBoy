@@ -12,7 +12,7 @@ import static fajitaboy.constants.AddressConstants.*;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class AddressBus implements MemoryInterface, ForceMemory {
+public class AddressBus implements MemoryInterface {
     /**
      * The array which contains all the memory.
      */
@@ -150,14 +150,14 @@ public class AddressBus implements MemoryInterface, ForceMemory {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");
         }
-        return ((ForceMemory)module[address]).forceRead(address);
+        return module[address].forceRead(address);
     }
 
     public void forceWrite(int address, int data){
     	if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("AddressBus.java");
         }
-        ((ForceMemory)module[address]).forceWrite(address, data);
+        module[address].forceWrite(address, data);
     }
 
     /**
