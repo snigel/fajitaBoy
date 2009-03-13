@@ -19,7 +19,7 @@ public class Eram extends MemoryComponent {
      *            two values are used for creating the right size of the ERAM
      *            array and for setting the offset value
      */
-    Eram(final int start, final int end) {
+    public Eram(final int start, final int end) {
         super(start, end);
     }
 

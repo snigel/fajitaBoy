@@ -7,7 +7,7 @@ package fajitaboy;
  */
 public class Vram extends MemoryComponent {
 
-    
+
     /**
      * @param start
      *            , address representing where vram begins in memory space
@@ -16,7 +16,7 @@ public class Vram extends MemoryComponent {
      *            two values are used for creating the right size of the vram
      *            array and for setting the offset value
      */
-    Vram(final int start, final int end) {
+    public Vram(final int start, final int end) {
         super(start, end);
     }
 }

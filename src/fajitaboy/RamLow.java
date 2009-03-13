@@ -18,8 +18,8 @@ public class RamLow extends MemoryComponent {
      *            two values are used for creating the right size of the RamHigh
      *            array and for setting the offset value
      */
-    RamLow(final int start, final int end) {
+    public RamLow(final int start, final int end) {
         super(start, end);
     }
-    
+
 }

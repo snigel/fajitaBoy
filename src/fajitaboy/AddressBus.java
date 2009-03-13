@@ -5,7 +5,7 @@ import static fajitaboy.constants.AddressConstants.*;
 /**
  * Addressbus class that handles the whole address space. Through it all the
  * differents areas in the memory can be reached.
- * 
+ *
  * @author Adam Hulin, Johan Gustafsson
  */
 /**
@@ -54,7 +54,7 @@ public class AddressBus implements MemoryInterface {
     private Oam oam;
     /**
      * The High RAM.
-     * 
+     *
      */
     private Hram hram;
     /**
@@ -68,11 +68,11 @@ public class AddressBus implements MemoryInterface {
 
     /**
      * Creates the addressbus and all the parts of the memory.
-     * 
+     *
      * @param romPath
      *            The ROM-file
      */
-    AddressBus(final String romPath) {
+    public AddressBus(final String romPath) {
         // All modules must be initialized here
         debug = new DebugMemory();
         initialize(debug, DEBUG_START, DEBUG_END);
@@ -145,7 +145,7 @@ public class AddressBus implements MemoryInterface {
         }
         module[address].write(address, data);
     }
-    
+
     public int forceRead(int address){
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");

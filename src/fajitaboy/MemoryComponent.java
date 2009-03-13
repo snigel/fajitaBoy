@@ -34,7 +34,7 @@ public class MemoryComponent implements MemoryInterface {
      *            values are used for creating the right size of the
      *            memorycomponent array and for setting the offset value.
      */
-    MemoryComponent(final int start, final int end) {
+    public MemoryComponent(final int start, final int end) {
     	this.length = end-start;
         offset = start; // set offset value for addressing
         reset();
@@ -43,7 +43,7 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * Default constuctor
      */
-    MemoryComponent(){
+    public MemoryComponent(){
         //Do nothing
     }
 

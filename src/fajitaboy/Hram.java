@@ -16,7 +16,7 @@ public class Hram extends MemoryComponent {
      *            two values are used for creating the right size of the HRAM
      *            array and for setting the offset value
      */
-    Hram(final int start, final int end) {
+    public Hram(final int start, final int end) {
         super(start, end);
     }
 }

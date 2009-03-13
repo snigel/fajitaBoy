@@ -17,7 +17,7 @@ public class Cartridge extends MemoryComponent {
      * @param romPath
      *            , is the location of a gameboy rom located in file system
      */
-    Cartridge(final int start, final String romPath) {
+    public Cartridge(final int start, final String romPath) {
         this.offset = start;
         readRom(romPath);
     }

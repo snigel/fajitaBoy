@@ -15,7 +15,7 @@ public class Oam extends MemoryComponent {
      *            two values are used for creating the right size of the OAM
      *            array and for setting the offset value
      */
-    Oam(final int start, final int end) {
+    public Oam(final int start, final int end) {
         super(start, end);
     }
 }

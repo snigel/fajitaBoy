@@ -16,7 +16,7 @@ public class InterruptRegister implements MemoryInterface {
     /**
      * Constructs the InterruptRegister.
      */
-    InterruptRegister() {
+    public InterruptRegister() {
         reset();
     }
 
