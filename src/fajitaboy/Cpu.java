@@ -12,7 +12,7 @@ public final class Cpu {
     /**
      * Address bus to access the memory.
      */
-    private AddressBus ram;
+    private MemoryInterface ram;
 
     /**
      * Program counter/pointer 8bit register.
@@ -87,7 +87,7 @@ public final class Cpu {
      * @param ram
      *            The addressBus
      */
-    public Cpu(AddressBus ram) {
+    public Cpu(MemoryInterface ram) {
         this.ram = ram;
         reset();
     }

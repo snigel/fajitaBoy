@@ -47,9 +47,9 @@ public class Oscillator {
     private Cpu cpu;
 
     /**
-     * Pointer to AddressBus instance.
+     * Pointer to MemoryInterface instance.
      */
-    private AddressBus ram;
+    private MemoryInterface ram;
 
     /**
      * Pointer to LCD instance.
@@ -61,9 +61,9 @@ public class Oscillator {
      * @param cpu
      *            Pointer to CPU instance.
      * @param ram
-     *            Pointer to AddressBus instance.
+     *            Pointer to MemoryInterface instance.
      */
-    public Oscillator(Cpu cpu, AddressBus ram) {
+    public Oscillator(Cpu cpu, MemoryInterface ram) {
         this.cpu = cpu;
         this.ram = ram;
         lcd = new LCD(ram);

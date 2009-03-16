@@ -10,9 +10,9 @@ import static fajitaboy.constants.MessageConstants.*;
 public class LCD implements ClockPulseReceiver {
 
 	/**
-	 * Pointer to AddressBus class.
+	 * Pointer to MemoryInterface class.
 	 */
-	AddressBus ram;
+    MemoryInterface ram;
 	
 	/* (non-Javadoc)
 	 * @see ClockPulseReceiver#oscillatorMessage(int)
@@ -21,9 +21,9 @@ public class LCD implements ClockPulseReceiver {
 	/**
 	 * Creates a new LCD with default values.
 	 * 
-	 * @param ram Pointer to an AddressBus.
+	 * @param ram Pointer to an MemoryInterface.
 	 */
-	public LCD( AddressBus ram ) {
+	public LCD( MemoryInterface ram ) {
 		this.ram = ram;
 		reset();
 	}
