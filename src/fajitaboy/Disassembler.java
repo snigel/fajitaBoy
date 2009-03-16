@@ -2,75 +2,104 @@ package fajitaboy;
 
 import java.util.List;
 import java.util.LinkedList;
+
 /**
- * A class for disassembling game boy cpu instructions.
+ * A class for disassembling game boy cpu instructions. Since this class hold no
+ * mutable state, it has been declared it static.
  * @author Arvid
- *
  */
-public class Disassembler {
-    /** Disassemble a list of bytes.
-     * @param bus Addressbus object
-     * @param addr Adress to start disassembling
-     * @param len Number of instructions
-     * @return A list of strings, representing the disassembled code.
-     *         Each string is one instruction.
+public final class Disassembler {
+
+    /**
+     * Hidden unused constructor.
      */
-    public static List<DisassembledInstruction> disassemble(final AddressBus bus, final int addr, int len) {
+    private Disassembler() {
+
+    }
+
+    /**
+     * Disassemble a list of bytes.
+     * @param bus
+     *            Addressbus object
+     * @param addr
+     *            Adress to start disassembling
+     * @param len
+     *            Number of instructions
+     * @return A list of strings, representing the disassembled code. Each
+     *         string is one instruction.
+     */
+    public static List<DisassembledInstruction> disassemble(
+            final AddressBus bus, final int addr, final int len) {
+
+        // Disassemble len instructions, starting at curAddr.
+
         List<DisassembledInstruction> out;
         out = new LinkedList<DisassembledInstruction>();
         int curAddr = addr;
 
         for (int i = 0; i < len; i++) {
+            // this instruction starts at iAddr.
             int iAddr = curAddr;
-            List iData = new LinkedList<Integer>();
+            // the data this instruction is disassembled from, is contained in iData.
+            List<Integer> iData = new LinkedList<Integer>();
             int opcode = bus.read(curAddr++);
             InstructionSet.Instruction instr;
 
             instr = InstructionSet.getInstruction(opcode);
             iData.add(opcode);
 
-            String pn = instr.getPrettyName();
-            String intrString = pn;
+            String pn = new String(instr.getPrettyName()); //create a copy.
             String formatString = "";
 
             InstructionSet.InstructionArgument arg;
+            //keep reading arguments.
             while ((arg = getNextArgument(pn)) != null) {
+                // we could switch over argument type here, format different arguments accordingly.
                 formatString = "0x%0" + arg.getSize() * 2 + "x";
+
+                // convert arguments
                 int argValue = 0;
                 for (int j = arg.getSize() - 1; j >= 0; j--) {
                     argValue = (argValue << 8) + bus.read(curAddr + j);
                 }
+                // save the data for output
                 for (int j = 0; j < arg.getSize(); j++) {
                     iData.add(bus.read(curAddr + j));
                 }
 
+                // forward adress pointer.
                 curAddr += arg.getSize();
 
-                pn = pn.replaceFirst(Character.toString(arg.getFChar()),
-                        String.format(formatString, argValue));
+                pn = pn.replaceFirst(Character.toString(arg.getFChar()), String
+                        .format(formatString, argValue));
             }
             String iStr = String.format("%04x: %s", iAddr, pn);
-            out.add(new Disassembler.DisassembledInstruction(iData, iAddr, iStr));
+            out
+                    .add(new Disassembler.DisassembledInstruction(iData, iAddr,
+                            iStr));
         }
 
-        // all data inläst, returnera.
+        // len instructions has been disassembled, return.
         return out;
     }
 
     /**
      * Get next argument.
-     * @param str input string
-     * @return
+     * @param str
+     *            input string
+     * @return Next instruction argument to disassemble.
      */
-    private static InstructionSet.InstructionArgument getNextArgument(final String str) {
-        for (InstructionSet.InstructionArgument ia : InstructionSet.InstructionArgument.values()) {
+    private static InstructionSet.InstructionArgument getNextArgument(
+            final String str) {
+        for (InstructionSet.InstructionArgument ia : InstructionSet.InstructionArgument
+                .values()) {
             if (str.indexOf(ia.getFChar()) > -1) {
                 return ia;
             }
         }
-        // TODO bättre lösning, för att returnera null är satan.
         return null;
     }
+
     /**
      * Instructions.
      * @author Arvid
@@ -80,10 +109,12 @@ public class Disassembler {
          * DATA.
          */
         private List<Integer> data;
+
         /**
          * Adress.
          */
         private int addr;
+
         /**
          * Instruction.
          */
@@ -91,11 +122,15 @@ public class Disassembler {
 
         /**
          * Constructor.
-         * @param d data
-         * @param a address
-         * @param ist input string
+         * @param d
+         *            data
+         * @param a
+         *            address
+         * @param ist
+         *            input string
          */
-        public DisassembledInstruction(final List<Integer> d, final int a, String ist) {
+        public DisassembledInstruction(final List<Integer> d, final int a,
+                final String ist) {
             this.data = d;
             this.addr = a;
             this.instructionString = ist;
@@ -124,8 +159,9 @@ public class Disassembler {
 
         /**
          * Overloaded toString for instructions.
+         * @return A string representation of this disassembled instruction.
          */
-        public String toString() {
+        public final String toString() {
             String out = String.format("%04x: ", addr);
             for (int d : data) {
                 out += String.format("%02x ", d);
