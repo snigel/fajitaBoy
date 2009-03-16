@@ -1,5 +1,6 @@
 package fajitaboy;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +54,6 @@ public final class Debugger {
         breakPoints = new HashSet<Integer>();
         cpu = new Cpu(addressBus);
         osc = new Oscillator(cpu, addressBus);
-
         prompt();
     }
 
@@ -538,11 +538,15 @@ public final class Debugger {
      */
     public static void main(final String[] args) {
         if (args.length == 1) {
-            new Debugger(args[0]);
+            String path = args[0];
+            if ((new File(path)).exists()) {
+                new Debugger(path);
+            } else {
+                System.out.println(path + " is not a valid rom. Quitting.");
+            }
         } else {
             System.out.println("Usage:\n\t"
                     + "java Debugger.java /path/to/tetris.gb");
         }
-
     }
 }
