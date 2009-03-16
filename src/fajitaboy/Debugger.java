@@ -67,7 +67,6 @@ public final class Debugger {
      * executes it.
      */
     private void prompt() {
-        String scLine;
         String prevLine = "";
         Scanner inputScanner = new Scanner(System.in);
         boolean running = true;
@@ -87,130 +86,148 @@ public final class Debugger {
             } else {
                 prevLine = line;
             }
-            scLine = in.next();
-            scLine.trim();
-            scLine.toLowerCase();
 
-            // Step
-            if (scLine.equals("t")) {
-                if (in.hasNextInt(argRadix)) {
-                    debugStep(in.nextInt(argRadix));
-                } else {
-                    debugStep(1);
-                }
+            scanCommand(in);
+        }
+    }
 
-                // Switch hex/dec input
-            } else if (scLine.equals("hex")) {
-                switchRadix();
+    /**
+     * Scans input from the given Scanner, and performs a debugger command,
+     * depending on the input.
+     * @param in
+     *            Scanner to read input from.
+     */
+    private void scanCommand(final Scanner in) {
+        String scLine = in.next();
+        scLine.trim();
+        scLine.toLowerCase();
 
-                // Reset
-            } else if (scLine.equals("s")) {
-                cpu.reset();
-                addressBus.reset();
-
-                // Show/Set registers
-            } else if (scLine.equals("r")) {
-                if (in.hasNext()) {
-                    String reg = in.next();
-                    if (in.hasNextInt(argRadix)) {
-                        int value = in.nextInt(argRadix);
-                        setReg(reg, value);
-                    } else {
-                        showDebugError("r expects zero or two arguments");
-                    }
-                } else {
-                    showRegs();
-                }
-
-                // Write to memory
-            } else if (scLine.equals("e")) {
-                if (in.hasNextInt(argRadix)) {
-
-                    int addr = in.nextInt(argRadix);
-                    List<Integer> toWrite = new LinkedList<Integer>();
-                    while (in.hasNextInt(argRadix)) {
-                        int data = in.nextInt(argRadix);
-                        toWrite.add(data);
-                    }
-                    writeData(addr, toWrite);
-                } else {
-                    showDebugError("e expects two or more arguments");
-                }
-
-                // Hexdump
-            } else if (scLine.equals("d")) {
-                if (in.hasNextInt(argRadix)) {
-                    int addr = in.nextInt(argRadix);
-                    if (in.hasNextInt(argRadix)) {
-                        int len = in.nextInt(argRadix);
-                        hexDump(addr, len);
-                    } else {
-                        hexDump(addr);
-                    }
-                } else {
-                    showDebugError("d expects one or two arguments");
-                }
-
-                // Show/modify breakpoints
-            } else if (scLine.equals("b")) {
-                if (in.hasNextInt(argRadix)) {
-                    int addr = in.nextInt(argRadix);
-                    toggleBreakpoint(addr);
-                } else {
-                    System.out.println("Current breakpoints: " + breakPoints);
-                }
-
-                // Disassemble instructions
-            } else if (scLine.equals("p") || scLine.equals("i")) {
-                if (in.hasNextInt(argRadix)) {
-                    int lenOrAddr = in.nextInt(argRadix);
-                    if (in.hasNextInt(argRadix)) {
-                        int len = in.nextInt(argRadix);
-                        disassemble(lenOrAddr, len);
-                    } else {
-                        disassemble(lenOrAddr);
-                    }
-
-                } else {
-                    showDebugError("p expects one or two arguments");
-                }
-
-                // Pause on interrupts on/off
-            } else if (scLine.equals("n")) {
-                if (in.hasNextInt(argRadix)) {
-                    int i = in.nextInt(argRadix);
-                    if (i == 0) {
-                        interruptEnabled = false;
-                        System.out.println("Not pausing on interrupts");
-                    } else if (i == 1) {
-                        interruptEnabled = true;
-                        System.out.println("Pausing on interrupts");
-                    } else {
-                        showDebugError("n expects either no arguments or 0/1");
-                    }
-
-                } else {
-                    System.out.println("Interrupt: "
-                            + cpu.getExecuteInterrupt()
-                            + "\tPause on interrupts: " + interruptEnabled);
-                }
-
-                // Run forever
-            } else if (scLine.equals("g")) {
-                runForever();
-
-                // Show help
-            } else if (scLine.equals("?")) {
-                showHelp();
-
-                // Quit
-            } else if (scLine.equals("q")) {
-                System.exit(0);
-
-                // No valid parse
+        // Step
+        if (scLine.equals("t")) {
+            if (in.hasNextInt(argRadix)) {
+                debugStep(in.nextInt(argRadix));
             } else {
-                showDebugError("Invalid command!");
+                debugStep(1);
             }
+
+            // Switch hex/dec input
+        } else if (scLine.equals("hex")) {
+            switchRadix();
+
+            // Reset
+        } else if (scLine.equals("s")) {
+            cpu.reset();
+            addressBus.reset();
+
+            // Show/Set registers
+        } else if (scLine.equals("r")) {
+            if (in.hasNext()) {
+                String reg = in.next();
+                if (in.hasNextInt(argRadix)) {
+                    int value = in.nextInt(argRadix);
+                    setReg(reg, value);
+                } else {
+                    showDebugError("r expects zero or two arguments");
+                }
+            } else {
+                showRegs();
+            }
+
+            // Write to memory
+        } else if (scLine.equals("e")) {
+            if (in.hasNextInt(argRadix)) {
+
+                int addr = in.nextInt(argRadix);
+                List<Integer> toWrite = new LinkedList<Integer>();
+                while (in.hasNextInt(argRadix)) {
+                    int data = in.nextInt(argRadix);
+                    toWrite.add(data);
+                }
+
+                if (toWrite.size() == 0) {
+                    System.out
+                            .println("No data was inputted, performing hex dump instead.");
+                    hexDump(addr);
+                } else {
+                    writeData(addr, toWrite);
+                }
+
+            } else {
+                showDebugError("e expects two or more arguments");
+            }
+
+            // Hexdump
+        } else if (scLine.equals("d")) {
+            if (in.hasNextInt(argRadix)) {
+                int addr = in.nextInt(argRadix);
+                if (in.hasNextInt(argRadix)) {
+                    int len = in.nextInt(argRadix);
+                    hexDump(addr, len);
+                } else {
+                    hexDump(addr);
+                }
+            } else {
+                showDebugError("d expects one or two arguments");
+            }
+
+            // Show/modify breakpoints
+        } else if (scLine.equals("b")) {
+            if (in.hasNextInt(argRadix)) {
+                int addr = in.nextInt(argRadix);
+                toggleBreakpoint(addr);
+            } else {
+                System.out.println("Current breakpoints: " + breakPoints);
+            }
+
+            // Disassemble instructions
+        } else if (scLine.equals("p") || scLine.equals("i")) {
+            if (in.hasNextInt(argRadix)) {
+                int lenOrAddr = in.nextInt(argRadix);
+                if (in.hasNextInt(argRadix)) {
+                    int len = in.nextInt(argRadix);
+                    disassemble(lenOrAddr, len);
+                } else {
+                    disassemble(lenOrAddr);
+                }
+
+            } else {
+                showDebugError("p expects one or two arguments");
+            }
+
+            // Pause on interrupts on/off
+        } else if (scLine.equals("n")) {
+            if (in.hasNextInt(argRadix)) {
+                int i = in.nextInt(argRadix);
+                if (i == 0) {
+                    interruptEnabled = false;
+                    System.out.println("Not pausing on interrupts");
+                } else if (i == 1) {
+                    interruptEnabled = true;
+                    System.out.println("Pausing on interrupts");
+                } else {
+                    showDebugError("n expects either no arguments or 0/1");
+                }
+
+            } else {
+                System.out.println("Interrupt: " + cpu.getExecuteInterrupt()
+                        + "\tPause on interrupts: " + interruptEnabled);
+            }
+
+            // Run forever
+        } else if (scLine.equals("g")) {
+            runForever();
+
+            // Show help
+        } else if (scLine.equals("?")) {
+            showHelp();
+
+            // Quit
+        } else if (scLine.equals("q")) {
+            System.exit(0);
+
+            // No valid parse
+        } else {
+            showDebugError("Invalid command!");
         }
     }
 
