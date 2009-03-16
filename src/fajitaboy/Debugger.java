@@ -423,7 +423,15 @@ public final class Debugger {
         int c = 0;
         int lenLast = 0;
         while (true) {
-            c += cpu.step();
+        	try { 
+        		c += cpu.step();
+        	}
+        	catch (RomWriteException e) {
+        		System.out.println("ROM tried to write to read only memory. Execution stopped.");
+        		System.out.println(e);
+        		break;
+        	}
+        	
             String outStr = Integer.toString(c);
 
             // Remove previous output
@@ -490,7 +498,16 @@ public final class Debugger {
     private void debugStep(final int steps) {
         int c = 0;
         for (int i = 0; i < steps; i++) {
-            c += cpu.step();
+        	
+        	try { 
+        		c += cpu.step();
+        	}
+        	catch (RomWriteException e) {
+        		System.out.println("ROM tried to write to read only memory. Execution stopped.");
+        		System.out.println(e);
+        		break;
+        	}
+        	
             if (getBreakpoint(cpu.getPC())) {
                 System.out.println(
                         "Breakpoint at " + cpu.getPC() + " reached.");
