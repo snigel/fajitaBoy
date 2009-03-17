@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -21,7 +22,7 @@ public final class Debugger {
     /**
      * AdressBus to emulate.
      */
-    private AddressBus addressBus;
+    private DebuggerMemoryInterface addressBus;
 
     /**
      * CPU to emulate.
@@ -50,7 +51,7 @@ public final class Debugger {
      *            ROM-file to load into the CPU.
      */
     private Debugger(final String path) {
-        addressBus = new AddressBus(path);
+        addressBus = new DebuggerMemoryInterface(new AddressBus(path));
         breakPoints = new HashSet<Integer>();
         cpu = new Cpu(addressBus);
         osc = new Oscillator(cpu, addressBus);
@@ -105,9 +106,9 @@ public final class Debugger {
         // Step
         if (scLine.equals("t")) {
             if (in.hasNextInt(argRadix)) {
-                debugStep(in.nextInt(argRadix));
+                debugNSteps(false, in.nextInt(argRadix));
             } else {
-                debugStep(1);
+                debugNSteps(false, 1);
             }
 
             // Switch hex/dec input
@@ -177,6 +178,56 @@ public final class Debugger {
                 toggleBreakpoint(addr);
             } else {
                 System.out.println("Current breakpoints: " + breakPoints);
+            }
+
+            // Show/modify memory breakpoints
+        } else if (scLine.equals("mb")) {
+            if (in.hasNext()) {
+                String typeStr = in.next();
+                DebuggerMemoryInterface.ActionType type = DebuggerMemoryInterface.ActionType
+                        .fromTinyString(typeStr);
+
+                if (type != null) {
+                    if (in.hasNextInt(argRadix)) {
+                        int lower = in.nextInt(argRadix);
+                        if (in.hasNextInt(argRadix)) {
+                            int upper = in.nextInt(argRadix);
+                            addressBus
+                                    .addBreakpoint(addressBus.new MemoryBreakpoint(
+                                            lower, upper, type));
+
+                        } else {
+                            addressBus
+                                    .addBreakpoint(addressBus.new MemoryBreakpoint(
+                                            lower, type));
+                        }
+                    }
+                } else {
+                    showDebugError("First argument to mb must be one of \"r\", \"w\" or \"rw\".");
+                }
+            } else {
+                System.out.println("Current memory breakpoints: ");
+                List<DebuggerMemoryInterface.MemoryBreakpoint> mbs = addressBus
+                        .getMBreakPoints();
+                for (int i = 0; i < mbs.size(); i++) {
+                    DebuggerMemoryInterface.MemoryBreakpoint mb = mbs.get(i);
+                    System.out.println(i + ". " + mb);
+                }
+            }
+
+            // Remove a memory breakpoint
+        } else if (scLine.equals("rmb")) {
+            if (in.hasNextInt()) {
+                int idx = in.nextInt();
+                try {
+                    addressBus.removeBreakpoint(idx);
+                } catch (IndexOutOfBoundsException e) {
+                    showDebugError("Invalid memory break point index.");
+                }
+            } else {
+                showDebugError("rmb must be given exactly one argument, index"
+                        + " of memory breakpoint to remove."
+                        + "Try \"mb\" to view a list of memory breakpoints.");
             }
 
             // Disassemble instructions
@@ -309,6 +360,8 @@ public final class Debugger {
             }
             System.out.println(out);
         }
+
+        addressBus.clearDirtyActions();
     }
 
     /**
@@ -332,6 +385,7 @@ public final class Debugger {
             addressBus.write(curAddr & 0xFFFF, d & 0xFF);
             curAddr++;
         }
+        addressBus.clearDirtyActions();
     }
 
     /**
@@ -428,45 +482,6 @@ public final class Debugger {
     }
 
     /**
-     * Steps the program until a breakpoint is reached.
-     */
-    private void runForever() {
-        int c = 0;
-        int lenLast = 0;
-        while (true) {
-            try {
-                c += osc.step();
-            } catch (RomWriteException e) {
-                System.out
-                        .println("ROM tried to write to read only memory. Execution stopped.");
-                System.out.println(e);
-                break;
-            }
-
-            String outStr = Integer.toString(c);
-
-            // Remove previous output
-            for (int i = 0; i < lenLast; i++) {
-                outStr = '\b' + outStr;
-            }
-            lenLast = Integer.toString(c).length();
-            System.out.print(outStr);
-
-            // Check if there's a breakpoint on PC
-            if (getBreakpoint(cpu.getPC())) {
-                System.out
-                        .println("Breakpoint at " + cpu.getPC() + " reached.");
-                break;
-
-                // Check for cpu interrupts
-            } else if (interruptEnabled && cpu.getExecuteInterrupt()) {
-                System.out.println("Cpu interrupt");
-                break;
-            }
-        }
-    }
-
-    /**
      * Disassembles a series of instructions from PC.
      * @param len
      *            number of instructions
@@ -488,6 +503,8 @@ public final class Debugger {
         for (Disassembler.DisassembledInstruction di : dInstructs) {
             System.out.println(di);
         }
+
+        addressBus.clearDirtyActions();
     }
 
     /**
@@ -501,34 +518,90 @@ public final class Debugger {
     }
 
     /**
-     * Steps the program a specified number of steps, and stops on breakpoints.
-     * @param steps
-     *            Number of steps.
+     * Steps the oscillator one step, throws on three different cases:
+     *  1. Read/Write errors. The cpu tried to write or read somewhere it's
+     *   not allowed.
+     *  2. Breakpoint reached. The cpu reached a user specified breakpoint.
+     *  3. Memory breakpoint triggered. The cpu wrote or read somewhere where
+     *   the user have setup a memory breakpoint.
+     * @return Number of cycles this step took.
+     * @throws InterruptedStepException if the interruption was interrupted, this
+     *  is thrown.
      */
-    private void debugStep(final int steps) {
+    private int debugStep() throws InterruptedStepException {
         int c = 0;
-        for (int i = 0; i < steps; i++) {
-
-            try {
-                c += osc.step();
-            } catch (RomWriteException e) {
-                System.out
-                        .println("ROM tried to write to read only memory. Execution stopped.");
-                System.out.println(e);
-                break;
-            }
-
-            if (getBreakpoint(cpu.getPC())) {
-                System.out
-                        .println("Breakpoint at " + cpu.getPC() + " reached.");
-                break;
-            }
-            if (interruptEnabled && cpu.getExecuteInterrupt()) {
-                System.out.println("Cpu interrupt");
-                break;
-            }
+        try {
+            c += osc.step();
+        } catch (RomWriteException e) {
+            throw new InterruptedStepException(
+                    "ROM tried to write to read only memory. Execution stopped: "
+                            + e, 0);
         }
-        System.out.println("Cycles run: " + c);
+
+        if (getBreakpoint(cpu.getPC())) {
+            throw new InterruptedStepException("Breakpoint at " + cpu.getPC()
+                    + " reached.", c);
+        }
+        if (interruptEnabled && cpu.getExecuteInterrupt()) {
+            throw new InterruptedStepException("CPU interrupt.", c);
+        }
+        if (addressBus.getDirtyActions().size() > 0) {
+            throw new InterruptedStepException("Memory breakpoint reached.", c);
+        }
+
+        return c;
+    }
+
+    /**
+     * Steps the oscillator forever or a specified number of steps, and stops
+     * on breakpoints.
+     * @param forever If set to true, steps is ignored and the oscillator is
+     * stepped forever.
+     * @param steps If forever is set to fals, debugNSteps will step steps steps.
+     */
+    private void debugNSteps(final boolean forever, final int steps) {
+        int c = 0;
+        int lenLast = 0;
+
+        System.out.print("Cycles run: ");
+        for (int i = 0; i < steps || forever; i++) {
+            try {
+                c += debugStep();
+            } catch (InterruptedStepException e) {
+                System.out.println(e.getCycles());
+                System.out.println(e);
+                printDirtyActions();
+                addressBus.clearDirtyActions();
+                break;
+            }
+
+            // TODO saker händer i lite konstig ordning här
+            String outStr = Integer.toString(c);
+
+            // Remove previous output
+            for (int j = 0; j < lenLast; j++) {
+                outStr = '\b' + outStr;
+            }
+            lenLast = Integer.toString(c).length();
+            System.out.print(outStr);
+        }
+        System.out.print("\n");
+    }
+
+    /**
+     * Prints the list of dirty actions that the addressbus has accumulated.
+     */
+    private void printDirtyActions() {
+        for (DebuggerMemoryInterface.MemoryAction ma : addressBus.getDirtyActions()) {
+            System.out.println(ma);
+        }
+    }
+
+    /**
+     * Steps the program until a breakpoint is reached.
+     */
+    private void runForever() {
+        debugNSteps(true, -1);
     }
 
     /**
@@ -537,6 +610,11 @@ public final class Debugger {
      *            Standard input arguments.
      */
     public static void main(final String[] args) {
+        Map<String, String> env = System.getenv();
+        for (String envName : env.keySet()) {
+            System.out.format("%s=%s%n", envName, env.get(envName));
+        }
+
         if (args.length == 1) {
             String path = args[0];
             if ((new File(path)).exists()) {

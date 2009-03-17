@@ -21,7 +21,7 @@ public final class Disassembler {
     /**
      * Disassemble a list of bytes.
      * @param bus
-     *            Addressbus object
+     *            MemoryInterface object
      * @param addr
      *            Adress to start disassembling
      * @param len
