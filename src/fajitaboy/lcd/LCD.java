@@ -2,6 +2,7 @@ package fajitaboy.lcd;
 
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.MessageConstants.*;
+import static fajitaboy.constants.LCDConstants.*;
 
 import fajitaboy.ClockPulseReceiver;
 import fajitaboy.MemoryInterface;
@@ -16,6 +17,10 @@ public class LCD implements ClockPulseReceiver {
 	 * Pointer to MemoryInterface class.
 	 */
     MemoryInterface ram;
+    
+    Sprite[] sprites = new Sprite[GB_SPRITES];
+    BackgroundMap bgm = new BackgroundMap();
+    Screen screen = new Screen();
 	
 	/* (non-Javadoc)
 	 * @see ClockPulseReceiver#oscillatorMessage(int)
@@ -38,6 +43,36 @@ public class LCD implements ClockPulseReceiver {
 		
 	}
 	
+	/**
+	 * Draws the GameBoy screen once.
+	 */
+	public void drawScreen() {
+		try {
+//	 		Clear screen
+			screen.clear();
+			
+//			Read OAM (Sprites, Tiles, Backgroudn Map...)
+			// Read OAM
+			// Read Sprites
+			// Read Tiles
+			bgm.readBackground(ram, BackgroundMap.MapType.BACKGROUND);
+			
+//	 		Draw background map
+			bgm.draw(screen, ram);
+			
+//	 		Draw sprites
+		}
+		catch (Exception e) {
+			System.out.println(e);
+		}
+	}
+	
+	/**
+	 * Converts 2 bytes into 8 4-color pixels.
+	 * @param bitsLo Low bits of pixels
+	 * @param bitsHi High bits of pixels
+	 * @return Array of 8 pixels
+	 */
 	public static int[] convertToPixels(int bitsLo, int bitsHi) {
 		int[] pixels = new int[8];
 		

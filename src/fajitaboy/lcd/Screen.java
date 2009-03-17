@@ -18,23 +18,31 @@ public class Screen {
 		}
 	}
 	
+	/**
+	 * Blits a sprite onto the screen.
+	 * 
+	 * @param s Sprite to be drawn.
+	 * @param x X-coordinate to draw tile at (minus 8)
+	 * @param y Y-coordinate to draw tile at (minus 16)
+	 * @throws Exception
+	 */
 	public void blit(Sprite s, int x, int y) throws Exception {
 //		Prepare variables
 		int lcdLeft, lcdTop, lcdRight, lcdBottom, sLeft, sTop, sRight, sBottom, lcdx, lcdy, sx, sy;
-		lcdLeft = Math.min(0, x);
-		lcdRight = Math.max(x + 8, GB_LCD_W);
-		lcdTop = Math.min(0, y);
-		lcdBottom = Math.max(y + s.h, GB_LCD_H);
+		lcdLeft = Math.min(0, x - 8);
+		lcdRight = Math.max(x, GB_LCD_W);
+		lcdTop = Math.min(0, y - 16);
+		lcdBottom = Math.max(y - 16 + s.h, GB_LCD_H);
 		
 		// Exit if sprite outside screen
 		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
 			return;
 		}
 		
-		sLeft = Math.max(0, -x);
-		sRight = Math.min(8, GB_LCD_W - x);
-		sTop = Math.max(0, -y);
-		sBottom = Math.min(s.h, GB_LCD_H - y); 
+		sLeft = Math.max(0, -(x-8));
+		sRight = Math.min(8, GB_LCD_W - (x-8));
+		sTop = Math.max(0, -(y-16));
+		sBottom = Math.min(s.h, GB_LCD_H - (y-16)); 
 		
 		// Exit if sprite outside screen
 		if ( sLeft >= sRight || sTop >= sBottom ) {
@@ -61,6 +69,14 @@ public class Screen {
 		}
 	}
 	
+	/**
+	 * Blits a tile onto the screen
+	 * 
+	 * @param t Tile to be drawn
+	 * @param x X-position to draw tile at
+	 * @param y Y-position to draw tile at
+	 * @throws Exception
+	 */
 	public void blit(Tile t, int x, int y) throws Exception {
 //		Prepare variables
 		int lcdLeft, lcdTop, lcdRight, lcdBottom, tLeft, tTop, tRight, tBottom, lcdx, lcdy, tx, ty;

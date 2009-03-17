@@ -1,9 +1,12 @@
 package fajitaboy.lcd;
 
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.LCDConstants.*;
+import fajitaboy.AddressBus;
 import fajitaboy.MemoryInterface;
 
 public class BackgroundMap {
-	private static enum MapType {BACKGROUND, WINDOW}
+	public static enum MapType {BACKGROUND, WINDOW}
 
 	private Tile[][] data = new Tile[32][32];
 	MapType type;
@@ -49,6 +52,29 @@ public class BackgroundMap {
 				
 				t.readTile(ram, addr);
 				data[i][j] = t;
+			}
+		}
+	}
+	
+	public void draw(Screen screen, MemoryInterface ram) throws Exception {
+// 		Prepare variables
+		int scx, scy, firstTileX, firstTileY;
+		scx = ram.read(ADDRESS_SCX);
+		scy = ram.read(ADDRESS_SCY);
+		firstTileX = (int)(scx/8);
+		firstTileY = (int)(scy/8);
+		
+//		Draw tiles
+		int dx, dy, datax, datay;
+		// For each row...
+		for ( int y = 0; y < GB_LCD_H/8; y += 1 ) {
+			dy = (firstTileY+y)*8 - scy;
+			datay = (firstTileY+y) % 32;
+			// For each column...
+			for ( int x = 0; x < GB_LCD_W/8; x += 1 ) {
+				dx = (firstTileX+x)*8 - scx;
+				datax = (firstTileX+x) % 32;
+				screen.blit(data[datax][datay], dx, dy);
 			}
 		}
 	}
