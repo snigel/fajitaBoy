@@ -15,7 +15,7 @@ public final class SpeedTest {
     /**
      * Number of instructions to try.
      */
-    private static final int INSTRUCTIONS = 5000000;
+    private static final int INSTRUCTIONS = 50000000;
 
     /**
      * Runs INSTRUCTIONS, times it and prints the time it took, and how many cycles were run per second.
@@ -23,7 +23,7 @@ public final class SpeedTest {
     private void test() {
         System.out.println("Running " + INSTRUCTIONS + " instructions");
 
-        AddressBus a = new AddressBus("fajitaboy/tetris.gb");
+        AddressBus a = new AddressBus("/tetris_patched.gb");
         Cpu c = new Cpu(a);
 
         int cycl = 0;
@@ -32,12 +32,13 @@ public final class SpeedTest {
         }
         System.out.println("Cycles run: " + cycl);
 
-        a = new AddressBus("fajitaboy/tetris.gb");
+        a = new AddressBus("/tetris_patched.gb");
         c = new Cpu(a);
+        Oscillator o = new Oscillator(c, a);
         // c.reset();
         long t = System.currentTimeMillis();
         for (int i = 0; i < INSTRUCTIONS; i++) {
-            c.step();
+            o.step();
         }
 
         long totaltime = System.currentTimeMillis() - t;
@@ -51,7 +52,7 @@ public final class SpeedTest {
     /**
      * Runs SpeedTest.
      */
-    public static void main() {
+    public static void main(String args[]) {
         (new SpeedTest()).test();
     }
 }
