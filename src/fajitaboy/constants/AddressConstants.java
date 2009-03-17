@@ -45,5 +45,18 @@ public final class AddressConstants {
 	public static final int HRAM_START = 0xFF80;
 	public static final int HRAM_END = 0xFFFF;
 	public static final int INTERRUPT_ADDRESS = 0xFFFF;
+
+	public static final int SOUND1_LOW = 0xFF13;
+	public static final int SOUND1_HIGH = 0xFF14;
+	public static final int SOUND2_LOW = 0xFF18;
+	public static final int SOUND2_HIGH = 0xFF19;
+	public static final int SOUND3_LOW = 0xFF1D;
+	public static final int SOUND3_HIGH = 0xFF1E;
+	public static final int SOUND4_LOW = 0xFF13;
+	public static final int SOUND4_HIGH = 0xFF14;
+	public static final int SOUND_CHANNEL_CONTROL = 0xFF24;
+	public static final int SOUND_OUTPUT_SELECT = 0xFF25;
+	public static final int SOUND_ON_OFF= 0xFF26;
+ 
 	
 }
