@@ -120,6 +120,10 @@ public final class Cpu {
         int cycleTime = 0;
         executeInterrupt = false;
         int jumpAddress = 0x0000;
+        
+        // Perform processor operation
+        int inst = ram.read(pc);
+        cycleTime = runInstruction(inst);
 
         // Interrupt handler
         if (ime) {
@@ -160,10 +164,6 @@ public final class Cpu {
             sp -= 2;
             dblwrite(sp, pc);
             pc = jumpAddress;
-        } else {
-            // Perform processor operation
-            int inst = ram.read(pc);
-            cycleTime = runInstruction(inst);
         }
 
         return cycleTime;
@@ -1532,7 +1532,7 @@ public final class Cpu {
             cycleTime += 16;
             break;
         case 0xe9: // JP (HL)
-            pc = ram.read(getHL());
+            pc = getHL();
             cycleTime += 4;
             break;
         case 0xEA: // LD (nn),A
