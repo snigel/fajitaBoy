@@ -165,7 +165,7 @@ public class Oscillator {
             if (ly == 144) {
                 lcd.oscillatorMessage(MSG_LCD_VBLANK);
             } else if (ly >= 154) {
-                ram.write(ADDRESS_LY, 0);
+                ram.forceWrite(ADDRESS_LY, 0);
             }
         }
 
