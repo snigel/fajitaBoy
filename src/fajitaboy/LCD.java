@@ -1,7 +1,9 @@
 package fajitaboy;
 
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.MessageConstants.*;
+import java.lang.Math.*;
 
 /**
  * @author Tobias Svensson
@@ -10,12 +12,13 @@ import static fajitaboy.constants.MessageConstants.*;
 public class LCD implements ClockPulseReceiver {
 
 	private class Sprite {
-		public int bits[][];
-		public boolean tall = false;
+		int bits[][];
+	private
+	    int h = 8; // Height of sprite in pixels
 		
-		public Sprite(boolean tall) {
-			this.tall = true;
-			bits = new int[8][16];
+		public Sprite(int height) {
+			h = height;
+			bits = new int[8][height];
 		}
 		
 		public void readSprite(int address) {
@@ -24,6 +27,13 @@ public class LCD implements ClockPulseReceiver {
 		
 		public int[][] getSprite() {
 			return null;
+		}
+		
+		public void setHeight( int height ) {
+			if ( h != height ) {
+				h = height;
+				bits = new int[8][height];
+			}
 		}
 	}
 	
@@ -40,6 +50,108 @@ public class LCD implements ClockPulseReceiver {
 		
 		public int[][] getTile() {
 			return null;
+		}
+	}
+	
+	private class Screen {
+		public int bits[][];
+		
+		public Screen() {
+			bits = new int[GB_LCD_W][GB_LCD_H];
+		}
+		
+		public void clear() {
+			for ( int x = 0; x < GB_LCD_W; x++ ) {
+				for ( int y = 0; y < GB_LCD_H; y++ ) {
+					bits[x][y] = 0;
+				}
+			}
+		}
+		
+		public void blit(Sprite s, int x, int y) throws Exception {
+//			Prepare variables
+			int lcdLeft, lcdTop, lcdRight, lcdBottom, sLeft, sTop, sRight, sBottom, lcdx, lcdy, sx, sy;
+			lcdLeft = Math.min(0, x);
+			lcdRight = Math.max(x + 8, GB_LCD_W);
+			lcdTop = Math.min(0, y);
+			lcdBottom = Math.max(y + s.h, GB_LCD_H);
+			
+			// Exit if sprite outside screen
+			if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
+				return;
+			}
+			
+			sLeft = Math.max(0, -x);
+			sRight = Math.min(8, GB_LCD_W - x);
+			sTop = Math.max(0, -y);
+			sBottom = Math.min(s.h, GB_LCD_H - y); 
+			
+			// Exit if sprite outside screen
+			if ( sLeft >= sRight || sTop >= sBottom ) {
+				return;
+			}
+			
+// 			Safety guards for debug purposes...
+			if ( lcdRight - lcdLeft != sRight - sLeft ) {
+				throw new Exception("blitSprite: Blitted widths on screen and of sprite does not match.");
+			}
+			if ( lcdBottom - lcdTop != sBottom - sTop ) {
+				throw new Exception("blitSprite: Blitted heights on screen and of sprite does not match.");
+			}
+			
+//			Blit sprite to screen
+			sy = sTop;
+			// For each line...
+			for ( lcdy = lcdTop; lcdy < lcdBottom; lcdy++ ) {
+				sx = sLeft;
+				// For each pixel...
+				for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
+					bits[lcdx][lcdy] = s.bits[sx][sy];
+				}
+			}
+		}
+		
+		public void blit(Tile t, int x, int y) throws Exception {
+//			Prepare variables
+			int lcdLeft, lcdTop, lcdRight, lcdBottom, tLeft, tTop, tRight, tBottom, lcdx, lcdy, tx, ty;
+			lcdLeft = Math.min(0, x);
+			lcdRight = Math.max(x + 8, GB_LCD_W);
+			lcdTop = Math.min(0, y);
+			lcdBottom = Math.max(y + 8, GB_LCD_H);
+			
+			// Exit if sprite outside screen
+			if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
+				return;
+			}
+			
+			tLeft = Math.max(0, -x);
+			tRight = Math.min(8, GB_LCD_W - x);
+			tTop = Math.max(0, -y);
+			tBottom = Math.min(8, GB_LCD_H - y); 
+			
+			// Exit if sprite outside screen
+			if ( tLeft >= tRight || tTop >= tBottom ) {
+				return;
+			}
+			
+// 			Safety guards for debug purposes...
+			if ( lcdRight - lcdLeft != tRight - tLeft ) {
+				throw new Exception("blitSprite: Blitted widths on screen and of tile does not match.");
+			}
+			if ( lcdBottom - lcdTop != tBottom - tTop ) {
+				throw new Exception("blitSprite: Blitted heights on screen and of tile does not match.");
+			}
+			
+//			Blit sprite to screen
+			ty = tTop;
+			// For each line...
+			for ( lcdy = lcdTop; lcdy < lcdBottom; lcdy++ ) {
+				tx = tLeft;
+				// For each pixel...
+				for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
+					bits[lcdx][lcdy] = t.bits[tx][ty];
+				}
+			}
 		}
 	}
 	
@@ -67,6 +179,30 @@ public class LCD implements ClockPulseReceiver {
 	 */
 	public void reset() {
 		
+	}
+	
+	public int[] convertToPixels(int bitsLo, int bitsHi) {
+		int[] pixels = new int[8];
+		
+		if ( (bitsLo & 0x80) != 0 ) pixels[0] += 1;
+		if ( (bitsLo & 0x40) != 0 ) pixels[1] += 1;
+		if ( (bitsLo & 0x20) != 0 ) pixels[2] += 1;
+		if ( (bitsLo & 0x10) != 0 ) pixels[3] += 1;
+		if ( (bitsLo & 0x08) != 0 ) pixels[4] += 1;
+		if ( (bitsLo & 0x04) != 0 ) pixels[5] += 1;
+		if ( (bitsLo & 0x02) != 0 ) pixels[6] += 1;
+		if ( (bitsLo & 0x01) != 0 ) pixels[7] += 1;
+		
+		if ( (bitsHi & 0x80) != 0 ) pixels[0] += 2;
+		if ( (bitsHi & 0x40) != 0 ) pixels[1] += 2;
+		if ( (bitsHi & 0x20) != 0 ) pixels[2] += 2;
+		if ( (bitsHi & 0x10) != 0 ) pixels[3] += 2;
+		if ( (bitsHi & 0x08) != 0 ) pixels[4] += 2;
+		if ( (bitsHi & 0x04) != 0 ) pixels[5] += 2;
+		if ( (bitsHi & 0x02) != 0 ) pixels[6] += 2;
+		if ( (bitsHi & 0x01) != 0 ) pixels[7] += 2;
+		
+		return pixels;
 	}
 	
 	/**
