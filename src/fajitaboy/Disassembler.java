@@ -74,10 +74,9 @@ public final class Disassembler {
                 pn = pn.replaceFirst(Character.toString(arg.getFChar()), String
                         .format(formatString, argValue));
             }
-            String iStr = String.format("%04x: %s", iAddr, pn);
             out
                     .add(new Disassembler.DisassembledInstruction(iData, iAddr,
-                            iStr));
+                            pn));
         }
 
         // len instructions has been disassembled, return.

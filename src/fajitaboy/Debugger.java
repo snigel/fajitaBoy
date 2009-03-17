@@ -294,13 +294,14 @@ public final class Debugger {
         }
     }
 
-    /** showTrace nr shows the lastest n PC-values
-     * @param nr number of PC-values to show. 
+    /** showTrace nr shows a disassemble of the latest nr of instructions.
+     * @param nr number of instructions to show.
      */
     private void showTrace(final int nr) {
         System.out.println("Showing latest " + nr + " PC-values.");
         for (int i = max(0, pcLog.size()-nr); i < pcLog.size(); i++) {
-            System.out.println(String.format("%04x", pcLog.get(i)));
+            //System.out.println(String.format("%04x", pcLog.get(i)));
+            disassemble(pcLog.get(i), 1);
         }
         System.out.print("\n");
     }
@@ -505,7 +506,9 @@ public final class Debugger {
                 + "Type can be r, w, or rw.\n"
                 + "mb type lower upper\tAdds a memory breakpoint over the "
                 + "address space from lower to upper of type\n"
-                + "rmb idx \t Removes the memory breakpoint with given index.\n";
+                + "rmb idx \t Removes the memory breakpoint with given index.\n"
+                + "tr \t Shows a disassemble of the latest 20 instructions.\n"
+                + "tr nr \t Shows a disassemble of the latest nr of instructions.\n";
 
         System.out.println(helpStr);
     }
