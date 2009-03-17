@@ -568,28 +568,55 @@ public final class Debugger {
     private void debugNSteps(final boolean forever, final int steps) {
         int c = 0;
         int lenLast = 0;
-
-        System.out.print("Cycles run: ");
+        final boolean counter = false;
+        final boolean pointCounter = true;
+        int lastPoint = 0;
+        int points = 0;
+        
         for (int i = 0; i < steps || forever; i++) {
             try {
                 c += debugStep();
             } catch (InterruptedStepException e) {
-                System.out.println(e.getCycles());
+                if (pointCounter && points > 0) {
+                    System.out.print("\n");
+                }
+                System.out.println("Stopped after " + i + " steps.");
                 System.out.println(e);
                 printDirtyActions();
                 addressBus.clearDirtyActions();
+                c += e.getCycles();
                 break;
             }
-
-            // TODO saker händer i lite konstig ordning här
-            String outStr = Integer.toString(c);
-
-            // Remove previous output
-            for (int j = 0; j < lenLast; j++) {
-                outStr = '\b' + outStr;
+            
+            if (pointCounter) {
+                if (c - lastPoint > 1000) {
+                    points++;
+                    lastPoint = c;
+                    if (points > 80) {
+                        System.out.println(".");
+                        points = 0;
+                    } else {
+                        System.out.print(".");
+                    }
+                    
+                }
             }
-            lenLast = Integer.toString(c).length();
-            System.out.print(outStr);
+            
+            
+            if (counter) {
+                // TODO saker händer i lite konstig ordning här
+                String outStr = Integer.toString(c);
+                
+                // Remove previous output
+                for (int j = 0; j < lenLast; j++) {
+                    outStr = '\b' + outStr;
+                }
+                lenLast = Integer.toString(c).length();
+                System.out.print(outStr);
+            }
+        }
+        if (!counter) {
+            System.out.print("\nCycles run: " + c);
         }
         System.out.print("\n");
     }
