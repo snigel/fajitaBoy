@@ -41,8 +41,11 @@ public final class Debugger {
      */
     private HashSet<Integer> breakPoints;
 
+    /**
+     * List of logged pc-values. This is used to provide a backwards trace.
+     */
     private List<Integer> pcLog;
-    
+
     /**
      * Stops debugging on interrupts.
      */
@@ -272,8 +275,7 @@ public final class Debugger {
             if (in.hasNextInt()) {
                 int nr = in.nextInt();
                 showTrace(nr);
-            }
-            else {
+            } else {
                 showTrace(20);
             }
             // Run forever
@@ -299,13 +301,13 @@ public final class Debugger {
      */
     private void showTrace(final int nr) {
         System.out.println("Showing latest " + nr + " PC-values.");
-        for (int i = max(0, pcLog.size()-nr); i < pcLog.size(); i++) {
+        for (int i = max(0, pcLog.size() - nr); i < pcLog.size(); i++) {
             //System.out.println(String.format("%04x", pcLog.get(i)));
             disassemble(pcLog.get(i), 1);
         }
         System.out.print("\n");
     }
-    
+
     /**
      * Toggles between hexadecimal and decimal arguments.
      */
@@ -599,7 +601,7 @@ public final class Debugger {
         final boolean pointCounter = true;
         int lastPoint = 0;
         int points = 0;
-        
+
         for (int i = 0; i < steps || forever; i++) {
             try {
                 c += debugStep();
@@ -614,7 +616,7 @@ public final class Debugger {
                 c += e.getCycles();
                 break;
             }
-            
+
             if (pointCounter) {
                 if (c - lastPoint > 1000) {
                     points++;
@@ -625,15 +627,15 @@ public final class Debugger {
                     } else {
                         System.out.print(".");
                     }
-                    
+
                 }
             }
-            
-            
+
+
             if (counter) {
                 // TODO saker händer i lite konstig ordning här
                 String outStr = Integer.toString(c);
-                
+
                 // Remove previous output
                 for (int j = 0; j < lenLast; j++) {
                     outStr = '\b' + outStr;
