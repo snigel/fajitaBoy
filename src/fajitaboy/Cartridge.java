@@ -26,7 +26,8 @@ public class Cartridge extends MemoryComponent {
      * {@inheritDoc}
      */
     public void write(int address, int data) {
-        throw new RomWriteException("Catridge.java, adress:" + address);
+    	System.out.println("tried to write address: "+address);
+        //throw new RomWriteException("Catridge.java, adress:" + address);
     }
     
     /**
