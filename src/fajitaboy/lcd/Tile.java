@@ -5,7 +5,7 @@ import fajitaboy.MemoryInterface;
 public class Tile {
 	public int bits[][];
 	
-	public Tile(boolean tall) {
+	public Tile() {
 		bits = new int[8][8];
 	}
 	
@@ -26,7 +26,10 @@ For each line, the first byte defines the least significant bits of the color nu
 			data[i] = ram.read(address + i);
 		}
 		
-		for (int i = 0; i < 8; i += 2) {
+		LCDC lcdc = new LCDC();
+		lcdc.readLCDC(ram);
+		int height = lcdc.objSpriteSize ? 8 : 16;
+		for (int i = 0; i < height; i += 2) {
 			int lower = data[i];
 			int upper = data[i+1];
 			

@@ -61,7 +61,7 @@ public class LCD implements ClockPulseReceiver {
 		
 		return pixels;
 	}
-	
+
 	/**
 	 * Receives and handles messages from the Oscillator.
 	 * 
