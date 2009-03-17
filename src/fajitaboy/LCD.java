@@ -9,6 +9,40 @@ import static fajitaboy.constants.MessageConstants.*;
  */
 public class LCD implements ClockPulseReceiver {
 
+	private class Sprite {
+		public int bits[][];
+		public boolean tall = false;
+		
+		public Sprite(boolean tall) {
+			this.tall = true;
+			bits = new int[8][16];
+		}
+		
+		public void readSprite(int address) {
+			
+		}
+		
+		public int[][] getSprite() {
+			return null;
+		}
+	}
+	
+	private class Tile {
+		public int bits[][];
+		
+		public Tile(boolean tall) {
+			bits = new int[8][8];
+		}
+		
+		public void readTile(int address) {
+			
+		}
+		
+		public int[][] getTile() {
+			return null;
+		}
+	}
+	
 	/**
 	 * Pointer to MemoryInterface class.
 	 */
