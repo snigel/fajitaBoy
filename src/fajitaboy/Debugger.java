@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import static java.lang.Math.*;
 
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
@@ -40,6 +41,8 @@ public final class Debugger {
      */
     private HashSet<Integer> breakPoints;
 
+    private List<Integer> pcLog;
+    
     /**
      * Stops debugging on interrupts.
      */
@@ -51,6 +54,7 @@ public final class Debugger {
      *            ROM-file to load into the CPU.
      */
     private Debugger(final String path) {
+        pcLog = new LinkedList<Integer>();
         addressBus = new DebuggerMemoryInterface(new AddressBus(path));
         breakPoints = new HashSet<Integer>();
         cpu = new Cpu(addressBus);
@@ -264,6 +268,14 @@ public final class Debugger {
                         + "\tPause on interrupts: " + interruptEnabled);
             }
 
+        } else if (scLine.equals("tr")) {
+            if (in.hasNextInt()) {
+                int nr = in.nextInt();
+                showTrace(nr);
+            }
+            else {
+                showTrace(20);
+            }
             // Run forever
         } else if (scLine.equals("g")) {
             runForever();
@@ -282,6 +294,17 @@ public final class Debugger {
         }
     }
 
+    /** showTrace nr shows the lastest n PC-values
+     * @param nr number of PC-values to show. 
+     */
+    private void showTrace(final int nr) {
+        System.out.println("Showing latest " + nr + " PC-values.");
+        for (int i = max(0, pcLog.size()-nr); i < pcLog.size(); i++) {
+            System.out.println(String.format("%04x", pcLog.get(i)));
+        }
+        System.out.print("\n");
+    }
+    
     /**
      * Toggles between hexadecimal and decimal arguments.
      */
@@ -537,6 +560,7 @@ public final class Debugger {
     private int debugStep() throws InterruptedStepException {
         int c = 0;
         try {
+            pcLog.add(cpu.getPC());
             c += osc.step();
         } catch (RomWriteException e) {
             throw new InterruptedStepException(
