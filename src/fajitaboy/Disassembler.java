@@ -3,6 +3,7 @@ package fajitaboy;
 import java.util.List;
 import java.util.LinkedList;
 
+
 /**
  * A class for disassembling game boy cpu instructions. Since this class hold no
  * mutable state, it has been declared it static.
@@ -29,7 +30,7 @@ public final class Disassembler {
      *         string is one instruction.
      */
     public static List<DisassembledInstruction> disassemble(
-            final AddressBus bus, final int addr, final int len) {
+            final MemoryInterface bus, final int addr, final int len) {
 
         // Disassemble len instructions, starting at curAddr.
 
