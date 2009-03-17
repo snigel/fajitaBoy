@@ -476,7 +476,13 @@ public final class Debugger {
                 + "q" + "\t\tQuit debugger interface\n" + "ENTER"
                 + "\t\tRepeats last command\n" + "hex"
                 + "\t\tSwitches between decimal / hexadecimal input. "
-                + "Default is hex.\n" + "<CTRL> + C\t\t" + "Quit JavaBoy\n";
+                + "Default is hex.\n" + "<CTRL> + C\t\t" + "Quit JavaBoy\n"
+                + "mb \t\t View list of current memory breakpoints\n"
+                + "mb type addr\t\tAdds a memory breakpoint at addr, of type. "
+                + "Type can be r, w, or rw.\n"
+                + "mb type lower upper\tAdds a memory breakpoint over the "
+                + "address space from lower to upper of type\n"
+                + "rmb idx \t Removes the memory breakpoint with given index.\n";
 
         System.out.println(helpStr);
     }
