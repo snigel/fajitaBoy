@@ -3,6 +3,7 @@ package fajitaboy;
 import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.MessageConstants.*;
+import fajitaboy.lcd.LCD;
 
 /**
  * Oscillator emulates the clock frequency of the Game Boy and tells different
