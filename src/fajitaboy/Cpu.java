@@ -39,43 +39,43 @@ public final class Cpu {
     /**
      * The H register.
      */
-    private int h = 0;
+    private int h;
 
     /**
      * The L register.
      */
-    private int l = 0;
+    private int l;
 
     /**
      * The A register.
      */
-    private int a = 0;
+    private int a;
 
     /**
      * The B register.
      */
-    private int b = 0;
+    private int b;
 
     /**
      * The C register.
      */
-    private int c = 0;
+    private int c;
 
     /**
      * The D register.
      */
-    private int d = 0;
+    private int d;
 
     /**
      * The E register.
      */
-    private int e = 0;
+    private int e;
 
     // Internal variables:
     /**
      * temp variables to use in runInstruction().
      */
-    private int t1;
+    private int temp;
 
     /**
      * to know if an interrupt should be executed.
@@ -84,11 +84,11 @@ public final class Cpu {
 
     /**
      * Creates a new CPU with default values.
-     * @param ram
+     * @param addressbus
      *            The addressBus
      */
-    public Cpu(MemoryInterface ram) {
-        this.ram = ram;
+    public Cpu(final MemoryInterface addressbus) {
+        ram = addressbus;
         reset();
     }
 
@@ -116,15 +116,23 @@ public final class Cpu {
      * @return Returns the number of clock cycles used in this step.
      */
     public int step() {
-        // Initialize vars
         int cycleTime = 0;
-        executeInterrupt = false;
-        int jumpAddress = 0x0000;
-        
+
         // Perform processor operation
         int inst = ram.read(pc);
         cycleTime = runInstruction(inst);
 
+        handleInterrupts();
+
+        return cycleTime;
+    }
+
+    /**
+     * Handle interrupts.
+     */
+    private void handleInterrupts() {
+        int jumpAddress = 0x0000;
+        executeInterrupt = false;
         // Interrupt handler
         if (ime) {
             // Look for interrupts
@@ -161,18 +169,16 @@ public final class Cpu {
 
         if (executeInterrupt) {
             ime = false;
-            sp -= 2;
-            dblwrite(sp, pc);
+            push(pc);
             pc = jumpAddress;
         }
-
-        return cycleTime;
     }
 
     /**
      * Runs specified instruction.
      * @param instruction
      *            The opcode of the instruction to run.
+     * @return Clockcycles for this instruction.
      */
     private int runInstruction(final int instruction) {
         int cycleTime = 0;
@@ -232,11 +238,11 @@ public final class Cpu {
             cycleTime += 20;
             break;
         case 0x09: // ADD HL,BC
-            t1 = getHL() + getBC();
+            temp = getHL() + getBC();
             setH(((getHL() & 0x0F) + (getBC() & 0x0F)) > 0x0F);
-            setHL(t1);
+            setHL(temp);
             setN(0);
-            setC(t1 > 0xFFFF);
+            setC(temp > 0xFFFF);
             pc++;
             cycleTime += 8;
             break;
@@ -330,11 +336,11 @@ public final class Cpu {
             cycleTime += 12;
             break;
         case 0x19: // ADD HL,DE
-            t1 = getHL() + getDE();
+            temp = getHL() + getDE();
             setH(((getHL() & 0x0F) + (getDE() & 0x0F)) > 0x0F);
-            setHL(t1);
+            setHL(temp);
             setN(0);
-            setC(t1 > 0xFFFF);
+            setC(temp > 0xFFFF);
             pc++;
             cycleTime += 8;
             break;
@@ -451,11 +457,11 @@ public final class Cpu {
             break;
 
         case 0x29: // ADD HL,HL
-            t1 = getHL() * 2;
+            temp = getHL() * 2;
             calcH(getHL(), getHL());
             setN(0);
-            setC(t1 > 0xFFFF);
-            setHL(t1);
+            setC(temp > 0xFFFF);
+            setHL(temp);
             pc++;
             cycleTime += 8;
             break;
@@ -550,11 +556,11 @@ public final class Cpu {
             }
             break;
         case 0x39: // ADD HL,SP
-            t1 = getHL() + sp;
+            temp = getHL() + sp;
             calcH(getHL(), sp);
-            setHL(t1);
+            setHL(temp);
             setN(0);
-            setC(t1 > 0xFFFF);
+            setC(temp > 0xFFFF);
             pc++;
             cycleTime += 8;
             break;
@@ -1516,18 +1522,18 @@ public final class Cpu {
             cycleTime += 16;
             break;
         case 0xe8: // ADD SP,dd
-            t1 = (byte) readn();
+            temp = (byte) readn();
             setZ(0);
             setN(0);
-            if (t1 < 0) { // Negative
-                setC((sp + t1) < 0);
-                calcHsub(sp, -t1);
+            if (temp < 0) { // Negative
+                setC((sp + temp) < 0);
+                calcHsub(sp, -temp);
 
             } else { // Positive
-                setC((sp + t1) > 0xFFFF);
-                calcH(sp, t1);
+                setC((sp + temp) > 0xFFFF);
+                calcH(sp, temp);
             }
-            sp = sp + t1;
+            sp = sp + temp;
             pc += 2;
             cycleTime += 16;
             break;
@@ -1603,17 +1609,17 @@ public final class Cpu {
             cycleTime += 16;
             break;
         case 0xf8: // LD HL,SP+dd
-            t1 = (byte) readn();
+            temp = (byte) readn();
             setZ(0);
             setN(0);
-            setHL(sp + t1);
-            if (t1 < 0) { // Negative
-                setC((sp + t1) < 0);
-                calcHsub(sp, -t1);
+            setHL(sp + temp);
+            if (temp < 0) { // Negative
+                setC((sp + temp) < 0);
+                calcHsub(sp, -temp);
 
             } else { // Positive
-                setC((sp + t1) > 0xFFFF);
-                calcH(sp, t1);
+                setC((sp + temp) > 0xFFFF);
+                calcH(sp, temp);
             }
             pc += 2;
             cycleTime += 12;
@@ -1762,13 +1768,13 @@ public final class Cpu {
                 break;
             }
         } else {
-            int b = (op >>> 3) & 0x07;
+            int bit = (op >>> 3) & 0x07;
             if (op < 0x80) { // BIT
-                bit(b, r);
+                bit(bit, r);
             } else if (op < 0xc0) { // RES
-                r = res(b, r);
+                r = res(bit, r);
             } else { // SET
-                r = set(b, r);
+                r = set(bit, r);
             }
         }
         return r;
@@ -1804,12 +1810,12 @@ public final class Cpu {
      *            the register value to increment
      * @return new value of the register
      */
-    private int inc(int i) {
-        i = (i + 1) & 0xFF;
-        setZ(i == 0);
+    private int inc(final int i) {
+        int t = (i + 1) & 0xFF;
+        setZ(t == 0);
         setN(0);
-        setH((i & 0x0F) == 0x00);
-        return i;
+        setH((t & 0x0F) == 0x00);
+        return t;
     }
 
     /**
@@ -1818,12 +1824,12 @@ public final class Cpu {
      *            register value to decrement
      * @return new value of the register
      */
-    private int dec(int i) {
-        i = (i - 1) & 0xFF;
-        setZ(i == 0);
+    private int dec(final int i) {
+        int t = (i - 1) & 0xFF;
+        setZ(t == 0);
         setN(1);
-        setH((i & 0x0F) == 0x0F);
-        return i;
+        setH((t & 0x0F) == 0x0F);
+        return t;
     }
 
     /**
@@ -1831,7 +1837,7 @@ public final class Cpu {
      * @param s
      *            The register value to add
      */
-    private void add(int s) {
+    private void add(final int s) {
         setN(0);
         calcH(a, s);
         a += s;
@@ -1849,7 +1855,7 @@ public final class Cpu {
      * @param s
      *            The register value to subtract
      */
-    private void sub(int s) {
+    private void sub(final int s) {
         setN(1);
         calcHsub(a, s);
         a -= s;
@@ -1868,7 +1874,7 @@ public final class Cpu {
      * @param s
      *            The register value.
      */
-    private void and(int s) {
+    private void and(final int s) {
         setN(0);
         setH(1);
         setC(0);
@@ -1881,7 +1887,7 @@ public final class Cpu {
      * @param s
      *            Register value.
      */
-    private void xor(int s) {
+    private void xor(final int s) {
         a = (a ^ s) & 0xFF;
         setZ(a == 0);
         setN(0);
@@ -1894,7 +1900,7 @@ public final class Cpu {
      * @param s
      *            Register value.
      */
-    private void or(int s) {
+    private void or(final int s) {
         a = a | s;
         setZ(a == 0);
         setN(0);
@@ -1905,8 +1911,9 @@ public final class Cpu {
     /**
      * Compares a value with register A (A - s).
      * @param s
+     *            Register value.
      */
-    private void cp(int s) {
+    private void cp(final int s) {
         int t = a - s;
         setN(1);
         calcHsub(a, s);
@@ -1927,7 +1934,7 @@ public final class Cpu {
      * @param s
      *            Value to push to the stack.
      */
-    private void push(int s) {
+    private void push(final int s) {
         sp -= 2;
         dblwrite(sp, s);
     }
@@ -1953,52 +1960,53 @@ public final class Cpu {
     /**
      * BIT instruction. The Z flag is set to the same value as bit at position b
      * in s. (Z <- /sb).
-     * @param b
+     * @param bit
      *            bit number
      * @param s
      *            register value
      */
-    private void bit(int b, int s) {
+    private void bit(final int bit, final int s) {
         setN(0);
         setH(1);
-        setZ((s >>> b) & 0x01);
+        setZ((s >>> bit) & 0x01);
     }
 
     /**
      * RES instruction. Sets bit b in s to 0.
-     * @param b
+     * @param bit
      *            bit number
      * @param s
      *            register value
      * @return new value of s.
      */
-    private int res(int b, int s) {
-        return s & (~(1 << b));
+    private int res(final int bit, final int s) {
+        return s & (~(1 << bit));
     }
 
     /**
      * SET instruction. Sets bit b in s to 1.
-     * @param b
+     * @param bit
      *            bit number
      * @param s
      *            register value
      * @return new value of s.
      */
-    private int set(int b, int s) {
-        return s | (1 << b);
+    private int set(final int bit, final int s) {
+        return s | (1 << bit);
     }
 
     // Z
     /**
      * Changes the Z flag.
-     * @param b
+     * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setZ(boolean b) {
-        if (b)
+    private void setZ(final boolean value) {
+        if (value) {
             cc = cc | 0x80;
-        else
+        } else {
             cc = cc & 0x7F;
+        }
     }
 
     /**
@@ -2006,7 +2014,7 @@ public final class Cpu {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setZ(int i) {
+    private void setZ(final int i) {
         setZ(i != 0);
     }
 
@@ -2021,14 +2029,15 @@ public final class Cpu {
     // N
     /**
      * Changes the N flag.
-     * @param b
+     * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setN(boolean b) {
-        if (b)
+    private void setN(final boolean value) {
+        if (value) {
             cc = cc | 0x40;
-        else
+        } else {
             cc = cc & 0xBF;
+        }
     }
 
     /**
@@ -2036,7 +2045,7 @@ public final class Cpu {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setN(int i) {
+    private void setN(final int i) {
         setN(i != 0);
     }
 
@@ -2051,14 +2060,15 @@ public final class Cpu {
     // H
     /**
      * Changes the H flag.
-     * @param b
+     * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setH(boolean b) {
-        if (b)
+    private void setH(final boolean value) {
+        if (value) {
             cc = cc | 0x20;
-        else
+        } else {
             cc = cc & 0xDF;
+        }
     }
 
     /**
@@ -2066,7 +2076,7 @@ public final class Cpu {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setH(int i) {
+    private void setH(final int i) {
         setH(i != 0);
     }
 
@@ -2085,7 +2095,7 @@ public final class Cpu {
      * @param v2
      *            another value
      */
-    private void calcH(int v1, int v2) {
+    private void calcH(final int v1, final int v2) {
         setH(((v1 & 0x0F) + (v2 & 0x0F)) > 0x0F);
     }
 
@@ -2096,21 +2106,22 @@ public final class Cpu {
      * @param v2
      *            value to subtract
      */
-    private void calcHsub(int v1, int v2) {
+    private void calcHsub(final int v1, final int v2) {
         setH(((v1 & 0x0F) - (v2 & 0x0F)) < 0x00);
     }
 
     // C
     /**
      * Changes the C flag.
-     * @param b
+     * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setC(boolean b) {
-        if (b)
+    private void setC(final boolean value) {
+        if (value) {
             cc = cc | 0x10;
-        else
+        } else {
             cc = cc & 0xEF;
+        }
     }
 
     /**
@@ -2118,7 +2129,7 @@ public final class Cpu {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setC(int i) {
+    private void setC(final int i) {
         setC(i != 0);
     }
 
@@ -2137,21 +2148,21 @@ public final class Cpu {
      * @param data16bit
      *            16bit value to be written.
      */
-    private void dblwrite(int address, int data16bit) {
+    private void dblwrite(final int address, final int data16bit) {
         ram.write(address, data16bit & 0xFF);
         ram.write(address + 1, (data16bit >>> 8) & 0xFF);
     }
 
     /**
      * Calculates the double register of two registers.
-     * @param a
+     * @param rl
      *            the left part of the double register.
-     * @param b
+     * @param rr
      *            the right part of the double register.
      * @return the value of the double register.
      */
-    private int dblreg(int a, int b) {
-        return a * 0x100 + b;
+    private int dblreg(final int rl, final int rr) {
+        return rl * 0x100 + rr;
     }
 
     /*
@@ -2170,7 +2181,7 @@ public final class Cpu {
      * @param largeInt
      *            The new 16bit value of HL.
      */
-    public void setHL(int largeInt) {
+    public void setHL(final int largeInt) {
         h = (largeInt >> 8) & 0xFF;
         l = largeInt & 0xFF;
     }
@@ -2188,7 +2199,7 @@ public final class Cpu {
      * @param largeInt
      *            The new 16bit value of BC.
      */
-    public void setBC(int largeInt) {
+    public void setBC(final int largeInt) {
         b = (largeInt >> 8) & 0xFF;
         c = largeInt & 0xFF;
     }
@@ -2206,7 +2217,7 @@ public final class Cpu {
      * @param largeInt
      *            The new 16bit value of DE.
      */
-    public void setDE(int largeInt) {
+    public void setDE(final int largeInt) {
         d = (largeInt >> 8) & 0xFF;
         e = largeInt & 0xFF;
     }
@@ -2217,7 +2228,7 @@ public final class Cpu {
      * @param largeInt
      *            The new 16bit value of AF.
      */
-    private void setAF(int largeInt) {
+    private void setAF(final int largeInt) {
         a = (largeInt >> 8) & 0xFF;
         cc = largeInt & 0xFF;
     }
@@ -2236,7 +2247,7 @@ public final class Cpu {
      * @param smallInt
      *            New 8bit value of A
      */
-    public void setA(int smallInt) {
+    public void setA(final int smallInt) {
         a = smallInt;
     }
 
@@ -2253,7 +2264,7 @@ public final class Cpu {
      * @param smallInt
      *            New 8bit value of F
      */
-    public void setF(int smallInt) {
+    public void setF(final int smallInt) {
         cc = smallInt;
     }
 
@@ -2267,10 +2278,10 @@ public final class Cpu {
 
     /**
      * Sets the SP register.
-     * @param smallInt
+     * @param largeInt
      *            New 16bit value of SP.
      */
-    public void setSP(int largeInt) {
+    public void setSP(final int largeInt) {
         sp = largeInt;
     }
 
@@ -2292,11 +2303,11 @@ public final class Cpu {
 
     /**
      * Sets the PC register.
-     * @param smallInt
+     * @param largeInt
      *            New 16bit value of PC.
      */
-    public void setPC(int smallInt) {
-        pc = smallInt;
+    public void setPC(final int largeInt) {
+        pc = largeInt;
     }
 
     /**
@@ -2309,11 +2320,11 @@ public final class Cpu {
 
     /**
      * Changes the IME flag.
-     * @param ime
+     * @param value
      *            New value of the IME flag.
      */
-    public void setIME(boolean ime) {
-        this.ime = ime;
+    public void setIME(final boolean value) {
+        ime = value;
     }
 
     /**
