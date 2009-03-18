@@ -49,7 +49,6 @@ public class LCD implements ClockPulseReceiver {
 	 * Draws the GameBoy screen once.
 	 */
 	private void drawScreen() {
-		try {
 //	 		Clear screen
 			screen.clear();
 			
@@ -63,10 +62,7 @@ public class LCD implements ClockPulseReceiver {
 			bgm.draw(screen, ram);
 			
 //	 		Draw sprites
-		}
-		catch (Exception e) {
-			System.out.println(e);
-		}
+
 	}
 	
 	/**

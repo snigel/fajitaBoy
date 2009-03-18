@@ -4,9 +4,10 @@ import fajitaboy.MemoryInterface;
 
 public class Tile {
 	public int bits[][];
+	public int height;
 	
 	public Tile() {
-		bits = new int[8][8];
+
 	}
 	
 	public void readTile(MemoryInterface ram, int address) {
@@ -26,14 +27,13 @@ For each line, the first byte defines the least significant bits of the color nu
 			data[i] = ram.read(address + i);
 		}
 		
-		LCDC lcdc = new LCDC();
-		lcdc.readLCDC(ram);
-		int height = lcdc.objSpriteSize ? 8 : 16;
-		for (int i = 0; i < height; i += 2) {
+		bits = new int[8][8];
+		                 
+		for (int i = 0; i < 16; i += 2) {
 			int lower = data[i];
 			int upper = data[i+1];
 			
-			bits[i] = LCD.convertToPixels(lower, upper);
+			bits[i/2] = LCD.convertToPixels(lower, upper);
 		}
 		
 	}

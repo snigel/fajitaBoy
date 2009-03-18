@@ -15,39 +15,52 @@ public class BackgroundMap {
 		LCDC lcdc = new LCDC();
 		lcdc.readLCDC(ram);
 		
-		
 		//read tile numbers
-		int tileNumbers[] = new int[256];
-		for (int i = 0; i < 256; i++) {
-			int addr = 0;
-			
-			if (type == MapType.BACKGROUND) {
-				if (lcdc.bgTileMapSelect) {
-					addr = 0x9800;
-				} else {
-					addr = 0x9C00;
-				}
-			} else if (type == MapType.WINDOW) {
-				if (lcdc.windowTileMapSelect) {
-					addr = 0x9800;
-				} else {
-					addr = 0x9C00;
-				}
+		int tileNumbers[] = new int[GB_MAP_W * GB_MAP_H];
+		int addr_base = 0;
+		if (type == MapType.BACKGROUND) {
+			if (lcdc.bgTileMapSelect) {
+				addr_base = 0x9C00;
+			} else {
+				addr_base = 0x9800;
 			}
-			
-			tileNumbers[i] = ram.read(addr + i);
+		} else if (type == MapType.WINDOW) {
+			if (lcdc.windowTileMapSelect) {
+				addr_base = 0x9C00;
+			} else {
+				addr_base = 0x9800;
+			}
 		}
 		
+		for (int i = 0; i < GB_MAP_W * GB_MAP_H; i++) {
+			tileNumbers[i] = ram.read(addr_base + i);
+		}
+		
+		/*
+		 * 
+An area of VRAM known as Background Tile Map contains the numbers of tiles to be displayed. 
+It is organized as 32 rows of 32 bytes each. Each byte contains a number of a tile to be displayed. 
+Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF. 
+In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000). 
+In the second case, patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000). 
+The Tile Data Table address for the background can be selected via LCDC register.
+		 */
 		//read tile patterns
-		for (int i = 0; i < 32; i++) {
-			for (int j = 0; j < 32; j++) {
+		
+		for (int i = 0; i < GB_MAP_H; i++) {
+			for (int j = 0; j < GB_MAP_W; j++) {
 				Tile t = new Tile();
 				int addr;
 				
-				if (lcdc.tileDataSelect) {
-					addr = 0x8800 + tileNumbers[i*32 + j];
+				if (!lcdc.tileDataSelect) {
+					addr = 0x8000 + tileNumbers[i*GB_MAP_H + j]*(GB_TILE_W + GB_TILE_H);
 				} else {
-					addr = 0x9000 + (256 - tileNumbers[i*32 + j]); //TODO antagligen fel
+					//TODO antagligen fel
+					/*
+					 * 0x9000 + tileNumber*0xF == 0x9000 (om tileNumber' == 0)
+					 * 0x9000 + tileNumber*0xF== 0x8800 (om tileNumber' == -128)
+					 */
+					addr = 0x8800 + tileNumbers[i*GB_MAP_H + j]*(GB_TILE_W + GB_TILE_H); 
 				}
 				
 				t.readTile(ram, addr);
@@ -56,7 +69,7 @@ public class BackgroundMap {
 		}
 	}
 	
-	public void draw(Screen screen, MemoryInterface ram) throws Exception {
+	public void draw(Screen screen, MemoryInterface ram) {
 // 		Prepare variables
 		int scx, scy, firstTileX, firstTileY;
 		scx = ram.read(ADDRESS_SCX);
@@ -74,7 +87,8 @@ public class BackgroundMap {
 			for ( int x = 0; x < GB_LCD_W/8; x += 1 ) {
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
-				screen.blit(data[datax][datay], dx, dy);
+				Tile t = data[datay][datax];
+				screen.blit(t, dx, dy);
 			}
 		}
 	}

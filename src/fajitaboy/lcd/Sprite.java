@@ -14,7 +14,7 @@ public class Sprite {
 	
 	public Sprite(int height) {
 		h = height;
-		bits = new int[8][height];
+		bits = new int[height][8];
 	}
 	
 	public void readSprite(MemoryInterface ram, int address) {
@@ -28,8 +28,8 @@ public class Sprite {
 		flipX = (flags & 0x04) > 0;
 	}
 	
-	public int[][] getSprite() {
-		return null;
+	public int[][] getSprite(MemoryInterface ram) {
+		return getTile(ram).getTile();
 	}
 	
 	public Tile getTile(MemoryInterface ram) {
@@ -41,7 +41,7 @@ public class Sprite {
 	public void setHeight( int height ) {
 		if ( h != height ) {
 			h = height;
-			bits = new int[8][height];
+			bits = new int[height][8];
 		}
 	}
 }

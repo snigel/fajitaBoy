@@ -5,4 +5,10 @@ public final class LCDConstants {
 	public static final int GB_LCD_H = 144;
 	public static final int GB_SPRITES = 256;
 	public static final int GB_TILES = 192;
+	
+	public static final int GB_MAP_W = 32;
+	public static final int GB_MAP_H = 32;
+	public static final int GB_TILE_W = 8;
+	public static final int GB_TILE_H = 8;
+	
 }

@@ -7,13 +7,13 @@ public class Screen {
 	public int bits[][];
 
 	public Screen() {
-		bits = new int[GB_LCD_W][GB_LCD_H];
+		bits = new int[GB_LCD_H][GB_LCD_W];
 	}
 	
 	public void clear() {
 		for ( int x = 0; x < GB_LCD_W; x++ ) {
 			for ( int y = 0; y < GB_LCD_H; y++ ) {
-				bits[x][y] = 0;
+				bits[y][x] = 0;
 			}
 		}
 	}
@@ -64,7 +64,7 @@ public class Screen {
 			sx = sLeft;
 			// For each pixel...
 			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
-				bits[lcdx][lcdy] = s.bits[sx][sy];
+				bits[lcdy][lcdx] = s.bits[sy][sx];
 			}
 		}
 	}
@@ -77,13 +77,13 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int x, int y) throws Exception {
+	public void blit(Tile t, int x, int y) {
 //		Prepare variables
 		int lcdLeft, lcdTop, lcdRight, lcdBottom, tLeft, tTop, tRight, tBottom, lcdx, lcdy, tx, ty;
-		lcdLeft = Math.min(0, x);
-		lcdRight = Math.max(x + 8, GB_LCD_W);
-		lcdTop = Math.min(0, y);
-		lcdBottom = Math.max(y + 8, GB_LCD_H);
+		lcdLeft = Math.max(0, x);
+		lcdRight = Math.min(x + 8, GB_LCD_W);
+		lcdTop = Math.max(0, y);
+		lcdBottom = Math.min(y + 8, GB_LCD_H);
 		
 		// Exit if sprite outside screen
 		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
@@ -99,7 +99,7 @@ public class Screen {
 		if ( tLeft >= tRight || tTop >= tBottom ) {
 			return;
 		}
-		
+		/*
 //			Safety guards for debug purposes...
 		if ( lcdRight - lcdLeft != tRight - tLeft ) {
 			throw new Exception("blitSprite: Blitted widths on screen and of tile does not match.");
@@ -107,6 +107,7 @@ public class Screen {
 		if ( lcdBottom - lcdTop != tBottom - tTop ) {
 			throw new Exception("blitSprite: Blitted heights on screen and of tile does not match.");
 		}
+		*/
 		
 //		Blit sprite to screen
 		ty = tTop;
@@ -115,8 +116,10 @@ public class Screen {
 			tx = tLeft;
 			// For each pixel...
 			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
-				bits[lcdx][lcdy] = t.bits[tx][ty];
+				bits[lcdy][lcdx] = t.bits[ty][tx];
+				tx++;
 			}
+			ty++;
 		}
 	}
 	
