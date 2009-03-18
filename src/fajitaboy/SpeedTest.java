@@ -18,7 +18,8 @@ public final class SpeedTest {
     private static final int INSTRUCTIONS = 50000000;
 
     /**
-     * Runs INSTRUCTIONS, times it and prints the time it took, and how many cycles were run per second.
+     * Runs INSTRUCTIONS, times it and prints the time it took,
+     * and how many cycles were run per second.
      */
     private void test() {
         System.out.println("Running " + INSTRUCTIONS + " instructions");
@@ -51,8 +52,10 @@ public final class SpeedTest {
 
     /**
      * Runs SpeedTest.
+     * @param args
+     * No parameters
      */
-    public static void main(String args[]) {
+    public static void main(final String[] args) {
         (new SpeedTest()).test();
     }
 }
