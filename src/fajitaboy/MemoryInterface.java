@@ -22,7 +22,7 @@ public interface MemoryInterface {
      *            The data we want to write to the specified address
      */
     void write(int address, int data);
-    
+
     /**
      * Performs a previlegie read from the specified address.
      * @param address
@@ -30,7 +30,7 @@ public interface MemoryInterface {
      * @return int This is supposed to return the memory contents located at
      *         address.
      */
-    public int forceRead(int address);
+    int forceRead(final int address);
 
     /**
      * Performs a previlegie read from the specified address.
@@ -39,10 +39,10 @@ public interface MemoryInterface {
      * @param data
      *            The data we want to write to the specified address
      */
-    public void forceWrite(int address, int data);
-    
+    void forceWrite(int address, int data);
+
     /**
-     * Resets memory and initializes any values if required
+     * Resets memory and initializes any values if required.
      */
     void reset();
 }
