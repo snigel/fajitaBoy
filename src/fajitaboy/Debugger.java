@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
+import fajitaboy.lcd.LCD;
 import static java.lang.Math.*;
 
 /**
@@ -278,6 +280,10 @@ public final class Debugger {
             } else {
                 showTrace(20);
             }
+            // Dump screen
+        } else if (scLine.equals("screen")) {
+            dumpScreen();
+
             // Run forever
         } else if (scLine.equals("g")) {
             runForever();
@@ -294,6 +300,22 @@ public final class Debugger {
         } else {
             showDebugError("Invalid command!");
         }
+    }
+    
+    private void dumpScreen() {
+    	LCD lcd = osc.getLCD();
+    	int[][] scr = lcd.getScreen();
+    	for (int i = 0; i < scr.length; i++) {
+    		for (int j = 0; j < scr[i].length; j++) {
+    			int pxl = scr[i][j];
+    			if (pxl > 0) {
+    				System.out.print(pxl);
+    			} else {
+    				System.out.print(' ');
+    			}
+    		}
+    		System.out.print("\n");
+    	}
     }
 
     /** showTrace nr shows a disassemble of the latest nr of instructions.
@@ -408,7 +430,7 @@ public final class Debugger {
                 System.out
                         .println("Address overflow detected! Wrapping! Silly you!");
             }
-            addressBus.write(curAddr & 0xFFFF, d & 0xFF);
+            addressBus.forceWrite(curAddr & 0xFFFF, d & 0xFF);
             curAddr++;
         }
         addressBus.clearDirtyActions();
@@ -565,7 +587,7 @@ public final class Debugger {
     private int debugStep() throws InterruptedStepException {
         int c = 0;
         try {
-            pcLog.add(cpu.getPC());
+            // pcLog.add(cpu.getPC());
             c += osc.step();
         } catch (RomWriteException e) {
             throw new InterruptedStepException(
@@ -618,7 +640,7 @@ public final class Debugger {
             }
 
             if (pointCounter) {
-                if (c - lastPoint > 1000) {
+                if (c - lastPoint > 100000) {
                     points++;
                     lastPoint = c;
                     if (points > 80) {
@@ -672,11 +694,6 @@ public final class Debugger {
      *            Standard input arguments.
      */
     public static void main(final String[] args) {
-        Map<String, String> env = System.getenv();
-        for (String envName : env.keySet()) {
-            System.out.format("%s=%s%n", envName, env.get(envName));
-        }
-
         if (args.length == 1) {
             String path = args[0];
             if ((new File(path)).exists()) {
