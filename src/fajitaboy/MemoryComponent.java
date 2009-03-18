@@ -9,10 +9,10 @@ package fajitaboy;
  */
 public class MemoryComponent implements MemoryInterface {
 
-	/**
-	 * The size of the ram array
-	 */
-	protected int length;
+    /**
+     * The size of the ram array.
+     */
+    protected int length;
 
     /**
      * This array holds the memory space of RAM.
@@ -35,15 +35,15 @@ public class MemoryComponent implements MemoryInterface {
      *            memorycomponent array and for setting the offset value.
      */
     public MemoryComponent(final int start, final int end) {
-    	this.length = end-start;
+        this.length = end - start;
         offset = start; // set offset value for addressing
         reset();
     }
 
     /**
-     * Default constuctor
+     * Default constuctor.
      */
-    public MemoryComponent(){
+    public MemoryComponent() {
         //Do nothing
     }
 
@@ -61,7 +61,7 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public void write(final int address, final int data) {
+    public final void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
@@ -72,15 +72,15 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public void reset() {
-    	ram = new int[length];
+    public final void reset() {
+        ram = new int[length];
     }
 
 
     /**
      * {@inheritDoc}
      */
-    public int forceRead(int address) {
+    public final int forceRead(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
@@ -91,7 +91,7 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public void forceWrite(int address, int data) {
+    public final void forceWrite(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
