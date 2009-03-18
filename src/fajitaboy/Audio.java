@@ -17,7 +17,7 @@ public class Audio{
 		samplerate = 44100;
 		af = new AudioFormat(samplerate,8,1,true,false);
 		sdl = AudioSystem.getSourceDataLine(af);
-		buffer = new byte[1];
+		buffer = new byte[706];
 		sdl.open(af);
 		sdl.start();
 		
@@ -26,12 +26,13 @@ public class Audio{
 	public void generateTone(int freq,int duration, int volume){
 		for(int i=0; i<(float)(duration)/1000*samplerate; i++){
 			double angle = i/(samplerate/freq)*2.0*Math.PI;
-			buffer[0]=(byte)(Math.sin(angle)*volume);
-			sdl.write(buffer,0,1);
+			
+			buffer[i%706]=(byte)(Math.sin(angle)*volume);
+			if(i%706==0)
+				noise(buffer);
 		}
 	}
-	//	sdl.drain();
-	//	sdl.stop();
-	//	sdl.close();
-	
+	private void noise(byte[] buffer){
+		sdl.write(buffer,0,706);
+	}
 }
