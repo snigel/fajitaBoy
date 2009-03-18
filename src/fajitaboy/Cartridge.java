@@ -25,18 +25,17 @@ public class Cartridge extends MemoryComponent {
     /**
      * {@inheritDoc}
      */
-    public void write(int address, int data) {
-    	System.out.println("tried to write address: "+address);
-        //throw new RomWriteException("Catridge.java, adress:" + address);
+    public final void write(final int address, final int data) {
+        System.out.println("\n Write to cartridge at: "
+                + Integer.toHexString(address));
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public final void reset() {
-    	//do nothing.
-    	//reloading the cartridge is not needed
-    	//reset MBC if it will be implemented
+        //reloading the cartridge is not needed
+        //reset MBC if it will be implemented
     }
 
     /**
@@ -65,13 +64,3 @@ public class Cartridge extends MemoryComponent {
     }
 
 }
-/*
- * Some code for reading out title or type testread(0x134, 16,
- * "Cartridge title"); testread(0x148, 1, "Cartridge type");
- *
- * }
- *
- * private void testread(int start, int length, String type){ String output="";
- * for(int i=0; i<length; i++){ output=output+addressBus.read(i+start); }
- * System.out.println(type+": "+output); }
- */
