@@ -1,6 +1,7 @@
 package fajitaboy;
 
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 
 /**
  * Addressbus class that handles the whole address space. Through it all the
@@ -16,7 +17,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * The array which contains all the memory.
      */
-    private MemoryInterface[] module = new MemoryInterface[0x10000]; // Size of
+    private MemoryInterface[] module = new MemoryInterface[GB_ADDRESS_SPACE];
 
     // All modules be declared here
 
@@ -149,7 +150,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public int forceRead(int address){
+    public final int forceRead(final int address) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");
         }
@@ -159,8 +160,8 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public void forceWrite(int address, int data){
-    	if (address < 0 || address > module.length) {
+    public final void forceWrite(final int address, final int data) {
+        if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("AddressBus.java");
         }
         module[address].forceWrite(address, data);
@@ -170,8 +171,8 @@ public class AddressBus implements MemoryInterface {
      * Resets the memory to zero. The ROM is left untouched.
      */
     public final void reset() {
-    	interruptRegister.reset();
-    	debug.reset();
+        interruptRegister.reset();
+        debug.reset();
         raml.reset();
         echo.reset();
         ramh.reset();
