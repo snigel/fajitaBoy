@@ -5,7 +5,7 @@ import static fajitaboy.constants.LCDConstants.GB_LCD_W;
 
 public class Screen {
 	public int bits[][];
-	
+
 	public Screen() {
 		bits = new int[GB_LCD_W][GB_LCD_H];
 	}
@@ -118,5 +118,9 @@ public class Screen {
 				bits[lcdx][lcdy] = t.bits[tx][ty];
 			}
 		}
+	}
+	
+	public int[][] getBits() {
+		return bits;
 	}
 }

@@ -22,6 +22,8 @@ public class LCD implements ClockPulseReceiver {
     BackgroundMap bgm = new BackgroundMap();
     Screen screen = new Screen();
 	
+    boolean newScreen = false;
+    
 	/* (non-Javadoc)
 	 * @see ClockPulseReceiver#oscillatorMessage(int)
 	 */
@@ -46,7 +48,7 @@ public class LCD implements ClockPulseReceiver {
 	/**
 	 * Draws the GameBoy screen once.
 	 */
-	public void drawScreen() {
+	private void drawScreen() {
 		try {
 //	 		Clear screen
 			screen.clear();
@@ -110,6 +112,7 @@ public class LCD implements ClockPulseReceiver {
 				ram.write( ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01 );
 			}
 			ram.forceWrite( ADDRESS_STAT, (ram.read( ADDRESS_STAT ) & 0xFC) + 1 ); // Replace with forcedWrite
+			drawScreen();
 		}
 		
 		if ( message == MSG_LCD_CHANGE_MODE ) {
@@ -158,6 +161,15 @@ public class LCD implements ClockPulseReceiver {
 		}
 		
 		return 0;
+	}
+	
+	public boolean newScreenAvailable() {
+		return newScreen;
+	}
+	
+	public int[][] getScreen() {
+		newScreen = false;
+		return screen.getBits();
 	}
 
 }
