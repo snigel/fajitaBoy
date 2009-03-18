@@ -72,7 +72,7 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final void reset() {
+    public void reset() {
         ram = new int[length];
     }
 
@@ -80,7 +80,7 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final int forceRead(final int address) {
+    public int forceRead(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
@@ -91,7 +91,7 @@ public class MemoryComponent implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final void forceWrite(final int address, final int data) {
+    public void forceWrite(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
