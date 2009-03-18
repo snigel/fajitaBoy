@@ -158,7 +158,7 @@ public final class InstructionSet {
             new Instruction(0x1d, "DEC  E", "DEC  E"),
             new Instruction(0x1e, "LD   E,n", "LD   E,%"),
             new Instruction(0x1f, "RRA", "RRA"),
-            new Instruction(0x20, "JR   NZ,d", "JR   NZ,d"),
+            new Instruction(0x20, "JR   NZ,d", "JR   NZ,%"), //should be an offset
             new Instruction(0x21, "LD   HL,nn", "LD   HL,#"),
             new Instruction(0x22, "LD (HLI),A", "LD (HLI),A"),
             new Instruction(0x23, "INC  HL", "INC  HL"),
