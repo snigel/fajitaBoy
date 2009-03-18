@@ -199,4 +199,9 @@ public class Oscillator {
             }
         }
     }
+    
+    public LCD getLCD() {
+    	return lcd;
+    }
+    
 }
