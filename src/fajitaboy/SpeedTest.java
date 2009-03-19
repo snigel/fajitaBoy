@@ -24,7 +24,7 @@ public final class SpeedTest {
     private void test() {
         System.out.println("Running " + INSTRUCTIONS + " instructions");
 
-        AddressBus a = new AddressBus("/tetris_patched.gb");
+        AddressBus a = new AddressBus("/tetris.gb");
         Cpu c = new Cpu(a);
 
         int cycl = 0;
@@ -33,7 +33,7 @@ public final class SpeedTest {
         }
         System.out.println("Cycles run: " + cycl);
 
-        a = new AddressBus("/tetris_patched.gb");
+        a = new AddressBus("/tetris.gb");
         c = new Cpu(a);
         Oscillator o = new Oscillator(c, a);
         // c.reset();
@@ -46,8 +46,8 @@ public final class SpeedTest {
         System.out.println("Time run (ms): " + totaltime);
         System.out.println("Cycles per instruction~: "
                 + ((float) cycl / INSTRUCTIONS));
-        System.out.println("cycles per second (hz): "
-                + (cycl / totaltime * 1000));
+        System.out.println("cycles per second (MHz): "
+                + (cycl / (totaltime * 1000)));
     }
 
     /**
