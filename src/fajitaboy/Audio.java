@@ -27,7 +27,7 @@ public class Audio{
 		for(int i=0; i<(float)(duration)/1000*samplerate; i++){
 			double angle = i/(samplerate/freq)*2.0*Math.PI;
 			
-			buffer[i%706]=(byte)(Math.sin(angle)*volume);
+			buffer[i%706]=(byte)(Math.signum(Math.sin(angle))*volume);
 			if(i%706==0)
 				noise(buffer);
 		}

@@ -108,7 +108,7 @@ public class LCD implements ClockPulseReceiver {
 				ram.write( ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01 );
 			}
 			ram.forceWrite( ADDRESS_STAT, (ram.read( ADDRESS_STAT ) & 0xFC) + 1 ); // Replace with forcedWrite
-			drawScreen();
+			//drawScreen();
 		}
 		
 		if ( message == MSG_LCD_CHANGE_MODE ) {
