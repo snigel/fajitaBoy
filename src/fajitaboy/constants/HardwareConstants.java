@@ -13,4 +13,5 @@ public final class HardwareConstants {
 	public static final int GB_TIMER_CLOCK_2 = 64;
 	public static final int GB_TIMER_CLOCK_3 = 256;
 	public static final int GB_DIV_CLOCK = 64;
+	public static final int GB_ADDRESS_SPACE = 0x10000;
 }
