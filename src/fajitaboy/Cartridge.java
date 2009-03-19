@@ -26,8 +26,8 @@ public class Cartridge extends MemoryComponent {
      * {@inheritDoc}
      */
     public final void write(final int address, final int data) {
-        System.out.println("\n Write to cartridge at: "
-                + Integer.toHexString(address));
+        //System.out.println("\n Write to cartridge at: "
+        //        + Integer.toHexString(address));
     }
 
     /**
