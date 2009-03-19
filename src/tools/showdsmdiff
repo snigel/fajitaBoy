@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+diff --suppress-common-lines -w -i -b -E -y $1 $2

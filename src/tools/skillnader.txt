@@ -1,0 +1,11 @@
+* vi skriver ut hexvärden på följande vis:
+0xab12
+javaboy skriver:
+AB12
+
+alltså upcase, utan 0x-prefix
+
+* vi hanterar instruction 0xDD som NOP, dom skriver "Unknown Opcode!"
+* vi skriver instruction bb som "CP E", dom skriver "CP A, E"
+* vi skriver instruction [f0 41] som "LD A, (0x41)", javaboy skriver LDH A, (FF41)
+  i vilket fall behöver vi markera att det är ff41 det handlar om, vet inte varför dom skriver LDH, men det kanske inte heller skadar.

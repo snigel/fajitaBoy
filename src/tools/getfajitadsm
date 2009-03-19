@@ -1,0 +1,12 @@
+#!/bin/bash
+
+ADDR=0100
+LEN=1000
+ROM=/home/arvid/ecworkspace/fajita_trunk/src/fajitaboy/tetris.gb
+BINDIR=/home/arvid/ecworkspace/fajita_trunk/bin
+
+pushd .
+cd $BINDIR
+DSM=$(echo "p $ADDR $LEN" | java fajitaboy.Debugger $ROM)
+popd
+echo "$DSM" > fajitaboy_dsm_$(basename $ROM)_$ADDR+$LEN.txt

@@ -555,7 +555,7 @@ public final class Debugger {
      */
     private void disassemble(final int addr, final int len) {
         List<Disassembler.DisassembledInstruction> dInstructs = Disassembler
-                .disassemble(addressBus, addr, len);
+                .disassemble(addressBus, addr, len, true);
         for (Disassembler.DisassembledInstruction di : dInstructs) {
             System.out.println(di);
         }

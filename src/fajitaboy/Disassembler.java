@@ -30,7 +30,7 @@ public final class Disassembler {
      *         string is one instruction.
      */
     public static List<DisassembledInstruction> disassemble(
-            final MemoryInterface bus, final int addr, final int len) {
+            final MemoryInterface bus, final int addr, final int len, final boolean javaboyComp) {
 
         // Disassemble len instructions, starting at curAddr.
 
@@ -56,8 +56,13 @@ public final class Disassembler {
             //keep reading arguments.
             while ((arg = getNextArgument(pn)) != null) {
                 // we could switch over argument type here, format different arguments accordingly.
-                formatString = "0x%0" + arg.getSize() * 2 + "x";
 
+            	if (javaboyComp) {
+            		// if javaboy, do not prefix with 0x, and upcase. 
+            		formatString = "%0" + arg.getSize() * 2 + "X";
+            	} else {
+            		formatString = "0x%0" + arg.getSize() * 2 + "x";
+            	}
                 // convert arguments
                 int argValue = 0;
                 for (int j = arg.getSize() - 1; j >= 0; j--) {
@@ -76,7 +81,7 @@ public final class Disassembler {
             }
             out
                     .add(new Disassembler.DisassembledInstruction(iData, iAddr,
-                            pn));
+                            pn, javaboyComp));
         }
 
         // len instructions has been disassembled, return.
@@ -120,6 +125,11 @@ public final class Disassembler {
          */
         private String instructionString;
 
+        /** 
+         * 
+         */
+        private boolean javaboyComp;
+
         /**
          * Constructor.
          * @param d
@@ -130,10 +140,11 @@ public final class Disassembler {
          *            input string
          */
         public DisassembledInstruction(final List<Integer> d, final int a,
-                final String ist) {
+                final String ist, final boolean jbc) {
             this.data = d;
             this.addr = a;
             this.instructionString = ist;
+            this.javaboyComp = jbc;
         }
 
         /**
@@ -162,9 +173,21 @@ public final class Disassembler {
          * @return A string representation of this disassembled instruction.
          */
         public final String toString() {
-            String out = String.format("%04x: ", addr);
+    		// if javaboy, do not prefix with 0x, and upcase.
+        	//change here for javaboy
+        	String out;
+        	if (javaboyComp) {
+        		out = String.format("%04X: ", addr);
+        	} else {
+        		out = String.format("%04x: ", addr);
+        	}
+        	
             for (int d : data) {
-                out += String.format("%02x ", d);
+            	if (javaboyComp) {
+            		out += String.format("%02X ", d);
+            	} else {
+            		out += String.format("%02x ", d);
+            	}
             }
             for (int i = 0; i < 10 - data.size() * 3; i++) {
                 out += " ";
