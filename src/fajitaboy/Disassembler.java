@@ -60,7 +60,7 @@ public final class Disassembler {
      *            If true, stay true to dah javaboy stylez.
      * @return Disassembled instruction.
      */
-    private static DisassembledInstruction dsmInstruction(
+    public static DisassembledInstruction dsmInstruction(
             final MemoryInterface bus, final int addr, final boolean javaboyComp) {
         // this instruction starts at iAddr.
         int curAddr = addr;

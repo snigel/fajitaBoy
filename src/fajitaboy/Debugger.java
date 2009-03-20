@@ -127,6 +127,10 @@ public final class Debugger {
             }
             disassemble(cpu.getPC(), 1);
 
+            // step over
+        } else if (scLine.equals("to")) {
+            stepOver();
+
             // Switch hex/dec input
         } else if (scLine.equals("hex")) {
             switchRadix();
@@ -293,7 +297,12 @@ public final class Debugger {
 
             // Run forever
         } else if (scLine.equals("g")) {
-            runForever();
+            if (in.hasNextInt(argRadix)) {
+                int stop = in.nextInt(argRadix);
+                runForever(stop);
+            } else {
+                runForever();
+            }
 
             // Show help
         } else if (scLine.equals("?")) {
@@ -677,7 +686,7 @@ public final class Debugger {
                 if (pointCounter && points > 0) {
                     System.out.print("\n");
                 }
-                System.out.println("Stopped after " + i + " steps.");
+                System.out.println("Stopped after " + (i + 1) + " steps.");
                 System.out.println(e);
                 printDirtyActions();
                 addressBus.clearDirtyActions();
@@ -712,13 +721,33 @@ public final class Debugger {
         }
     }
 
+    private void stepOver() {
+        int pc = cpu.getPC();
+        Disassembler.DisassembledInstruction instr = Disassembler.dsmInstruction(addressBus, pc, false);
+        runForever(pc + instr.getData().size());
+    }
+    
     /**
-     * Steps the program until a breakpoint is reached.
+     * Steps the program forever, or until some kind of breakpoint is reached.
      */
     private void runForever() {
         debugNSteps(true, -1);
     }
 
+    /**
+     * Steps the program until a breakpoint is reached.
+     */
+    private void runForever(int stop) {
+        // if there already is an breakpoint at stop, we wont remove it.
+        if (getBreakpoint(stop)) {
+            debugNSteps(true, -1);
+        } else {
+            toggleBreakpoint(stop);
+            debugNSteps(true, -1);
+            toggleBreakpoint(stop);
+        }
+    }
+    
     /**
      * Starts the debugger with a specified ROM-filepath.
      * @param args
