@@ -45,7 +45,7 @@ public final class Debugger {
     /**
      * List of logged pc-values. This is used to provide a backwards trace.
      */
-    private List<Integer> pcLog;
+    private LinkedList<Integer> pcLog;
 
     /**
      * Stops debugging on interrupts.
@@ -326,9 +326,9 @@ public final class Debugger {
      *            number of instructions to show.
      */
     private void showTrace(final int nr) {
-        System.out.println("Showing latest " + nr + " PC-values.");
-        for (int i = max(0, pcLog.size() - nr); i < pcLog.size(); i++) {
-            // System.out.println(String.format("%04x", pcLog.get(i)));
+        int sz = pcLog.size();
+        System.out.println("Showing latest " + min(sz, nr) + " PC-values.");
+        for (int i = max(0, sz - nr); i < sz; i++) {
             disassemble(pcLog.get(i), 1);
         }
         System.out.print("\n");
@@ -596,6 +596,14 @@ public final class Debugger {
         System.out.println(str);
         System.out.println("Write ? for help");
     }
+    
+    private void logPC(final int pc) {
+        if (pcLog.add(pc)) {
+            if (pcLog.size() > 1024) {
+                pcLog.removeFirst();
+            }
+        }
+    }
 
     /**
      * Steps the oscillator one step, throws on three different cases: 1.
@@ -610,7 +618,7 @@ public final class Debugger {
     private int debugStep() throws InterruptedStepException {
         int c = 0;
         try {
-            // pcLog.add(cpu.getPC());
+            logPC(cpu.getPC());
             c += osc.step();
         } catch (RomWriteException e) {
             throw new InterruptedStepException(
