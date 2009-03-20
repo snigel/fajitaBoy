@@ -22,8 +22,17 @@ Bit 0 - BG Display (for CGB see below) (0=Off, 1=On)
 	public boolean objSpriteSize;
 	public boolean objSpriteDisplay;
 	public boolean bgDisplay;
+	private MemoryInterface ram;
 	
-	public void readLCDC(MemoryInterface ram) {
+	public LCDC( MemoryInterface ram ) {
+		this.ram = ram;
+	}
+	
+	/**
+	 * Reads LCDC flags from memory.
+	 * @param ram
+	 */
+	public void readLCDC() {
 		int b = ram.read(0xFF40);
 		lcdDisplayEnable = (b & 0x80) > 0;
 		windowTileMapSelect = (b & 0x40) > 0;

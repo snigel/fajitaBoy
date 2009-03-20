@@ -4,7 +4,6 @@ import fajitaboy.MemoryInterface;
 
 public class Tile {
 	public int bits[][];
-	public int height;
 	
 	public Tile() {
 

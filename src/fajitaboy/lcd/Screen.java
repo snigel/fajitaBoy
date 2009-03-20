@@ -26,13 +26,13 @@ public class Screen {
 	 * @param y Y-coordinate to draw tile at (minus 16)
 	 * @throws Exception
 	 */
-	public void blit(Sprite s, int x, int y) throws Exception {
+	public void blit(Sprite s, int x, int y) {
 //		Prepare variables
 		int lcdLeft, lcdTop, lcdRight, lcdBottom, sLeft, sTop, sRight, sBottom, lcdx, lcdy, sx, sy;
-		lcdLeft = Math.min(0, x - 8);
-		lcdRight = Math.max(x, GB_LCD_W);
-		lcdTop = Math.min(0, y - 16);
-		lcdBottom = Math.max(y - 16 + s.h, GB_LCD_H);
+		lcdLeft = Math.max(0, x - 8);
+		lcdRight = Math.min(x, GB_LCD_W);
+		lcdTop = Math.max(0, y - 16);
+		lcdBottom = Math.min(y - 8, GB_LCD_H);
 		
 		// Exit if sprite outside screen
 		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
@@ -42,19 +42,11 @@ public class Screen {
 		sLeft = Math.max(0, -(x-8));
 		sRight = Math.min(8, GB_LCD_W - (x-8));
 		sTop = Math.max(0, -(y-16));
-		sBottom = Math.min(s.h, GB_LCD_H - (y-16)); 
+		sBottom = Math.min(8, GB_LCD_H - (y-16)); 
 		
 		// Exit if sprite outside screen
 		if ( sLeft >= sRight || sTop >= sBottom ) {
 			return;
-		}
-		
-//			Safety guards for debug purposes...
-		if ( lcdRight - lcdLeft != sRight - sLeft ) {
-			throw new Exception("blitSprite: Blitted widths on screen and of sprite does not match.");
-		}
-		if ( lcdBottom - lcdTop != sBottom - sTop ) {
-			throw new Exception("blitSprite: Blitted heights on screen and of sprite does not match.");
 		}
 		
 //		Blit sprite to screen
@@ -65,7 +57,9 @@ public class Screen {
 			// For each pixel...
 			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
 				bits[lcdy][lcdx] = s.bits[sy][sx];
+				sx++;
 			}
+			sy++;
 		}
 	}
 	
@@ -99,15 +93,6 @@ public class Screen {
 		if ( tLeft >= tRight || tTop >= tBottom ) {
 			return;
 		}
-		/*
-//			Safety guards for debug purposes...
-		if ( lcdRight - lcdLeft != tRight - tLeft ) {
-			throw new Exception("blitSprite: Blitted widths on screen and of tile does not match.");
-		}
-		if ( lcdBottom - lcdTop != tBottom - tTop ) {
-			throw new Exception("blitSprite: Blitted heights on screen and of tile does not match.");
-		}
-		*/
 		
 //		Blit sprite to screen
 		ty = tTop;

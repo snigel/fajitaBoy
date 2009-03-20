@@ -23,6 +23,7 @@ public final class AddressConstants {
     public static final int ADDRESS_LYC = 0xFF45;
     public static final int ADDRESS_WY = 0xFF4A;
     public static final int ADDRESS_WX = 0xFF4B;
+    public static final int ADDRESS_DMA = 0xFF46;
 
     public static final int DEBUG_START = 0x0000;
     public static final int DEBUG_END = 0x10000;

@@ -17,10 +17,11 @@ public class LCD implements ClockPulseReceiver {
 	 * Pointer to MemoryInterface class.
 	 */
     MemoryInterface ram;
-    
-    Sprite[] sprites = new Sprite[GB_SPRITES];
+  
     BackgroundMap bgm = new BackgroundMap();
+    SpriteAttributeTable sat = new SpriteAttributeTable();
     Screen screen = new Screen();
+    LCDC lcdc;
 	
     boolean newScreen = false;
     
@@ -35,6 +36,7 @@ public class LCD implements ClockPulseReceiver {
 	 */
 	public LCD( MemoryInterface ram ) {
 		this.ram = ram;
+		lcdc = new LCDC(ram);
 		reset();
 	}
 	
@@ -51,17 +53,22 @@ public class LCD implements ClockPulseReceiver {
 	private void drawScreen() {
 //	 		Clear screen
 			screen.clear();
+			lcdc.readLCDC();
 			
 //			Read OAM (Sprites, Tiles, Backgroudn Map...)
 			// Read OAM
 			// Read Sprites
+			sat.readSprites(ram);
+			
 			// Read Tiles
-			bgm.readBackground(ram, BackgroundMap.MapType.BACKGROUND);
+			bgm.readBackground(ram, BackgroundMap.MapType.BACKGROUND, lcdc);
 			
 //	 		Draw background map
 			bgm.draw(screen, ram);
 			
-//	 		Draw sprites
+//			Draw sprites
+			sat.draw(screen, ram, lcdc);
+			
 
 	}
 	

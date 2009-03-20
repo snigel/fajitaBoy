@@ -11,10 +11,7 @@ public class BackgroundMap {
 	private Tile[][] data = new Tile[32][32];
 	MapType type;
 	
-	public void readBackground(MemoryInterface ram, MapType type) {
-		LCDC lcdc = new LCDC();
-		lcdc.readLCDC(ram);
-		
+	public void readBackground(MemoryInterface ram, MapType type, LCDC lcdc) {
 		//read tile numbers
 		int tileNumbers[] = new int[GB_MAP_W * GB_MAP_H];
 		int addr_base = 0;
