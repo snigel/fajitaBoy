@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import fajitaboy.lcd.LCD;
@@ -301,30 +300,35 @@ public final class Debugger {
             showDebugError("Invalid command!");
         }
     }
-    
+
+    /**
+     * Reads pixeldata from lcd, and outputs them in the console.
+     */
     private void dumpScreen() {
-    	LCD lcd = osc.getLCD();
-    	int[][] scr = lcd.getScreen();
-    	for (int i = 0; i < scr.length; i++) {
-    		for (int j = 0; j < scr[i].length; j++) {
-    			int pxl = scr[i][j];
-    			if (pxl > 0) {
-    				System.out.print(pxl);
-    			} else {
-    				System.out.print(' ');
-    			}
-    		}
-    		System.out.print("\n");
-    	}
+        LCD lcd = osc.getLCD();
+        int[][] scr = lcd.getScreen();
+        for (int i = 0; i < scr.length; i++) {
+            for (int j = 0; j < scr[i].length; j++) {
+                int pxl = scr[i][j];
+                if (pxl > 0) {
+                    System.out.print(pxl);
+                } else {
+                    System.out.print(' ');
+                }
+            }
+            System.out.print("\n");
+        }
     }
 
-    /** showTrace nr shows a disassemble of the latest nr of instructions.
-     * @param nr number of instructions to show.
+    /**
+     * showTrace nr shows a disassemble of the latest nr of instructions.
+     * @param nr
+     *            number of instructions to show.
      */
     private void showTrace(final int nr) {
         System.out.println("Showing latest " + nr + " PC-values.");
         for (int i = max(0, pcLog.size() - nr); i < pcLog.size(); i++) {
-            //System.out.println(String.format("%04x", pcLog.get(i)));
+            // System.out.println(String.format("%04x", pcLog.get(i)));
             disassemble(pcLog.get(i), 1);
         }
         System.out.print("\n");
@@ -503,8 +507,10 @@ public final class Debugger {
                 + "No imput repeats the last command"
                 + "[Unimplemented] c [script]\t\t"
                 + "Execute _c_ommands from script file [default.scp]\n"
-                + "s\t\tRe_s_et CPU\n" + "r\t\tShow current register values\n"
-                + "r reg val\t" + "Set value of register reg to value val\n"
+                + "s\t\tRe_s_et CPU\n"
+                + "r\t\tShow current register values\n"
+                + "r reg val\t"
+                + "Set value of register reg to value val\n"
                 + "e addr val [val]"
                 + "Write values to RAM / ROM starting at address addr\n"
                 + "d addr len\tHex _D_ump len bytes starting at addr\n"
@@ -512,19 +518,33 @@ public final class Debugger {
                 + "D_i_sassemble len instructions starting at addr\n"
                 + "p len\t\t"
                 + "Disassemble len instructions starting at current PC\n"
-                + "n\t\t" + "Show interrupt state\n" + "n 1|0\t\t"
-                + "Enable/disable interrupts\n" + "t [len]\t\t"
+                + "n\t\t"
+                + "Show interrupt state\n"
+                + "n 1|0\t\t"
+                + "Enable/disable interrupts\n"
+                + "t [len]\t\t"
                 + "Execute len instructions starting at current PC [1]\n"
-                + "g\t\t" + "Execute forever\n" + "[Unimplemented] o\t\t"
-                + "Output Gameboy screen to applet window\n" + "b addr\t\t"
+                + "g\t\t"
+                + "Execute forever\n"
+                + "[Unimplemented] o\t\t"
+                + "Output Gameboy screen to applet window\n"
+                + "b addr\t\t"
                 + "Set breakpoint at addr\n"
-                + "[Unimplemented] k [keyname]\t\t" + "Toggle Gameboy key\n"
-                + "[Unimplemented] m bank\t\t" + "_M_ap to ROM bank\n"
-                + "[Unimplemented] m\t\t" + "Display current ROM mapping\n"
-                + "q" + "\t\tQuit debugger interface\n" + "ENTER"
-                + "\t\tRepeats last command\n" + "hex"
+                + "[Unimplemented] k [keyname]\t\t"
+                + "Toggle Gameboy key\n"
+                + "[Unimplemented] m bank\t\t"
+                + "_M_ap to ROM bank\n"
+                + "[Unimplemented] m\t\t"
+                + "Display current ROM mapping\n"
+                + "q"
+                + "\t\tQuit debugger interface\n"
+                + "ENTER"
+                + "\t\tRepeats last command\n"
+                + "hex"
                 + "\t\tSwitches between decimal / hexadecimal input. "
-                + "Default is hex.\n" + "<CTRL> + C\t\t" + "Quit JavaBoy\n"
+                + "Default is hex.\n"
+                + "<CTRL> + C\t\t"
+                + "Quit JavaBoy\n"
                 + "mb \t\t View list of current memory breakpoints\n"
                 + "mb type addr\t\tAdds a memory breakpoint at addr, of type. "
                 + "Type can be r, w, or rw.\n"
@@ -557,7 +577,11 @@ public final class Debugger {
         List<Disassembler.DisassembledInstruction> dInstructs = Disassembler
                 .disassemble(addressBus, addr, len, true);
         for (Disassembler.DisassembledInstruction di : dInstructs) {
-            System.out.println(di);
+            if (getBreakpoint(di.getAddr())) {
+                System.out.println("* " + di);
+            } else {
+                System.out.println("  " + di);
+            }
         }
 
         addressBus.clearDirtyActions();
@@ -574,15 +598,14 @@ public final class Debugger {
     }
 
     /**
-     * Steps the oscillator one step, throws on three different cases:
-     *  1. Read/Write errors. The cpu tried to write or read somewhere it's
-     *   not allowed.
-     *  2. Breakpoint reached. The cpu reached a user specified breakpoint.
-     *  3. Memory breakpoint triggered. The cpu wrote or read somewhere where
-     *   the user have setup a memory breakpoint.
+     * Steps the oscillator one step, throws on three different cases: 1.
+     * Read/Write errors. The cpu tried to write or read somewhere it's not
+     * allowed. 2. Breakpoint reached. The cpu reached a user specified
+     * breakpoint. 3. Memory breakpoint triggered. The cpu wrote or read
+     * somewhere where the user have setup a memory breakpoint.
      * @return Number of cycles this step took.
-     * @throws InterruptedStepException if the interruption was interrupted, this
-     *  is thrown.
+     * @throws InterruptedStepException
+     *             if the interruption was interrupted, this is thrown.
      */
     private int debugStep() throws InterruptedStepException {
         int c = 0;
@@ -610,16 +633,16 @@ public final class Debugger {
     }
 
     /**
-     * Steps the oscillator forever or a specified number of steps, and stops
-     * on breakpoints.
-     * @param forever If set to true, steps is ignored and the oscillator is
-     * stepped forever.
-     * @param steps If forever is set to fals, debugNSteps will step steps steps.
+     * Steps the oscillator forever or a specified number of steps, and stops on
+     * breakpoints.
+     * @param forever
+     *            If set to true, steps is ignored and the oscillator is stepped
+     *            forever.
+     * @param steps
+     *            If forever is set to fals, debugNSteps will step steps steps.
      */
     private void debugNSteps(final boolean forever, final int steps) {
         int c = 0;
-        int lenLast = 0;
-        final boolean counter = false;
         final boolean pointCounter = true;
         int lastPoint = 0;
         int points = 0;
@@ -652,31 +675,16 @@ public final class Debugger {
 
                 }
             }
-
-
-            if (counter) {
-                // TODO saker händer i lite konstig ordning här
-                String outStr = Integer.toString(c);
-
-                // Remove previous output
-                for (int j = 0; j < lenLast; j++) {
-                    outStr = '\b' + outStr;
-                }
-                lenLast = Integer.toString(c).length();
-                System.out.print(outStr);
-            }
         }
-        if (!counter) {
-            System.out.print("\nCycles run: " + c);
-        }
-        System.out.print("\n");
+        System.out.print("\nCycles run: " + c + "\n");
     }
 
     /**
      * Prints the list of dirty actions that the addressbus has accumulated.
      */
     private void printDirtyActions() {
-        for (DebuggerMemoryInterface.MemoryAction ma : addressBus.getDirtyActions()) {
+        for (DebuggerMemoryInterface.MemoryAction ma : addressBus
+                .getDirtyActions()) {
             System.out.println(ma);
         }
     }
