@@ -23,8 +23,8 @@ public final class InstructionSet {
          * Types of instruction-arguments. Each one has a representation, and a
          * size in number of bytes.
          */
-        VALUE('%', 1), DOUBLE_VALUE('#', 2), ADDRESS('&', 2), SIGNED_OFFSET(
-                '$', 2);
+        VALUE('%', 1), DOUBLE_VALUE('#', 2), SIGNED_OFFSET('~', 1), FF_OFFSET(
+                '$', 1);
 
         /** Representation. */
         private final char fChar;
@@ -150,7 +150,7 @@ public final class InstructionSet {
             new Instruction(0x15, "DEC  D", "DEC  D"),
             new Instruction(0x16, "LD   D,n", "LD   D,%"),
             new Instruction(0x17, "RLA", "RLA"),
-            new Instruction(0x18, "JR   d", "JR   d"),
+            new Instruction(0x18, "JR   d", "JR   ~"),
             new Instruction(0x19, "ADD  HL,DE", "ADD  HL,DE"),
             new Instruction(0x1a, "LD   A,(DE)", "LD   A,(DE)"),
             new Instruction(0x1b, "DEC  DE", "DEC  DE"),
@@ -158,7 +158,7 @@ public final class InstructionSet {
             new Instruction(0x1d, "DEC  E", "DEC  E"),
             new Instruction(0x1e, "LD   E,n", "LD   E,%"),
             new Instruction(0x1f, "RRA", "RRA"),
-            new Instruction(0x20, "JR   NZ,d", "JR   NZ,%"), //should be an offset
+            new Instruction(0x20, "JR   NZ,d", "JR   NZ,~"),
             new Instruction(0x21, "LD   HL,nn", "LD   HL,#"),
             new Instruction(0x22, "LD (HLI),A", "LD (HLI),A"),
             new Instruction(0x23, "INC  HL", "INC  HL"),
@@ -166,7 +166,7 @@ public final class InstructionSet {
             new Instruction(0x25, "DEC  H", "DEC  H"),
             new Instruction(0x26, "LD   H,n", "LD   H,%"),
             new Instruction(0x27, "DAA", "DAA"),
-            new Instruction(0x28, "JR   Z,d", "JR   Z,d"),
+            new Instruction(0x28, "JR   Z,d", "JR   Z,~"),
             new Instruction(0x29, "ADD  HL,HL", "ADD  HL,HL"),
             new Instruction(0x2a, "LD A,(HLI)", "LD A,(HLI)"),
             new Instruction(0x2b, "DEC  HL", "DEC  HL"),
@@ -174,7 +174,7 @@ public final class InstructionSet {
             new Instruction(0x2d, "DEC  L", "DEC  L"),
             new Instruction(0x2e, "LD   L,n", "LD   L,%"),
             new Instruction(0x2f, "CPL", "CPL"),
-            new Instruction(0x30, "JR   NC,d", "JR   NC,d"),
+            new Instruction(0x30, "JR   NC,d", "JR   NC,~"),
             new Instruction(0x31, "LD   SP,nn", "LD   SP,#"),
             new Instruction(0x32, "LD (HLD),A", "LD (HLD),A"),
             new Instruction(0x33, "INC  SP", "INC  SP"),
@@ -182,7 +182,7 @@ public final class InstructionSet {
             new Instruction(0x35, "DEC  (HL)", "DEC  (HL)"),
             new Instruction(0x36, "LD   (HL),n", "LD   (HL),%"),
             new Instruction(0x37, "SCF", "SCF"),
-            new Instruction(0x38, "JR   C,d", "JR   C,d"),
+            new Instruction(0x38, "JR   C,d", "JR   C,~"),
             new Instruction(0x39, "ADD  HL,SP", "ADD  HL,SP"),
             new Instruction(0x3a, "LD A,(HLD)", "LD A,(HLD)"),
             new Instruction(0x3b, "DEC  SP", "DEC  SP"),
@@ -350,15 +350,15 @@ public final class InstructionSet {
             new Instruction(0xdd, "NOP", "NOP"),
             new Instruction(0xde, "SBC  A,n", "SBC  A,%"),
             new Instruction(0xdf, "RST  18H", "RST  18H"),
-            new Instruction(0xe0, "LD (n),A", "LD (%),A"),
+            new Instruction(0xe0, "LD (f),A", "LD ($),A"),
             new Instruction(0xe1, "POP  HL", "POP  HL"),
-            new Instruction(0xe2, "LD (C),A", "LD (C),A"),
+            new Instruction(0xe2, "LD (0xFF00+C),A", "LD (0xFF00+C),A"),
             new Instruction(0xe3, "NOP", "NOP"),
             new Instruction(0xe4, "NOP", "NOP"),
             new Instruction(0xe5, "PUSH HL", "PUSH HL"),
             new Instruction(0xe6, "AND  n", "AND  %"),
             new Instruction(0xe7, "RST  20H", "RST  20H"),
-            new Instruction(0xe8, "ADD SP,s", "ADD SP,s"),
+            new Instruction(0xe8, "ADD SP,d", "ADD SP,~"),
             new Instruction(0xe9, "JP   (HL)", "JP   (HL)"),
             new Instruction(0xea, "LD (nn),A", "LD (#),A"),
             new Instruction(0xeb, "NOP", "NOP"),
@@ -366,7 +366,7 @@ public final class InstructionSet {
             new Instruction(0xed, "Prefix", "Prefix"),
             new Instruction(0xee, "XOR  n", "XOR  %"),
             new Instruction(0xef, "RST  28H", "RST  28H"),
-            new Instruction(0xf0, "LD A,(n)", "LD A,(%)"),
+            new Instruction(0xf0, "LD A,(f)", "LD A,($)"),
             new Instruction(0xf1, "POP  AF", "POP  AF"),
             new Instruction(0xf2, "NOP", "NOP"),
             new Instruction(0xf3, "DI", "DI"),
@@ -374,12 +374,12 @@ public final class InstructionSet {
             new Instruction(0xf5, "PUSH AF", "PUSH AF"),
             new Instruction(0xf6, "OR   n", "OR   %"),
             new Instruction(0xf7, "RST  30H", "RST  30H"),
-            new Instruction(0xf8, "LDHL SP,s", "LDHL SP,s"),
+            new Instruction(0xf8, "LDHL SP,d", "LDHL SP,~"),
             new Instruction(0xf9, "LD   SP,HL", "LD   SP,HL"),
             new Instruction(0xfa, "LD A,(nn)", "LD A,(#)"),
             new Instruction(0xfb, "EI", "EI"),
             new Instruction(0xfc, "NOP", "NOP"),
             new Instruction(0xfd, "NOP", "NOP"),
             new Instruction(0xfe, "CP   n", "CP   %"),
-            new Instruction(0xff, "RST  38H", "RST  38H") };
+            new Instruction(0xff, "RST  38H", "RST  38H")};
 }

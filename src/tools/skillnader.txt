@@ -1,3 +1,9 @@
+Förslags metod:
+
+lägg till ett javaboy kompabilitet läge i disassemlber?
+skriver ut hex värden på samma sätt. 
+diffa bättre.
+
 * vi skriver ut hexvärden på följande vis:
 0xab12
 javaboy skriver:
@@ -9,3 +15,33 @@ alltså upcase, utan 0x-prefix
 * vi skriver instruction bb som "CP E", dom skriver "CP A, E"
 * vi skriver instruction [f0 41] som "LD A, (0x41)", javaboy skriver LDH A, (FF41)
   i vilket fall behöver vi markera att det är ff41 det handlar om, vet inte varför dom skriver LDH, men det kanske inte heller skadar.
+* vi skriver
+015a: 20 fa     JR   NZ,0xfa
+dom skriver 
+015A: 20 FA     JR NZ, 0156: -6
+
+deras är uppenbarligen snyggare. man ser dels hur stort hoppet är, dels exakt vart man kommer.
+* vi skriver
+0169: 22        LD (HLI),A
+dom skriver
+0169: 22        LD (HL+), A
+skillnaden tycks obetydlig
+* vi skriver
+0175: e0 e0     LD (0xe0),A
+dom skriver
+0175: E0 E0     LDH (FFE0), A
+* vi skriver
+019f: 28        JR   Z,d
+dom skriver
+019F: 28 08     JR Z, 01A9
+
+uppenbart fel från våran sida
+
+* vi skriver
+01be: af        XOR  A
+dom skriver
+01BE: AF        XOR A, A
+
+obetydligt
+
+

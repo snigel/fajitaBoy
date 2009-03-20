@@ -1,4 +1,4 @@
 #!/bin/bash
 
-
-diff --suppress-common-lines -w -i -b -E -y $1 $2
+ign="E0\|DD\|BB\|B9\|B5\|F0\|A0\|22\|32\|EF\|C7\|20\|AF\|A7\|2A\|E2\|28"
+diff --suppress-common-lines -w -i -b -E -y $1 $2 # | grep "^[[:alnum:]]*: CB"  # | grep -v "^[[:alnum:]]*: \($ign\)" 

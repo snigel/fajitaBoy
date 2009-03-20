@@ -46,9 +46,12 @@ z80instrPath = "z80inst2.txt"
 gbDiffPath = "instrDiff.txt"
 
 --VALUE ('%', 1), DOUBLE_VALUE ('#', 2), ADDRESS ('&', 2), SIGNEDOFFSET ('¤', 2);
--- n value, nn double_value, ss address_offset
+-- n value %, nn double value #, d signed offset ~, f = "0xFF00 + value" $
 makeFormatString :: String -> String
-makeFormatString = sub "ss" "¤" . sub "n" "%" . sub "nn" "#"
+makeFormatString = sub "n" "%" 
+                   . sub "nn" "#" 
+                   . sub "d" "~"
+                   . sub "f" "$"
 
 --------------------------------------------------------------------------------
 -- Reading from z80instr
@@ -96,9 +99,18 @@ gbDiffLineToInstr l = Instruction {opcode    = op l
                                 }
     where op = fst . head . readHex . take 2
           nameField = trim . drop 26 . take 43
-          on l = if (nameField l) == "No operation" then "NOP" else parseDiffArguments $ nameField l
+          -- ändra till unknown för javaboy comp?          
+          on l = if (nameField l) == "No operation" 
+                  then "NOP" 
+                  else parseDiffArguments $ nameField l
           pn = makeFormatString . on
-          parseDiffArguments f = sub "offset" "s" $ sub "word" "nn" $ sub "byte" "n" f
+          parseDiffArguments f = sub "offset" "d" 
+                                 . sub "word" "nn" 
+                                 . sub "byte" "f" 
+                                 . sub "C" "0xFF00+C" $ f
+          desc = trim . drop 43
+          ffOffs l = desc l =~ "FF00+byte"
+          cOffs l = desc l =~ "FF00+C"
 
 
 testDiff = putStrLn =<< liftM (showIS . parseGbDiff) gbDiffUnparsed
