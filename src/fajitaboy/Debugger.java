@@ -118,6 +118,14 @@ public final class Debugger {
             } else {
                 debugNSteps(false, 1);
             }
+        // Step and disassemble
+        } else if (scLine.equals("td")) {
+            if (in.hasNextInt(argRadix)) {
+                debugNSteps(false, in.nextInt(argRadix));
+            } else {
+                debugNSteps(false, 1);
+            }
+            disassemble(cpu.getPC(), 1);
 
             // Switch hex/dec input
         } else if (scLine.equals("hex")) {
@@ -504,7 +512,7 @@ public final class Debugger {
      */
     private void showHelp() {
         String helpStr = "?\t\tDisplay this help screen\n"
-                + "No imput repeats the last command"
+                + "No input repeats the last command\n"
                 + "[Unimplemented] c [script]\t\t"
                 + "Execute _c_ommands from script file [default.scp]\n"
                 + "s\t\tRe_s_et CPU\n"
@@ -551,8 +559,11 @@ public final class Debugger {
                 + "mb type lower upper\tAdds a memory breakpoint over the "
                 + "address space from lower to upper of type\n"
                 + "rmb idx \t Removes the memory breakpoint with given index.\n"
-                + "tr \t Shows a disassemble of the latest 20 instructions.\n"
-                + "tr nr \t Shows a disassemble of the latest nr of instructions.\n";
+                + "tr \t\t Shows a disassemble of the latest 20 instructions.\n"
+                + "tr nr \t\tShows a disassemble of the latest nr of instructions.\n"
+                + "td\t\tStep and disassemble. Works as t, but shows a "
+                + "disassemble of comming instruction.\n"
+                + "screen\t\t Outputs screen to console\n";
 
         System.out.println(helpStr);
     }
@@ -596,7 +607,11 @@ public final class Debugger {
         System.out.println(str);
         System.out.println("Write ? for help");
     }
-    
+
+    /**
+     * Logs a pc value in the pc log, pruning the log if necessary.
+     * @param pc pc value to log
+     */
     private void logPC(final int pc) {
         if (pcLog.add(pc)) {
             if (pcLog.size() > 1024) {
