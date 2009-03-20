@@ -87,6 +87,12 @@ public final class Cpu {
      * @param addressbus
      *            The addressBus
      */
+    
+    /**
+     * Halts the CPU until an interrupt occurs if active.
+     */
+    private boolean stop;
+    
     public Cpu(final MemoryInterface addressbus) {
         ram = addressbus;
         reset();
@@ -107,6 +113,7 @@ public final class Cpu {
         l = 0x4D;
         sp = 0xfffe;
         ime = true;
+        stop = false;
         executeInterrupt = false;
     }
 
@@ -119,11 +126,14 @@ public final class Cpu {
         int cycleTime = 0;
 
         // Perform processor operation
-        int inst = ram.read(pc);
-        cycleTime = runInstruction(inst);
+        if ( !stop ) {
+        	int inst = ram.read(pc);
+            cycleTime = runInstruction(inst);	
+        } else {
+        	cycleTime = 16; // Must proceed cycles during stop!
+        }
 
         handleInterrupts();
-
         return cycleTime;
     }
 
@@ -169,6 +179,7 @@ public final class Cpu {
 
         if (executeInterrupt) {
             ime = false;
+            stop = false;
             push(pc);
             pc = jumpAddress;
         }
@@ -283,7 +294,10 @@ public final class Cpu {
             pc++;
             cycleTime += 4;
             break;
-        // case 0x10:logln("STOP");break;
+        case 0x10:
+        	stop = true;
+        	cycleTime += 4;
+        	;break;
         case 0x11: // LD DE,nn
             setDE(readnn());
             pc += 3;
@@ -866,7 +880,10 @@ public final class Cpu {
             pc++;
             cycleTime += 8;
             break;
-        // case 0x76: logln("HALT"); break;
+        case 0x76: // HALT  (Implemented identically to STOP)
+        	stop = true;
+        	cycleTime += 4;
+        	break;
         case 0x77: // LD (HL),A
             ram.write(getHL(), a);
             pc++;
