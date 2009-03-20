@@ -309,7 +309,7 @@ public final class Debugger {
                 }
 
             } else {
-                System.out.println("Interrupt: " + cpu.getExecuteInterrupt()
+                System.out.println("Interrupt: " + cpu.getIME()
                         + "\tPause on interrupts: " + interruptEnabled);
             }
 
