@@ -1,6 +1,10 @@
 package fajitaboy;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +61,10 @@ public final class Debugger {
      * @param path
      *            ROM-file to load into the CPU.
      */
+    
+    private PrintWriter traceWriter;
+    private boolean tracingToFile = false;
+    
     private Debugger(final String path) {
         pcLog = new LinkedList<Integer>();
         addressBus = new DebuggerMemoryInterface(new AddressBus(path));
@@ -127,6 +135,27 @@ public final class Debugger {
             }
             disassemble(cpu.getPC(), 1);
 
+            // Step and disassemble
+        } else if (scLine.equals("trf")) {
+            tracingToFile = !tracingToFile;
+        	if (tracingToFile) {
+            	try {
+            		System.out.println("Writing trace to file.");
+            		traceWriter = new PrintWriter(new BufferedWriter(new FileWriter("trace.log")));
+            	} catch (IOException e) {
+            		System.out.println("Could not open output-file for trace!");
+            		tracingToFile = false;
+            		return;
+            	}
+            	
+            } else {
+            	if (traceWriter != null) {
+            		System.out.println("Stopped trace.");
+            		traceWriter.close();
+            		traceWriter = null;
+            	}
+            }
+            
             // step over
         } else if (scLine.equals("to")) {
             stepOver();
@@ -642,7 +671,11 @@ public final class Debugger {
     private int debugStep() throws InterruptedStepException {
         int c = 0;
         try {
-            logPC(cpu.getPC());
+        	int pc = cpu.getPC();
+        	if (tracingToFile) {
+        		traceWriter.println(Disassembler.dsmInstruction(addressBus, pc, true));
+        	}
+            logPC(pc);
             c += osc.step();
         } catch (RomWriteException e) {
             throw new InterruptedStepException(
@@ -709,6 +742,10 @@ public final class Debugger {
             }
         }
         System.out.print("\nCycles run: " + c + "\n");
+        
+        if (tracingToFile) {
+        	traceWriter.flush();
+        }
     }
 
     /**
