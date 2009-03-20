@@ -52,7 +52,7 @@ The Tile Data Table address for the background can be selected via LCDC register
 				Tile t = new Tile();
 				int addr;
 				
-				if (!lcdc.tileDataSelect) {
+				if (lcdc.tileDataSelect) {
 					addr = 0x8000 + tileNumbers[i*GB_MAP_H + j]*(GB_TILE_W + GB_TILE_H);
 				} else {
 					//TODO antagligen fel
