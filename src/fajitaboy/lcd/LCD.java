@@ -104,9 +104,11 @@ public class LCD implements ClockPulseReceiver {
 		if ( message == MSG_LCD_VBLANK ) {
 //			Trigger VBlank interrupt if enabled
 			int stat = ram.read(ADDRESS_STAT);
-			if ( (stat & 0x01 ) != 0 ) {
-				ram.write( ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01 );
+			if ( (stat & 0x10 ) != 0 ) {
+				ram.write( ADDRESS_IF, ram.read(ADDRESS_IF) | 0x02 );
 			}
+			ram.write( ADDRESS_IF, ram.read(ADDRESS_IF) | 0x01 );
+			
 			ram.forceWrite( ADDRESS_STAT, (ram.read( ADDRESS_STAT ) & 0xFC) + 1 ); // Replace with forcedWrite
 			drawScreen();
 		}
