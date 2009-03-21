@@ -81,7 +81,20 @@ public final class Cpu {
      * to know if an interrupt should be executed.
      */
     private boolean executeInterrupt;
+    
+    /**
+     * Address to jump to during interrupts.
+     */
+    private int interruptJumpAddress;
 
+    /**
+     * Bit to turn off on interrupt execution
+     */
+    private int interruptBit;
+    
+    private int ieReg;
+    private int ifReg;
+    
     /**
      * Creates a new CPU with default values.
      * @param addressbus
@@ -125,6 +138,9 @@ public final class Cpu {
     public int step() {
         int cycleTime = 0;
 
+        // Search for interrupts
+        findInterrupts();
+        
         // Perform processor operation
         if ( !stop ) {
         	int inst = ram.read(pc);
@@ -133,55 +149,62 @@ public final class Cpu {
         	cycleTime = 16; // Must proceed cycles during stop!
         }
 
+        // Handle interrupts
         handleInterrupts();
         return cycleTime;
+    }
+    
+    public void findInterrupts() {
+    	interruptJumpAddress = 0x0000;
+    	interruptBit = 0xFF;
+    	executeInterrupt = false;
+    	int bit = 0x00;
+
+    	// Look for interrupts
+    	ieReg = ram.read(ADDRESS_IE);
+    	ifReg = ram.read(ADDRESS_IF);
+
+    	if ((ieReg & 0x01) != 0 && (ifReg & 0x01) != 0) {
+    		// V-Blank interrupt
+    		interruptJumpAddress = ADDRESS_INT_VBLANK;
+    		interruptBit = 0xFE;
+    	} else if ((ieReg & 0x02) != 0 && (ifReg & 0x02) != 0) {
+    		// LCD Status interrupt
+    		interruptJumpAddress = ADDRESS_INT_LCDSTAT;
+    		interruptBit = 0xFD;
+    	} else if ((ieReg & 0x04) != 0 && (ifReg & 0x04) != 0) {
+    		// Timer interrupt
+    		interruptJumpAddress = ADDRESS_INT_TIMER;
+    		interruptBit = 0xFB;
+    	} else if ((ieReg & 0x08) != 0 && (ifReg & 0x08) != 0) {
+    		// Serial interrupt
+    		interruptJumpAddress = ADDRESS_INT_SERIAL;
+    		interruptBit = 0xF7;
+    	} else if ((ieReg & 0x10) != 0 && (ifReg & 0x10) != 0) {
+    		// Joypad interrupt
+    		interruptJumpAddress = ADDRESS_INT_JOYPAD;
+    		interruptBit = 0xEF;
+    	}
+
+    	if ( interruptJumpAddress != 0x000 ) {
+    		stop = false;
+    		if ( ime ) {
+    			executeInterrupt = true;
+    		}
+    	}
     }
 
     /**
      * Handle interrupts.
      */
     private void handleInterrupts() {
-        int jumpAddress = 0x0000;
-        executeInterrupt = false;
-        // Interrupt handler
-        if (ime) {
-            // Look for interrupts
-            int ieReg = ram.read(ADDRESS_IE);
-            int ifReg = ram.read(ADDRESS_IF);
-
-            if ((ieReg & 0x01) != 0 && (ifReg & 0x01) != 0) {
-                // V-Blank interrupt
-                executeInterrupt = true;
-                jumpAddress = ADDRESS_INT_VBLANK;
-                ram.write(ADDRESS_IF, ifReg & 0xFE);
-            } else if ((ieReg & 0x02) != 0 && (ifReg & 0x02) != 0) {
-                // LCD Status interrupt
-                executeInterrupt = true;
-                jumpAddress = ADDRESS_INT_LCDSTAT;
-                ram.write(ADDRESS_IF, ifReg & 0xFD);
-            } else if ((ieReg & 0x04) != 0 && (ifReg & 0x04) != 0) {
-                // Timer interrupt
-                executeInterrupt = true;
-                jumpAddress = ADDRESS_INT_TIMER;
-                ram.write(ADDRESS_IF, ifReg & 0xFB);
-            } else if ((ieReg & 0x08) != 0 && (ifReg & 0x08) != 0) {
-                // Serial interrupt
-                executeInterrupt = true;
-                jumpAddress = ADDRESS_INT_SERIAL;
-                ram.write(ADDRESS_IF, ifReg & 0xF7);
-            } else if ((ieReg & 0x10) != 0 && (ifReg & 0x10) != 0) {
-                // Joypad interrupt
-                executeInterrupt = true;
-                jumpAddress = ADDRESS_INT_JOYPAD;
-                ram.write(ADDRESS_IF, ifReg & 0xEF);
-            }
-        }
-
         if (executeInterrupt) {
+        	ifReg = ram.read(ADDRESS_IF);
+        	ram.write(ADDRESS_IF, ifReg & interruptBit);
             ime = false;
             stop = false;
             push(pc);
-            pc = jumpAddress;
+            pc = interruptJumpAddress;
         }
     }
 
@@ -294,9 +317,10 @@ public final class Cpu {
             pc++;
             cycleTime += 4;
             break;
-        case 0x10:
+        case 0x10: // STOP
         	stop = true;
         	cycleTime += 4;
+        	pc++;
         	;break;
         case 0x11: // LD DE,nn
             setDE(readnn());
@@ -883,6 +907,7 @@ public final class Cpu {
         case 0x76: // HALT  (Implemented identically to STOP)
         	stop = true;
         	cycleTime += 4;
+        	pc++;
         	break;
         case 0x77: // LD (HL),A
             ram.write(getHL(), a);

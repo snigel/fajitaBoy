@@ -105,9 +105,10 @@ public class AddressBus implements MemoryInterface {
         cartridge = new Cartridge(CARTRIDGE_START, romPath);
         initialize(cartridge, CARTRIDGE_START, CARTRIDGE_END);
 
-        oam = new Oam(OAM_START, OAM_END, cartridge);
+        oam = new Oam(OAM_START, OAM_END, this);
         initialize(oam, OAM_START, OAM_END);
 
+        module[ADDRESS_DMA] = oam;
     }
 
     /**

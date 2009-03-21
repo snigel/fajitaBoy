@@ -31,8 +31,8 @@ public class SpriteAttributeTable {
 			addr = 0xFE00 + 4*sprNo;
 			
 			// Read sprite data
-			x =    ram.read(addr);
-			y =    ram.read(addr+1);
+			y =    ram.read(addr);
+			x =    ram.read(addr+1);
 			id =   ram.read(addr+2);
 			attr = ram.read(addr+3);
 			

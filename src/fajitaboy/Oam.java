@@ -15,7 +15,7 @@ public class Oam extends MemoryComponent {
     /**
      * Used in dma transfer.
      */
-    private Cartridge cart;
+    private MemoryInterface memInt;
 
     /**
      * @param start
@@ -25,9 +25,9 @@ public class Oam extends MemoryComponent {
      *            two values are used for creating the right size of the OAM
      *            array and for setting the offset value
      */
-    public Oam(final int start, final int end, Cartridge cart) {
+    public Oam(final int start, final int end, MemoryInterface memInt) {
         super(start, end);
-        this.cart = cart;
+        this.memInt = memInt;
     }
 
     /**
@@ -53,13 +53,14 @@ public class Oam extends MemoryComponent {
      *            Memory area to copy. Must be in range 0x00 - 0xF1
      */
     private void dmaTransfer(int data) {
+    	//System.out.println(String.format("DMA Transfer, start address: %04x", data*0x100));
         if (data < 0 || data > 0xF1)
             return;
 
         int targAddr = data * 0x100;
         int destination = 0;
         while (destination < 0xA0) {
-            ram[destination] = cart.read(targAddr);
+            ram[destination] = memInt.read(targAddr);
             targAddr++;
             destination++;
         }
