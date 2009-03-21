@@ -102,11 +102,11 @@ public class AddressBus implements MemoryInterface {
         eram = new Eram(ERAM_START, ERAM_END);
         initialize(eram, ERAM_START, ERAM_END);
 
-        oam = new Oam(OAM_START, OAM_END);
-        initialize(oam, OAM_START, OAM_END);
-
         cartridge = new Cartridge(CARTRIDGE_START, romPath);
         initialize(cartridge, CARTRIDGE_START, CARTRIDGE_END);
+
+        oam = new Oam(OAM_START, OAM_END, cartridge);
+        initialize(oam, OAM_START, OAM_END);
 
     }
 
