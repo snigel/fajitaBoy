@@ -11,10 +11,15 @@ public class BackgroundMap {
 	private Tile[][] data = new Tile[32][32];
 	MapType type;
 	
-	public void readBackground(MemoryInterface ram, MapType type, LCDC lcdc) {
+    public BackgroundMap(MapType tp) {
+        type = tp;
+    }
+    
+	public void readBackground(MemoryInterface ram, LCDC lcdc) {
 		//read tile numbers
 		int tileNumbers[] = new int[GB_MAP_W * GB_MAP_H];
 		int addr_base = 0;
+        
 		if (type == MapType.BACKGROUND) {
 			if (lcdc.bgTileMapSelect) {
 				addr_base = 0x9C00;
@@ -52,12 +57,8 @@ The Tile Data Table address for the background can be selected via LCDC register
 				if (lcdc.tileDataSelect) {
 					addr = 0x8000 + tileNumbers[i*GB_MAP_H + j]*(GB_TILE_W + GB_TILE_H);
 				} else {
-					//TODO antagligen fel
-					/*
-					 * 0x9000 + tileNumber*0xF == 0x9000 (om tileNumber' == 0)
-					 * 0x9000 + tileNumber*0xF== 0x8800 (om tileNumber' == -128)
-					 */
-					addr = 0x8800 + tileNumbers[i*GB_MAP_H + j]*(GB_TILE_W + GB_TILE_H); 
+                    // antagligen rätt
+					addr = 0x8800 + ((byte) tileNumbers[i*GB_MAP_H + j] )*(GB_TILE_W + GB_TILE_H); 
 				}
 				
 				t.readTile(ram, addr);
@@ -69,8 +70,18 @@ The Tile Data Table address for the background can be selected via LCDC register
 	public void draw(Screen screen, MemoryInterface ram) {
 // 		Prepare variables
 		int scx, scy, firstTileX, firstTileY;
-		scx = ram.read(ADDRESS_SCX);
-		scy = ram.read(ADDRESS_SCY);
+        if (type == MapType.BACKGROUND) {
+            scx = ram.read(ADDRESS_SCX);
+            scy = ram.read(ADDRESS_SCY);
+        } else { //WINDOW 
+            scx = ram.read(ADDRESS_WX);
+            scy = ram.read(ADDRESS_WY);
+            if (scx < 0 || scx > 166 || scy < 0 || scy > 143) {
+                return;
+            }
+            scy -= 7;
+        }
+        
 		firstTileX = (int)(scx/8);
 		firstTileY = (int)(scy/8);
 		
@@ -85,7 +96,7 @@ The Tile Data Table address for the background can be selected via LCDC register
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
 				Tile t = data[datay][datax];
-				screen.blit(t, dx, dy);
+                screen.blit(t, dx, dy, 0);
 			}
 		}
 	}
