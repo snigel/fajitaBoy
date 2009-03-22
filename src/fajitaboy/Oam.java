@@ -43,6 +43,48 @@ public class Oam extends MemoryComponent {
             ram[addr] = data;
         }
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public int read(final int address, final int data) {
+        int addr = address - offset;
+        if (address == ADDRESS_DMA) {
+            return 0x00;
+        } else if (addr < 0 || addr > ram.length) {
+            throw new ArrayIndexOutOfBoundsException("Oam.java");
+        } else {
+            return ram[addr];
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public int forceRead(final int address) {
+        int addr = address - offset;
+        if (address == ADDRESS_DMA) {
+            return 0x00;
+        } else if (addr < 0 || addr > ram.length) {
+            throw new ArrayIndexOutOfBoundsException("Oam.java");
+        } else {
+            return ram[addr];
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void forceWrite(final int address, final int data) {
+        int addr = address - offset;
+        if (address == ADDRESS_DMA) {
+            dmaTransfer(data);
+        } else if (addr < 0 || addr > ram.length) {
+            throw new ArrayIndexOutOfBoundsException("Oam.java");
+        } else {
+            ram[addr] = data;
+        }
+    }
 
     /**
      * Performs an OAM DMA transfer. This copies the area 0xXX00-0xXXFF from
