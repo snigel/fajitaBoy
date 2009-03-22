@@ -574,7 +574,7 @@ public final class Cpu {
             break;
         case 0x36: // LD (HL),n
             ram.write(getHL(), readn());
-            pc++;
+            pc += 2;
             cycleTime += 12;
             break;
         case 0x37: // SCF
