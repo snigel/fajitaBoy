@@ -1,5 +1,9 @@
 package fajitaboy;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -10,15 +14,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
 import fajitaboy.lcd.LCD;
 import static java.lang.Math.*;
+
+import fajitaboy.constants.LCDConstants;
 
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
  * lets the user input debugging commands to the emulator.
  * @author Arvid Jakobsson, Marcus Johansson
  */
-public final class Debugger {
+public final class Debugger implements DrawsGameboyScreen {
 
     /**
      * Maximum value for a byte.
@@ -65,12 +76,17 @@ public final class Debugger {
     private PrintWriter traceWriter;
     private boolean tracingToFile = false;
     
+    
+    private JFrame jfr;
+    // private boolean showFrame;
+    private GamePanel panelScreen;
+    
     private Debugger(final String path) {
         pcLog = new LinkedList<Integer>();
         addressBus = new DebuggerMemoryInterface(new AddressBus(path));
         breakPoints = new HashSet<Integer>();
         cpu = new Cpu(addressBus);
-        osc = new Oscillator(cpu, addressBus);
+        osc = new Oscillator(cpu, addressBus, this);
         prompt();
     }
 
@@ -135,7 +151,29 @@ public final class Debugger {
             }
             disassemble(cpu.getPC(), 1);
 
-            // Step and disassemble
+        // Show output window
+        } else if (scLine.equals("show")) {
+            if (jfr== null) {
+                jfr = new JFrame("FajitaBoy Screen");
+                jfr.setPreferredSize(new Dimension(400,400));
+                jfr.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                
+                panelScreen = new GamePanel(2);
+                panelScreen.setPreferredSize(new Dimension(400,400));
+                jfr.setContentPane(panelScreen);
+                
+
+                //jfr.getContentPane().add(panelScreen);
+                jfr.pack();
+            }
+            
+            jfr.setVisible(!jfr.isVisible());
+
+        // Draw to output window
+        } else if (scLine.equals("draw")) {
+            drawScreen();
+            
+        // Start tracing to file.
         } else if (scLine.equals("trf")) {
             tracingToFile = !tracingToFile;
         	if (tracingToFile) {
@@ -345,6 +383,10 @@ public final class Debugger {
         } else {
             showDebugError("Invalid command!");
         }
+    }
+    
+    private void drawScreen() {
+        panelScreen.draw(osc.getLCD().getScreen());
     }
 
     /**
@@ -748,6 +790,12 @@ public final class Debugger {
         }
     }
 
+    public void drawGameboyScreen(int[][] data) {
+        if (jfr != null && jfr.isVisible()) {
+            panelScreen.draw(data);
+        }
+    }
+    
     /**
      * Prints the list of dirty actions that the addressbus has accumulated.
      */

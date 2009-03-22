@@ -57,6 +57,8 @@ public class Oscillator {
      */
     private LCD lcd;
 
+    private DrawsGameboyScreen dgs; 
+    
     /**
      * Creates a new Oscillator with default values.
      * @param cpu
@@ -71,6 +73,21 @@ public class Oscillator {
         reset();
     }
 
+    /**
+     * Creates a new Oscillator with default values.
+     * @param cpu
+     *            Pointer to CPU instance.
+     * @param ram
+     *            Pointer to MemoryInterface instance.
+     */
+    public Oscillator(Cpu cpu, MemoryInterface ram, DrawsGameboyScreen dgs) {
+        this.cpu = cpu;
+        this.ram = ram;
+        lcd = new LCD(ram);
+        this.dgs = dgs; 
+        reset();
+    }
+    
     /**
      * Resets the Oscillator to default values.
      */
@@ -164,6 +181,12 @@ public class Oscillator {
             ly = ram.read(ADDRESS_LY);
             if (ly == 144) {
                 lcd.oscillatorMessage(MSG_LCD_VBLANK);
+                
+                //call draw
+                if (dgs != null) {
+                    dgs.drawGameboyScreen(lcd.getScreen());
+                }
+                
             } else if (ly >= 154) {
                 ram.forceWrite(ADDRESS_LY, 0);
             }
