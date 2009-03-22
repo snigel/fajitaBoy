@@ -56,7 +56,11 @@ public class Screen {
 			sx = sLeft;
 			// For each pixel...
 			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
-				bits[lcdy][lcdx] = s.bits[sy][sx];
+                int pxl = s.bits[sy][sx];
+                // pxl == 0 -> transparens
+                if (pxl != 0) { 
+                    bits[lcdy][lcdx] = pxl;
+                }
 				sx++;
 			}
 			sy++;
@@ -71,7 +75,7 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int x, int y) {
+	public void blit(Tile t, int x, int y, int ign) {
 //		Prepare variables
 		int lcdLeft, lcdTop, lcdRight, lcdBottom, tLeft, tTop, tRight, tBottom, lcdx, lcdy, tx, ty;
 		lcdLeft = Math.max(0, x);
@@ -101,7 +105,10 @@ public class Screen {
 			tx = tLeft;
 			// For each pixel...
 			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
-				bits[lcdy][lcdx] = t.bits[ty][tx];
+                int pxl = t.bits[ty][tx];
+                if (pxl != ign) {
+                    bits[lcdy][lcdx] = pxl;
+                }
 				tx++;
 			}
 			ty++;
