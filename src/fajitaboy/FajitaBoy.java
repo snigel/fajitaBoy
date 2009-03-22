@@ -1,56 +1,54 @@
 package fajitaboy;
 
+
 import java.applet.AudioClip;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
+import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
 
-import javax.swing.*;
+import javax.swing.JApplet;
+import javax.swing.JFileChooser;
 
 import fajitaboy.lcd.LCD;
 
 /**
  * An applet a day keeps the doctor away.
- * 
  * @author Marcus Johansson, Peter Olsson
  */
 @SuppressWarnings("serial")
-public class FajitaBoy extends JApplet implements KeyListener{
-
-    // ------------------------------------------------------------------------
-    // - Global variables
-    // ------------------------------------------------------------------------
+public class FajitaBoy extends JApplet implements KeyListener {
 
     // - Emulator stuff
+    /**
+     * Emulator containing emulation components.
+     */
     private Emulator emulator;
+
+    /**
+     * The thread in which runs the emulation.
+     */
     private Thread emulatorThread;
 
-    /** Emulator addressbus. */
-    // private AddressBus addressBus;
-    //
-    // /** Emulator cpu. */
-    // private Cpu cpu;
-    //
-    // /** Emulator oscillator. */
-    // private Oscillator oscillator;
-    /** -pling- Fajita! */
+    /**
+     * Start sound that is played when the Applet has started.
+     */
     private AudioClip bootSound;
 
-    // - Applet stuff
+    /**
+     * The size of the applet.
+     */
+    private Dimension frameSize = new Dimension(320, 288);
 
-    /** Appletviewer size. */
-    private Dimension frameSize = new Dimension(400, 400);
-
-    /** File opener for roms & savestates. */
+    /**
+     * The fileChooser that is being used whenever the user
+     * browse the file system.
+     */
     private JFileChooser fileChooser;
 
-    private JTextField fileStringField;
-
+    /**
+     * Path to the rom file. Not sure if this is needed.
+     */
     private String romPath;
 
     /**
@@ -101,7 +99,7 @@ public class FajitaBoy extends JApplet implements KeyListener{
         startScreen = new StartScreenPanel(this);
         singleplayerLoadscreen = new SingleplayerLoadPanel(this, fileChooser);
 
-      //  emulatorThread = new Thread(emulator);
+        // emulatorThread = new Thread(emulator);
 
         // Appletviewer resize
         resize(frameSize);
@@ -113,7 +111,7 @@ public class FajitaBoy extends JApplet implements KeyListener{
         gameState = GameState.STARTSCREEN;
         setContentPane(startScreen);
         getContentPane().validate();
-        
+
         addKeyListener(this);
     }
 
@@ -139,13 +137,8 @@ public class FajitaBoy extends JApplet implements KeyListener{
 
     }
 
-    // ------------------------------------------------------------------------
-    // - Controllers
-    // ------------------------------------------------------------------------
-
     /**
      * Changes what panel to show.
-     * 
      * @param state
      *            the state/panel
      */
@@ -172,13 +165,13 @@ public class FajitaBoy extends JApplet implements KeyListener{
             setContentPane(singleplayerLoadscreen);
             singleplayerLoadscreen.requestFocusInWindow();
             showStatus("Singleplayer Screen");
-            
+
             break;
         case PLAYGAME:
             setContentPane(gamePanel);
             showStatus("Emulator Screen");
-//            emulatorThread = new Thread(emulator);
-//            emulatorThread.start();
+            // emulatorThread = new Thread(emulator);
+            // emulatorThread.start();
             gamePanel.requestFocusInWindow();
             break;
         default:
@@ -186,58 +179,38 @@ public class FajitaBoy extends JApplet implements KeyListener{
         }
         gameState = state;
         validate();
-        
 
+        System.out.println("Applet has focus: " + this.hasFocus());
 
-        System.out.println("Applet has focus: " +this.hasFocus());
+        System.out.println("Start has focus: " + startScreen.hasFocus());
 
-        
-        System.out.println("Start has focus: " +startScreen.hasFocus());
-
-        
-
-        System.out.println("Single has focus: " +singleplayerLoadscreen.hasFocus());
-
-        
-
-        //System.out.println("Game has focus: " +gamePanel.hasFocus());
-        
-
+        System.out.println("Single has focus: "
+                + singleplayerLoadscreen.hasFocus());
     }
 
     /**
      * Changes to game view and starts emulation of the rom with given path.
-     * 
      * @param path
      *            filepath to rom
      */
     public final void startGame(final String path) {
 
         showStatus("Loading...");
-
-        emulator = new Emulator(path);
-        // GamePanel should not need LCD.
         gamePanel = new GamePanel(2);
-        
-        // TODO Grafikgruppen ta en titt på detta! 
-        //emulator.getLCD().setGamePanel(gamePanel);
-        
+        emulator = new Emulator(path);
+
         changeGameState(GameState.PLAYGAME);
-        
-        //gamePanel.addKeyListener(new KeyInputController(emulator.addressBus));
+
+        // gamePanel.addKeyListener(new KeyInputController(emulator.addressBus));
         gamePanel.addKeyListener(this);
         emulatorThread = new Thread(emulator);
         emulatorThread.start();
-        
 
     }
 
-    // ------------------------------------------------------------------------
     /**
      * Encapsulates the emulator.
-     * 
      * @author Marcus, Peter
-     * 
      */
     private final class Emulator implements Runnable {
 
@@ -249,12 +222,14 @@ public class FajitaBoy extends JApplet implements KeyListener{
 
         /** Emulator oscillator. */
         private Oscillator oscillator;
-        
-        private boolean running = false;
+
+        /**
+         * To know if the emulation should keep running.
+         */
+        private boolean running;
 
         /**
          * Standard constructor.
-         * 
          * @param path
          *            Rom path
          */
@@ -262,7 +237,8 @@ public class FajitaBoy extends JApplet implements KeyListener{
 
             addressBus = new AddressBus(path);
             cpu = new Cpu(addressBus);
-            oscillator = new Oscillator(cpu, addressBus);
+            oscillator = new Oscillator(cpu, addressBus, gamePanel);
+            running = false;
         }
 
         /**
@@ -271,44 +247,38 @@ public class FajitaBoy extends JApplet implements KeyListener{
         public void run() {
             showStatus("Game on!");
             running = true;
-            int i = 0;
             /*
-             * This loop should probably be in the oscillator instead.
-             * This loop runs at full speed but it goes too slow anyway. 
+             * This loop should probably be in the oscillator instead. This loop
+             * runs at full speed but it goes too slow anyway.
              */
             while (running) {
                 oscillator.step();
-                
-                /*
-                 * This is only a temporary solution!
-                 * Either the oscillator or the LCD should call the draw method
-                 * whenever the screen is to be redrawn. 
-                 */
-                if(i++ > 70000) {
-                    gamePanel.draw(oscillator.getLCD().getScreen());
-                    i = 0;
-                }
             }
-            //oscillator.run();
+            // oscillator.run();
         }
+
         /**
          * Pauses the emulator.
          */
         public void stop() {
-            //oscillator.stop();
+            // oscillator.stop();
             running = false;
         }
 
         /**
          * Returns the emulator screen.
-         * 
          * @return LCD the screen.
          */
-        LCD getLCD() {
+        public LCD getLCD() {
             return oscillator.getLCD();
         }
 
     }
+
+    // ------------------------------------------------------------------------
+    // - Controllers
+    // ------------------------------------------------------------------------
+
 
     public void keyPressed(KeyEvent e) {
         // TODO Auto-generated method stub
@@ -324,4 +294,5 @@ public class FajitaBoy extends JApplet implements KeyListener{
         // TODO Auto-generated method stub
         System.out.println("KEY :D");
     }
+
 }
