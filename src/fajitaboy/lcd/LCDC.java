@@ -1,7 +1,7 @@
 package fajitaboy.lcd;
 
 import fajitaboy.MemoryInterface;
-
+import static fajitaboy.constants.AddressConstants.*;
 
 public class LCDC {
 	/*
@@ -33,7 +33,7 @@ Bit 0 - BG Display (for CGB see below) (0=Off, 1=On)
 	 * @param ram
 	 */
 	public void readLCDC() {
-		int b = ram.read(0xFF40);
+		int b = ram.read(LCDC_REGISTER);
 		lcdDisplayEnable = (b & 0x80) > 0;
 		windowTileMapSelect = (b & 0x40) > 0;
 		windowDisplayEnable = (b & 0x20) > 0;
