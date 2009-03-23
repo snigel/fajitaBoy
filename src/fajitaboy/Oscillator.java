@@ -66,7 +66,7 @@ public class Oscillator {
      * @param ram
      *            Pointer to MemoryInterface instance.
      */
-    public Oscillator(Cpu cpu, MemoryInterface ram) {
+    public Oscillator(Cpu cpu, AddressBus ram) {
         this.cpu = cpu;
         this.ram = ram;
         lcd = new LCD(ram);
@@ -80,7 +80,7 @@ public class Oscillator {
      * @param ram
      *            Pointer to MemoryInterface instance.
      */
-    public Oscillator(Cpu cpu, MemoryInterface ram, DrawsGameboyScreen dgs) {
+    public Oscillator(Cpu cpu, AddressBus ram, DrawsGameboyScreen dgs) {
         this.cpu = cpu;
         this.ram = ram;
         lcd = new LCD(ram);

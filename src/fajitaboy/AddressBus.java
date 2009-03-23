@@ -184,9 +184,13 @@ public class AddressBus implements MemoryInterface {
         eram.reset();
         io.reset();
     }
-
-    public IO.JoyPad getJoyPad() {
-        return io.getJoyPad();
+    
+    public Vram getVram() {
+    	return vram;
     }
     
+    public IO.JoyPad getJoyPad() {
+    	return io.getJoyPad();
+    }
+
 }

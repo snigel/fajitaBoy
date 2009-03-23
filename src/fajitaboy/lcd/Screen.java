@@ -75,7 +75,7 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int x, int y, int ign) {
+	public void blit(Tile t, int x, int y, int ignore) {
 //		Prepare variables
 		int lcdLeft, lcdTop, lcdRight, lcdBottom, tLeft, tTop, tRight, tBottom, lcdx, lcdy, tx, ty;
 		lcdLeft = Math.max(0, x);
@@ -106,7 +106,7 @@ public class Screen {
 			// For each pixel...
 			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
                 int pxl = t.bits[ty][tx];
-                if (pxl != ign) {
+                if (pxl != ignore) {
                     bits[lcdy][lcdx] = pxl;
                 }
 				tx++;

@@ -1,14 +1,17 @@
 package fajitaboy.lcd;
 
+import fajitaboy.MemoryComponent;
 import fajitaboy.MemoryInterface;
 
-public class Tile {
-	public int bits[][];
+public class Tile extends MemoryComponent {
+	public int data[] = new int[16];
+	public int bits[][] = new int[8][8];
 	
 	public Tile() {
-
+		
 	}
 	
+	// This function should be removed later....
 	public void readTile(MemoryInterface ram, int address) {
 		/** 
 		 * 
@@ -37,7 +40,35 @@ For each line, the first byte defines the least significant bits of the color nu
 		
 	}
 	
-	public int[][] getTile() {
+	public void write(final int address, final int data) {
+		// Write to data
+		int addr = address & 0x000F;
+		this.data[addr] = data;
+		
+		// Update pixel
+		addr = addr & 0x000E;
+		int y = addr / 2;
+		bits[y] = LCD.convertToPixels(this.data[addr], this.data[addr+1]);
+	}
+	
+	public int read(final int address) {
+		return data[address & 0x000F];
+	}
+	
+	public void forceWrite(final int address, final int data) {
+		write(address,data);
+	}
+	
+	public int forceRead(final int address) {
+		return read(address);
+	}
+	
+	public int[][] getBits() {
 		return bits;
+	}
+	
+	public void reset() {
+		data = new int[16];
+		bits = new int[8][8];
 	}
 }

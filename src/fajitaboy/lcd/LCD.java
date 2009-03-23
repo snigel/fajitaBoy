@@ -4,6 +4,7 @@ import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.MessageConstants.*;
 import static fajitaboy.constants.LCDConstants.*;
 
+import fajitaboy.AddressBus;
 import fajitaboy.ClockPulseReceiver;
 import fajitaboy.MemoryInterface;
 
@@ -15,7 +16,7 @@ public class LCD implements ClockPulseReceiver {
     /**
      * Pointer to MemoryInterface class.
      */
-    MemoryInterface ram;
+    AddressBus ram;
 
     BackgroundMap bgm = new BackgroundMap(BackgroundMap.MapType.BACKGROUND);
 
@@ -39,7 +40,7 @@ public class LCD implements ClockPulseReceiver {
      * @param ram
      *            Pointer to an MemoryInterface.
      */
-    public LCD(MemoryInterface ram) {
+    public LCD(AddressBus ram) {
         this.ram = ram;
         lcdc = new LCDC(ram);
         reset();
@@ -80,26 +81,26 @@ public class LCD implements ClockPulseReceiver {
             //System.out.print(String.format("lcd enabled: %02x", ram.read(LCDC_REGISTER)));
             
             if (lcdc.objSpriteDisplay) {
-                sat.readSprites(ram);
-                sat.draw(screen, true, ram, lcdc);
+                sat.readSpriteAttributes(ram);
+                sat.draw(screen, true, ram, lcdc, ram.getVram());
             }
             
             // Read and draw background if enabled.            
             if (lcdc.bgDisplay) {
                 bgm.readBackground(ram, lcdc);
-                bgm.draw(screen, ram);
+                bgm.draw(screen, ram, ram.getVram());
             }
 
             // Read and draw window if enabled.
             if (lcdc.windowDisplayEnable) {
                 wnd.readBackground(ram, lcdc);
-                wnd.draw(screen, ram);
+                wnd.draw(screen, ram, ram.getVram());
             }
             
             // Read and draw sprites that are above bg & window, if sprites enabled.
             if (lcdc.objSpriteDisplay) {
-                sat.readSprites(ram);
-                sat.draw(screen, false, ram, lcdc);
+                sat.readSpriteAttributes(ram);
+                sat.draw(screen, false, ram, lcdc, ram.getVram());
             }
         }
     }
