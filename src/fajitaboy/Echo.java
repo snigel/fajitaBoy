@@ -65,7 +65,7 @@ public class Echo implements MemoryInterface {
      * {@inheritDoc}
      */
     public final void reset() {
-        mem.reset();
+        //mem.reset();
         //this should not need to be used. Use reset on the real object.
     }
 }
