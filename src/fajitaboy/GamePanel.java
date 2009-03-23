@@ -1,67 +1,91 @@
 package fajitaboy;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.*;
+import java.awt.image.*;
+
 import javax.swing.JPanel;
 
-/**
- * The panel in which the emulator screen will be shown.
- * @author Marcus Johansson, Peter Olsson
- */
-@SuppressWarnings("serial")
-public final class GamePanel extends JPanel implements DrawsGameboyScreen {
+// Instantiate this class and then use the draw() method to draw the
+// generated on the graphics context.
+public class GamePanel extends JPanel implements DrawsGameboyScreen {
+	GamePanelPixels gpp;
+	int[] pixels;
+	int zoom;
+	
+	public GamePanel( int zoom ) {
+		pixels = new int[160*144];
+		this.zoom = zoom;
+		gpp = new GamePanelPixels(pixels);
+	}
 
-    /**
-     * How many times to zoom.
-     */
-    private int zoom = 1;
+	void MyCanvas() {
+		// Add a listener for resize events
+		addComponentListener(new ComponentAdapter() {
+			// This method is called when the component's size changes
+			public void componentResized(ComponentEvent evt) {
+				Component c = (Component)evt.getSource();
 
-    /**
-     * Colors to use for the different color codes.
-     * This implementation doesn't care about the
-     * palettes at address FF47-FF49.
-     */
-    private Color[] palette = {
-            new Color(0xFF, 0xFF, 0xFF),
-            new Color(0xAA, 0xAA, 0xAA),
-            new Color(55, 55, 55),
-            new Color(0, 0, 0) };
+				// Get new size
+				Dimension newSize = c.getSize();
 
-    /**
-     * Creates a new GamePanel.
-     * @param zoom
-     *            How much to enlarge the game screen.
-     */
-    public GamePanel(final int zoom) {
-        this.zoom = zoom;
-        // this.setFocusable(true);
-        // requestFocusInWindow();
-        setIgnoreRepaint(true);
-    }
+				// Regenerate the image
+				//gpp = new GamePanelPixels(pixels);
+				c.repaint();
+			}
+		});
+	}
+	
+	public void paint(Graphics g) {
+		if (gpp != null) {
+			gpp.draw(g, 0, 0, 160*zoom, 144*zoom);
+		}
+	}
 
-    /**
-     * Draws the screen on the panel.
-     * @param data
-     *            The screen data to draw
-     */
-    public void drawGameboyScreen(final int[][] data) {
-        Graphics g = getGraphics();
+	public void drawGameboyScreen(int[][] data) {
+		int n = 0;
+		for( int i = 0; i < 144; i++ ) {
+			for( int j = 0; j < 160; j++ ) {
+				pixels[n] = data[i][j];
+				n++;
+			}
+		}
+		//gpp = new GamePanelPixels(pixels);
+		gpp.refresh(pixels);
+		repaint();
+	}
+}
 
-        for (int y = 0; y < data.length; y++) {
-            for (int x = 0; x < data[y].length; x++) {
-                g.setColor(palette[data[y][x]]);
-                g.fillRect(x * zoom, y * zoom, zoom, zoom);
-            }
-        }
-    }
+class GamePanelPixels {
+	// Holds the generated image
+	Image image;
 
-    /**
-     * Changes the zoom.
-     * @param newZoom
-     *            The new zoom value.
-     */
-    public void setZoom(final int newZoom) {
-        zoom = newZoom;
-    }
+	// 16-color model
+	ColorModel colorModel;
+	private byte[] palette;
 
+	public GamePanelPixels(int[] data) {
+		int width = 160;
+		int height = 144;
+		
+		palette = new byte[4];
+		palette[0] = (byte) 0xFF;
+		palette[1] = (byte) 0xAA;
+		palette[2] = (byte) 0x55;
+		palette[3] = (byte) 0x00;
+		colorModel = new IndexColorModel(2, 4, palette, palette, palette);
+		
+		refresh(data);
+	}
+	
+	public void refresh(int[] data) {
+		image = Toolkit.getDefaultToolkit().createImage( 
+				new MemoryImageSource(160, 144,
+						colorModel, data, 0, 160));
+	}
+	
+	public void draw(Graphics g, int x, int y, int w, int h) {
+		g.drawImage(image, x, y, w, h, null);
+	}
 }
