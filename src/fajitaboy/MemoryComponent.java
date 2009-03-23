@@ -53,7 +53,7 @@ public class MemoryComponent implements MemoryInterface {
     public int read(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
-            throw new ArrayIndexOutOfBoundsException("RamLow.java");
+            throw new ArrayIndexOutOfBoundsException(String.format("MemoryComponent: could not read 0x%04x", address));
         }
         return ram[addr];
     }
@@ -64,7 +64,7 @@ public class MemoryComponent implements MemoryInterface {
     public void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
-            throw new ArrayIndexOutOfBoundsException("RamHigh.java");
+            throw new ArrayIndexOutOfBoundsException(String.format("MemoryComponent: could not write 0x%04x", address));
         }
         ram[addr] = data;
     }

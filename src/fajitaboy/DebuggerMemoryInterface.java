@@ -10,7 +10,7 @@ import java.util.List;
  * @author arvid
  *
  */
-public class DebuggerMemoryInterface implements MemoryInterface {
+public class DebuggerMemoryInterface extends AddressBus {
     /**
      * An action type can be READ, WRITE or READ_WRITE. This enum is used
      * to specify different kinds of memory breakpoints, and different kinds
@@ -86,17 +86,13 @@ public class DebuggerMemoryInterface implements MemoryInterface {
     private List<MemoryAction> dirtyActions;
 
     /**
-     * The underlying memory interface.
-     */
-    private MemoryInterface wrappedMI;
-
-    /**
      * Create an DebuggerMemoryInterface using the argument as underlying
      * MemoryInterface.
      * @param wmi underlying memory interface.
      */
-    public DebuggerMemoryInterface(final MemoryInterface wmi) {
-        this.wrappedMI = wmi;
+    public DebuggerMemoryInterface(final String romPath) {
+        super(romPath);
+        
         mBreakPoints = new LinkedList<MemoryBreakpoint>();
         dirtyActions = new LinkedList<MemoryAction>();
     }
@@ -177,7 +173,7 @@ public class DebuggerMemoryInterface implements MemoryInterface {
      * @return Read value.
      */
     public final int forceRead(final int address) {
-        int r = wrappedMI.forceRead(address);
+        int r = super.forceRead(address);
         addIfBreaked(address, ActionType.READ, r);
         return r;
     }
@@ -188,8 +184,8 @@ public class DebuggerMemoryInterface implements MemoryInterface {
      * @param data Data to write.
      */
     public final void forceWrite(final int address, final int data) {
+        super.forceWrite(address, data);
         addIfBreaked(address, ActionType.WRITE, data);
-        wrappedMI.forceWrite(address, data);
     }
 
     /**
@@ -199,7 +195,7 @@ public class DebuggerMemoryInterface implements MemoryInterface {
      * @return Read value.
      */
     public final int read(final int address) {
-        int r = wrappedMI.read(address);
+        int r = super.read(address);
         addIfBreaked(address, ActionType.READ, r);
         return r;
     }
@@ -214,14 +210,8 @@ public class DebuggerMemoryInterface implements MemoryInterface {
          * write first, then perhaps add dirty action. the write action might
          * throw.
          */
-        wrappedMI.write(address, data);
+        super.write(address, data);
         addIfBreaked(address, ActionType.WRITE, data);
-    }
-
-    /** Resets memory.
-     */
-    public final void reset() {
-        wrappedMI.reset();
     }
 
     /** An object of class MemoryBreakpoint represents a breakpoint on a

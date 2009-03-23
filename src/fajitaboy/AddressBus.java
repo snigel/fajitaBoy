@@ -130,7 +130,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final int read(final int address) {
+    public int read(final int address) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");
         }
@@ -141,7 +141,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final void write(final int address, final int data) {
+    public void write(final int address, final int data) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("AddressBus.java");
         }
@@ -151,7 +151,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final int forceRead(final int address) {
+    public int forceRead(final int address) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("Addressbus.java");
         }
@@ -161,7 +161,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public final void forceWrite(final int address, final int data) {
+    public void forceWrite(final int address, final int data) {
         if (address < 0 || address > module.length) {
             throw new ArrayIndexOutOfBoundsException("AddressBus.java");
         }
@@ -185,4 +185,8 @@ public class AddressBus implements MemoryInterface {
         io.reset();
     }
 
+    public IO.JoyPad getJoyPad() {
+        return io.getJoyPad();
+    }
+    
 }

@@ -22,7 +22,7 @@ import javax.swing.WindowConstants;
 import fajitaboy.lcd.LCD;
 import static java.lang.Math.*;
 
-import fajitaboy.constants.LCDConstants;
+import static fajitaboy.constants.LCDConstants.*;
 
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
@@ -83,7 +83,7 @@ public final class Debugger implements DrawsGameboyScreen {
     
     private Debugger(final String path) {
         pcLog = new LinkedList<Integer>();
-        addressBus = new DebuggerMemoryInterface(new AddressBus(path));
+        addressBus = new DebuggerMemoryInterface(path);
         breakPoints = new HashSet<Integer>();
         cpu = new Cpu(addressBus);
         osc = new Oscillator(cpu, addressBus, this);
@@ -155,15 +155,14 @@ public final class Debugger implements DrawsGameboyScreen {
         } else if (scLine.equals("show")) {
             if (jfr== null) {
                 jfr = new JFrame("FajitaBoy Screen");
-                jfr.setPreferredSize(new Dimension(400,400));
                 jfr.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
                 
-                panelScreen = new GamePanel(2);
-                panelScreen.setPreferredSize(new Dimension(400,400));
+                int zoom = 2;
+                panelScreen = new GamePanel(zoom);
+                panelScreen.setPreferredSize(
+                		new Dimension(zoom*GB_LCD_W,zoom*GB_LCD_H));
                 jfr.setContentPane(panelScreen);
                 
-
-                //jfr.getContentPane().add(panelScreen);
                 jfr.pack();
             }
             
@@ -350,6 +349,14 @@ public final class Debugger implements DrawsGameboyScreen {
                 System.out.println("Interrupt: " + cpu.getIME()
                         + "\tPause on interrupts: " + interruptEnabled);
             }
+            // Toggle gameboy key
+        } else if (scLine.equals("k")) {
+            if (in.hasNext()) {
+                String key = in.next();
+                toggleKey(key);
+            } else {
+                showDebugError("k requires a key argument");
+            }            
 
         } else if (scLine.equals("tr")) {
             if (in.hasNextInt()) {
@@ -385,8 +392,31 @@ public final class Debugger implements DrawsGameboyScreen {
         }
     }
     
+    private void toggleKey(String key) {
+        IO.JoyPad jp = addressBus.getJoyPad(); 
+        if (key.equals("a")) {
+            jp.setA(!jp.isA());
+        } else if (key.equals("b")) {
+            jp.setB(!jp.isB());
+        } else if (key.equals("start")) {
+            jp.setStart(!jp.isStart());
+        } else if (key.equals("select")) {
+            jp.setSelect(!jp.isSelect());
+        } else if (key.equals("up")) {
+            jp.setUp(!jp.isUp());
+        } else if (key.equals("down")) {
+            jp.setDown(!jp.isDown());
+        } else if (key.equals("left")) {
+            jp.setLeft(!jp.isLeft());
+        } else if (key.equals("right")) {
+            jp.setRight(!jp.isRight());
+        } else {
+            System.out.println("Unknown key " + key);
+        }
+    }
+    
     private void drawScreen() {
-        panelScreen.draw(osc.getLCD().getScreen());
+        panelScreen.drawGameboyScreen(osc.getLCD().getScreen());
     }
 
     /**
@@ -792,7 +822,7 @@ public final class Debugger implements DrawsGameboyScreen {
 
     public void drawGameboyScreen(int[][] data) {
         if (jfr != null && jfr.isVisible()) {
-            panelScreen.draw(data);
+            panelScreen.drawGameboyScreen(data);
         }
     }
     
