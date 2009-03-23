@@ -2010,7 +2010,11 @@ public final class Cpu {
     private void bit(final int bit, final int s) {
         setN(0);
         setH(1);
-        setZ((s >>> bit) & 0x01);
+        if ( ((s >>> bit) & 0x01) == 0 ) {
+            setZ(1);
+        } else {
+            setZ(0);
+        }
     }
 
     /**
