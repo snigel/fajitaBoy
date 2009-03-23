@@ -43,6 +43,8 @@ public final class AddressConstants {
     public static final int ECHO_END = 0xFE00;
     public static final int OAM_START = 0xFE00;
     public static final int OAM_END = 0xFEA0;
+    public static final int AREA51_START = 0xFEA0;
+    public static final int AREA51_END = 0xFF00;
     public static final int IO_START = 0xFF00;
     public static final int IO_END = 0xFF80;
     public static final int HRAM_START = 0xFF80;
@@ -82,6 +84,13 @@ public final class AddressConstants {
     public static final int BGB_REGISTER = 0xFF47;
     public static final int OBP0_REGISTER = 0xFF48;
     public static final int OBP1_REGISTER = 0xFF49;
+    
+    //The real status register for the keypad
+    public static final int KEYPAD_STATUS_REGISTER = 0xFF00;
+    //The direction cross in the secret memory area
+    public static final int KEYPAD_CROSS_REGISTER = 0xFEA0;
+    //The buttons in the secret memory area
+    public static final int KEYPAD_BUTTON_REGISTER = 0xFEA1;
 
     //dupes for readability during development.
     public static final int SOUND1_LOW = 0xFF13;
