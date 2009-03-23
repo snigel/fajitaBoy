@@ -33,7 +33,7 @@ public class AudioMain implements DrawsGameboyScreen {
 
         au1 = new Audio();
         au2 = new Audio();
-        ab = new AddressBus("/tetris.gb");
+        ab = new AddressBus("/bombjack.gb");
 
         Cpu cpu = new Cpu(ab);
         Oscillator oc = new Oscillator(cpu, ab, this);
@@ -74,19 +74,14 @@ public class AudioMain implements DrawsGameboyScreen {
 
         //gp.drawGameboyScreen(data);
         
-        // if (i%70000==0){ //don't generate sound in the beginning
         int low1 = ab.read(SOUND1_LOW);
         int high1 = ab.read(SOUND1_HIGH)*0x100;
-        int freq1 = (high1+low1)&0x7ff;
-        //int freq1 = (131072 / (2048 - (((high1 & 0x7) << 8) | low1)));
+        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
+        au1.generateTone(freq1, duration, volume);
         
-        int low2 = ab.read(SOUND2_LOW);
-        int high2 = ab.read(SOUND2_HIGH);
-       // int freq2 = (131072 / (2048 - (((high2 & 0x7) << 8) | low2)));
-        
-       au1.generateTone(freq1, duration, volume);
-      // au2.generateTone(freq2, duration, volume);
-      // au2.noise();
-        // }
+        int low2 = ab.read(SOUND1_LOW);
+        int high2 = ab.read(SOUND1_HIGH)*0x100;
+        int freq2 = 131072/(2047-(high1+low1)&0x7ff);
+        au2.generateTone(freq2, duration, volume);
     }
 }
