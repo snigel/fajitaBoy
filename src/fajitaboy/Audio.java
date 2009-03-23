@@ -10,6 +10,8 @@ public class Audio{
 	AudioFormat af;
 	byte[] buffer;
 	SourceDataLine sdl;
+	int samples = 735;
+	boolean first = true;
 	
 	
 	public Audio()
@@ -17,21 +19,42 @@ public class Audio{
 		samplerate = 44100;
 		af = new AudioFormat(samplerate,8,1,true,false);
 		sdl = AudioSystem.getSourceDataLine(af);
-		buffer = new byte[1];
+		buffer = new byte[samples*2];
 		sdl.open(af);
 		sdl.start();
 		
 	}
 	
 	public void generateTone(int freq,int duration, int volume){
-		for(int i=0; i<(float)(duration)/1000*samplerate; i++){
-			double angle = i/(samplerate/freq)*2.0*Math.PI;
+	    /*
+	    if (samples > sdl.available()) {
+	        buffer = new byte[sdl.available()];	        
+	    }
+	    else {
+	        buffer = new byte[samples];
+	    }
+	    */
+		//for(int i=0; i<(float)(duration)/1000*samplerate; i++){
+	    if(first) {
+	        //buffer = new byte[735];
+	        for (int i = 0; i < 735; i++) {
+			    double angle = i/(samplerate/freq)*2.0*Math.PI;
 			
-			buffer[0]=(byte) (Math.sin(angle)*volume);
-				noise(buffer);
-		}
+			    buffer[i]=(byte) (Math.signum(Math.sin(angle)*volume));
+		    }
+	        first=false;
+	    }
+	    else {
+	        for (int i = 735; i < 1470; i++) {
+	            double angle = i/(samplerate/freq)*2.0*Math.PI;
+	            
+                buffer[i]=(byte) (Math.signum(Math.sin(angle)*volume));
+	        }
+	        first=true;
+            noise(buffer);
+	    }
 	}
 	private void noise(byte[] buffer){
-		sdl.write(buffer,0,1);
+		sdl.write(buffer,0,buffer.length);
 	}
 }

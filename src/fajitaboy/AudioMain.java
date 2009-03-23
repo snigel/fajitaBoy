@@ -20,7 +20,7 @@ public class AudioMain implements DrawsGameboyScreen {
 
     int duration = 100;
 
-    int volume = 125;
+    int volume = 225;
 
     public AudioMain() throws LineUnavailableException {
         JFrame jfr = new JFrame();
@@ -31,7 +31,7 @@ public class AudioMain implements DrawsGameboyScreen {
         System.out.println("Running " + INSTRUCTIONS + " instructions");
 
         au = new Audio();
-        ab = new AddressBus("/tetris.gb");
+        ab = new AddressBus("/home/johan/bombjack.gb");
 
         Cpu cpu = new Cpu(ab);
         Oscillator oc = new Oscillator(cpu, ab, this);
@@ -73,13 +73,13 @@ public class AudioMain implements DrawsGameboyScreen {
         gp.drawGameboyScreen(data);
         
         // if (i%70000==0){ //don't generate sound in the beginning
-        int low = ab.read(SOUND3_LOW);
-        int high = ab.read(SOUND3_HIGH);
+        int low = ab.read(SOUND1_LOW);
+        int high = ab.read(SOUND1_HIGH);
         int freq = (131072 / (2048 - (((high & 0x7) << 8) | low)));
         System.out.println(freq+" "+low+" "+high);
         //int i;
         //System.out.println(i++);
-        //au.generateTone(freq, duration, volume);
+        au.generateTone(freq, duration, volume);
         // }
     }
 }
