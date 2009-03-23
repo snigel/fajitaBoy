@@ -10,6 +10,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
 
+import fajitaboy.IO.JoyPad;
 import fajitaboy.lcd.LCD;
 
 /**
@@ -17,7 +18,7 @@ import fajitaboy.lcd.LCD;
  * @author Marcus Johansson, Peter Olsson
  */
 @SuppressWarnings("serial")
-public class FajitaBoy extends JApplet implements KeyListener {
+public class FajitaBoy extends JApplet {
 
     // - Emulator stuff
     /**
@@ -112,7 +113,7 @@ public class FajitaBoy extends JApplet implements KeyListener {
         setContentPane(startScreen);
         getContentPane().validate();
 
-        addKeyListener(this);
+        //addKeyListener(this);
     }
 
     /**
@@ -201,8 +202,7 @@ public class FajitaBoy extends JApplet implements KeyListener {
 
         changeGameState(GameState.PLAYGAME);
 
-        // gamePanel.addKeyListener(new KeyInputController(emulator.addressBus));
-        gamePanel.addKeyListener(this);
+        gamePanel.addKeyListener(new KeyInputController(emulator.addressBus.getJoyPad()));
         emulatorThread = new Thread(emulator);
         emulatorThread.start();
 
@@ -273,26 +273,6 @@ public class FajitaBoy extends JApplet implements KeyListener {
             return oscillator.getLCD();
         }
 
-    }
-
-    // ------------------------------------------------------------------------
-    // - Controllers
-    // ------------------------------------------------------------------------
-
-
-    public void keyPressed(KeyEvent e) {
-        // TODO Auto-generated method stub
-        System.out.println("KEY :D");
-    }
-
-    public void keyReleased(KeyEvent e) {
-        // TODO Auto-generated method stub
-        System.out.println("KEY :D");
-    }
-
-    public void keyTyped(KeyEvent e) {
-        // TODO Auto-generated method stub
-        System.out.println("KEY :D");
     }
 
 }

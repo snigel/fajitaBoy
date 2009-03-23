@@ -127,10 +127,10 @@ public class IO extends MemoryComponent {
                 jp |= !start ? 0x08 : 0x00;
             } else if (direction) {
                 // ugly as hell.
-                jp |= !down ? 0x01 : 0x00;
-                jp |= !up ? 0x02 : 0x00;
-                jp |= !left ? 0x04 : 0x00;
-                jp |= !right ? 0x08 : 0x00;
+                jp |= !right ? 0x01 : 0x00;
+                jp |= !left ? 0x02 : 0x00;
+                jp |= !up ? 0x04 : 0x00;
+                jp |= !down ? 0x08 : 0x00;
             }
             
             ram[ADDRESS_JOYPAD - offset] = jp;
