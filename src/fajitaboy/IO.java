@@ -111,8 +111,8 @@ public class IO extends MemoryComponent {
             
             int jp = ram[ADDRESS_JOYPAD - offset];
             
-            boolean button = (jp & 0x20) > 0;
-            boolean direction = (jp & 0x10) > 0;
+            boolean button = (jp & 0x20) == 0;
+            boolean direction = (jp & 0x10) == 0;
             
             if (!(button ^ direction)) {
                 // if neither direction nor button is selected
