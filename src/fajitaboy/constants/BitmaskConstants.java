@@ -6,4 +6,8 @@ public class BitmaskConstants {
 	public static final int AUDIO_FREQ_MASK = 0x38;
 	public static final int AUDIO_UPPER_BYTE = 5;
 	
+	public static final int KEYPAD_CROSS_MASK = 0x10;
+	public static final int KEYPAD_BUTTON_MASK = 0x20;
+	public static final int KEYPAD_STATUS_MASK = 0x30;
+	
 }
