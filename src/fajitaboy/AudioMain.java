@@ -14,7 +14,8 @@ public class AudioMain implements DrawsGameboyScreen {
 
     AddressBus ab;
 
-    Audio au;
+    Audio au1;
+    Audio au2;
 
     GamePanel gp;
 
@@ -30,7 +31,8 @@ public class AudioMain implements DrawsGameboyScreen {
 
         System.out.println("Running " + INSTRUCTIONS + " instructions");
 
-        au = new Audio();
+        au1 = new Audio();
+        au2 = new Audio();
         ab = new AddressBus("/tetris.gb");
 
         Cpu cpu = new Cpu(ab);
@@ -74,13 +76,17 @@ public class AudioMain implements DrawsGameboyScreen {
         
         // if (i%70000==0){ //don't generate sound in the beginning
         int low1 = ab.read(SOUND1_LOW);
-        int high1 = ab.read(SOUND1_HIGH);
-        int freq1 = (131072 / (2048 - (((high1 & 0x7) << 8) | low1)));
+        int high1 = ab.read(SOUND1_HIGH)*0x100;
+        int freq1 = (high1+low1)&0x7ff;
+        //int freq1 = (131072 / (2048 - (((high1 & 0x7) << 8) | low1)));
         
         int low2 = ab.read(SOUND2_LOW);
         int high2 = ab.read(SOUND2_HIGH);
-        int freq2 = (131072 / (2048 - (((high2 & 0x7) << 8) | low2)));
-        au.generateTone(freq1, freq2, duration, volume);
+       // int freq2 = (131072 / (2048 - (((high2 & 0x7) << 8) | low2)));
+        
+       au1.generateTone(freq1, duration, volume);
+      // au2.generateTone(freq2, duration, volume);
+      // au2.noise();
         // }
     }
 }
