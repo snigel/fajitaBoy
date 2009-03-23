@@ -14,13 +14,12 @@ public class Audio {
     byte[] buffer2;
     SourceDataLine sdl;
 
-    float samplerate = 44100;
+    float samplerate = 44100/2;
 
-    int samples = 700;
+    int samples = 735;
 
     public Audio() throws LineUnavailableException {
-        //af = new AudioFormat(samplerate, 8, 1, true, false);
-        af = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, samplerate, 8, 2, 2, samplerate, true);
+        af = new AudioFormat(samplerate*2, 8, 1, true, false);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
         sdl = (SourceDataLine) AudioSystem.getLine(info);
      //   sdl = AudioSystem.getSourceDataLine(af);
