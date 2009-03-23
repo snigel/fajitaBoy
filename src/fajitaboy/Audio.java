@@ -2,34 +2,28 @@ package fajitaboy;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 public class Audio {
-    
 
     AudioFormat af;
 
     byte[] buffer1;
-
     byte[] buffer2;
-
     SourceDataLine sdl;
 
-    float samplerate=11250;
-    int sample = (int)(samplerate/60);
-    int samples = sample * 100;
-    
+    float samplerate = 44100;
 
-    boolean first = true;
-
-    int i = 0;
-
-    int j = 0;
+    int samples = 700;
 
     public Audio() throws LineUnavailableException {
-        af = new AudioFormat(samplerate, 8, 1, true, false);
-        sdl = AudioSystem.getSourceDataLine(af);
+        //af = new AudioFormat(samplerate, 8, 1, true, false);
+        af = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, samplerate, 8, 2, 2, samplerate, true);
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
+        sdl = (SourceDataLine) AudioSystem.getLine(info);
+     //   sdl = AudioSystem.getSourceDataLine(af);
         buffer1 = new byte[samples];
         buffer2 = new byte[samples];
         sdl.open(af);
@@ -37,30 +31,34 @@ public class Audio {
 
     }
 
-    public void generateTone(int freq1, int freq2, int duration, int volume) {
-        /*
-         * if (samples > sdl.available()) { buffer = new byte[sdl.available()];
-         * } else { buffer = new byte[samples]; }
-         */
-        // for(int i=0; i<(float)(duration)/1000*samplerate; i++){
-        // buffer = new byte[sample];
-        j = i;
-        for (; i < j + sample; i++) {
-            double angle1 = i / (samplerate / freq1) * 2.0 * Math.PI;
-            double angle2 = i / (samplerate / freq2) * 2.0 * Math.PI;
-
-            buffer1[i] = (byte) (127*(Math.signum(Math.sin(angle1))+Math.signum(Math.sin(angle2)) ));
-         //   buffer2[i] = (byte) (Math.signum(Math.sin(angle2))*200);
+    public void generateTone(int freq1, int duration, int volume) {
+        buffer1 = new byte[samples];
+        for (int i=0; i < samples; i++) {
+            double angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[0] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[1] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[2] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[3] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[4] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[5] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[6] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            i++;
+            angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
+            buffer1[7] = (byte) (100 * Math.signum((Math.sin(angle1))));
+            sdl.write(buffer1, 0, 8);
+        
         }
-        i = i + sample;
-        if (i == samples) {
-            noise(buffer1);
-          //  noise(buffer2);
-            i = 0;
-        }
-    }
-
-    private void noise(byte[] buffer) {
-        sdl.write(buffer, 0, buffer.length);
     }
 }
