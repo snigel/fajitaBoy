@@ -17,7 +17,7 @@ public class Audio{
 		samplerate = 44100;
 		af = new AudioFormat(samplerate,8,1,true,false);
 		sdl = AudioSystem.getSourceDataLine(af);
-		buffer = new byte[706];
+		buffer = new byte[1];
 		sdl.open(af);
 		sdl.start();
 		
@@ -27,12 +27,11 @@ public class Audio{
 		for(int i=0; i<(float)(duration)/1000*samplerate; i++){
 			double angle = i/(samplerate/freq)*2.0*Math.PI;
 			
-			buffer[i%706]=(byte)(Math.signum(Math.sin(angle))*volume);
-			if(i%706==0)
+			buffer[0]=(byte) (Math.sin(angle)*volume);
 				noise(buffer);
 		}
 	}
 	private void noise(byte[] buffer){
-		sdl.write(buffer,0,706);
+		sdl.write(buffer,0,1);
 	}
 }
