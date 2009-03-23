@@ -18,6 +18,17 @@ public class IO extends MemoryComponent {
     public IO(final int start, final int end) {
         super(start, end);
     }
+    
+    public int read(final int address) {
+        int addr = address - offset;
+        if (addr < 0 || addr > ram.length) {
+            throw new ArrayIndexOutOfBoundsException("RamLow.java");
+        }
+        if (address == ADDRESS_JOYPAD) {
+            return ram[addr] | 0x0F;
+        }
+        return ram[addr];
+    }
 
     /**
      * {@inheritDoc}
@@ -58,5 +69,6 @@ public class IO extends MemoryComponent {
         write(BGB_REGISTER, 0xFC);
         write(OBP0_REGISTER, 0xFF);
         write(OBP1_REGISTER, 0xFF);
+        write(SOUND_ON_OFF, 0x80);
     }
 }
