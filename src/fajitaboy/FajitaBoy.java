@@ -13,6 +13,8 @@ import javax.swing.JFileChooser;
 import fajitaboy.IO.JoyPad;
 import fajitaboy.lcd.LCD;
 
+import static fajitaboy.constants.HardwareConstants.*;
+
 /**
  * An applet a day keeps the doctor away.
  * @author Marcus Johansson, Peter Olsson
@@ -222,6 +224,11 @@ public class FajitaBoy extends JApplet {
 
         /** Emulator oscillator. */
         private Oscillator oscillator;
+        
+        /** Oscillator cycles */
+        private int cycles;
+        private int nextHaltCycle;
+        private long nextNanos; 
 
         /**
          * To know if the emulation should keep running.
@@ -251,8 +258,25 @@ public class FajitaBoy extends JApplet {
              * This loop should probably be in the oscillator instead. This loop
              * runs at full speed but it goes too slow anyway.
              */
+            nextNanos = System.nanoTime() + GB_NANOS_PER_FRAME;
+            nextHaltCycle = GB_CYCLES_PER_FRAME;
+            cycles = 0;
+            long nanos;
             while (running) {
-                oscillator.step();
+                cycles += oscillator.step();
+                
+                // Wait if running too fast....
+                while ( cycles > nextHaltCycle ) {
+                	nanos = System.nanoTime();
+                	if ( nanos > nextNanos ) {
+                		nextHaltCycle += GB_CYCLES_PER_FRAME;
+                		nextNanos += GB_NANOS_PER_FRAME;
+                	} else {
+                		try {
+                		    Thread.sleep(1);
+                		} catch ( Exception e ) {}
+                	}
+                }
             }
             // oscillator.run();
         }
