@@ -1,5 +1,6 @@
 package fajitaboy;
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.BitmaskConstants.*;
 
 /**
  * Represent the I/0 part of the memory.
@@ -7,8 +8,11 @@ import static fajitaboy.constants.AddressConstants.*;
  */
 public class IO extends MemoryComponent {
 
+    /**
+     * Creates the internal IO class joypad.
+     */
     private JoyPad jp = new JoyPad();
-    
+
     /**
      * @param start
      *            , address representing where IO begins in memory space
@@ -20,8 +24,13 @@ public class IO extends MemoryComponent {
     public IO(final int start, final int end) {
         super(start, end);
     }
-    
-    public int read(final int address) {
+
+    /**
+     * The read method reads data from the IO addresses.
+     * @param address the memory address to read from.
+     * @return the value at the address
+     */
+    public final int read(final int address) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException(
@@ -29,28 +38,23 @@ public class IO extends MemoryComponent {
         }
         return ram[addr];
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public final void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
-            throw new ArrayIndexOutOfBoundsException("RamHigh.java");
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("RamLow.java: %04x", address));
         }
-        
-        if (address == DIV_REGISTER) {
-            ram[addr] = 0;
-        } else if (address == LY_REGISTER) { 
-            // LY is read only, don't handle.
-        } else if (address == ADDRESS_JOYPAD) {
-            ram[addr] = data;
-            jp.refresh();
-        } else {
-            ram[addr] = data;
+        switch (address) {
+            case DIV_REGISTER: ram[addr] = 0; break;
+            case LY_REGISTER: break;
+            case ADDRESS_JOYPAD: ram[addr] = data; jp.refresh(); break;
+            default: ram[addr] = data; break;
+
         }
-        
-        
     }
 
     /**
@@ -79,22 +83,37 @@ public class IO extends MemoryComponent {
         write(OBP1_REGISTER, 0xFF);
         write(SOUND_ON_OFF, 0x80);
     }
-    
-    public JoyPad getJoyPad() {
+
+    /**
+     * @return returns a joypad object.
+     */
+    public final JoyPad getJoyPad() {
         return jp;
     }
-    
+
+    /**
+     * The joypad is a part of the IO memory space.
+     * This class handles everything about the joypad address.
+     * @author DJ_BISSE & MC_ARVIXX
+     *
+     */
     public class JoyPad {
-        /*
-         * True if pressed.
+        /**
+         * Variables for all keys. True if pressed.
          */
         private boolean up, down, left, right, a, b, start, select;
-        
+
+        /**
+         * Starts the JoyPad and resets all variables to their default value.
+         */
         public JoyPad() {
             reset();
         }
-        
-        public void reset() {
+
+        /**
+         * Resets all JoyPad variables to their default value.
+         */
+        public final void reset() {
             up = false;
             down = false;
             left = false;
@@ -105,169 +124,175 @@ public class IO extends MemoryComponent {
             select = false;
             refresh();
         }
-        
-        public void refresh() {
+
+        /**
+         * Checks the status bits to see whether we're interested in the
+         * buttons or the cross and updates the joypad register accordingly.
+         */
+        public final void refresh() {
             // http://nocash.emubase.de/pandocs.htm#joypadinput
-            
-            int jp = ram[ADDRESS_JOYPAD - offset];
-            
+
+            int joyPad = ram[ADDRESS_JOYPAD - offset];
+
             // bit 5: select button keys (0 = Select)
-            boolean button = (jp & 0x20) == 0;
+            boolean button = (joyPad & 0x20) == 0;
             // bit 4: select direction keys (0 = Select)
-            boolean direction = (jp & 0x10) == 0;
-            
+            boolean direction = (joyPad & 0x10) == 0;
+
             // reset lower nibble
-            jp &= 0xF0;
+            joyPad &= UPPER_NIBBLE_MASK;
             if (!(button ^ direction)) {
                 // if neither direction nor button is selected
-                // or if both are selected, set lower nibble to 
+                // or if both are selected, set lower nibble to
                 // 1 == no button pressed
-                jp |= 0x0F;
+                joyPad |= LOWER_NIBBLE_MASK;
             } else if (button) {
-                jp |= !a ? 0x01 : 0x00;
-                jp |= !b ? 0x02 : 0x00;
-                jp |= !select ? 0x04 : 0x00;
-                jp |= !start ? 0x08 : 0x00;
+                joyPad |= a ? 0x00 : 0x01;
+                joyPad |= b ? 0x00 : 0x02;
+                joyPad |= select ? 0x00 : 0x04;
+                joyPad |= start ? 0x00 : 0x08;
             } else if (direction) {
-                jp |= !right ? 0x01 : 0x00;
-                jp |= !left ? 0x02 : 0x00;
-                jp |= !up ? 0x04 : 0x00;
-                jp |= !down ? 0x08 : 0x00;
+                joyPad |= right ? 0x00 : 0x01;
+                joyPad |= left ? 0x00 : 0x02;
+                joyPad |= up ? 0x00 : 0x04;
+                joyPad |= down ? 0x00 : 0x08;
             }
-            
-            ram[ADDRESS_JOYPAD - offset] = jp;
+
+            ram[ADDRESS_JOYPAD - offset] = joyPad;
+        }
+        /**
+         * Creates a interrupt from the keypad.
+         */
+        private void keyInterrupt() {
+            ram[ADDRESS_IF - offset] |= 0x10;
         }
 
-        private void fireInterrupt() {
-            ram[ADDRESS_IF - offset] |= 0x10; 
-        }
-        
         /**
          * @return the a
          */
-        public boolean isA() {
+        public final boolean isA() {
             return a;
         }
 
         /**
-         * @param a the a to set
+         * @param input the value to set a with
          */
-        public void setA(boolean a) {
-            this.a = a;
+        public final void setA(final boolean input) {
+            a = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
-         * @return the b
+         * @return the b.
          */
-        public boolean isB() {
+        public final boolean isB() {
             return b;
         }
 
         /**
-         * @param b the b to set
+         * @param input the value to set b with
          */
-        public void setB(boolean b) {
-            this.b = b;
+        public final void setB(final boolean input) {
+            b = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
          * @return the down
          */
-        public boolean isDown() {
+        public final boolean isDown() {
             return down;
         }
 
         /**
-         * @param down the down to set
+         * @param input the value to set down with
          */
-        public void setDown(boolean down) {
-            this.down = down;
+        public final void setDown(final boolean input) {
+            down = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
          * @return the left
          */
-        public boolean isLeft() {
+        public final boolean isLeft() {
             return left;
         }
 
         /**
-         * @param left the left to set
+         * @param input sets left to the value of input
          */
-        public void setLeft(boolean left) {
-            this.left = left;
+        public final void setLeft(final boolean input) {
+            left = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
          * @return the right
          */
-        public boolean isRight() {
+        public final boolean isRight() {
             return right;
         }
 
         /**
-         * @param right the right to set
+         * @param input sets right to the value of input.
          */
-        public void setRight(boolean right) {
-            this.right = right;
+        public final void setRight(final boolean input) {
+            right = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
          * @return the select
          */
-        public boolean isSelect() {
+        public final boolean isSelect() {
             return select;
         }
 
         /**
-         * @param select the select to set
+         * @param input Sets select to the value of input.
          */
-        public void setSelect(boolean select) {
-            this.select = select;
+        public final void setSelect(final boolean input) {
+            select = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
          * @return the start
          */
-        public boolean isStart() {
+        public final boolean isStart() {
             return start;
         }
 
         /**
-         * @param start the start to set
+         * @param input sets start to the value of input.
          */
-        public void setStart(boolean start) {
-            this.start = start;
+        public final void setStart(final boolean input) {
+            start = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
 
         /**
          * @return the up
          */
-        public boolean isUp() {
+        public final boolean isUp() {
             return up;
         }
 
         /**
-         * @param up the up to set
+         * @param input sets up to the value of input.
          */
-        public void setUp(boolean up) {
-            this.up = up;
+        public final void setUp(final boolean input) {
+            up = input;
             refresh();
-            fireInterrupt();
+            keyInterrupt();
         }
     }
 }
