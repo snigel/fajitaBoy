@@ -8,7 +8,11 @@ import fajitaboy.memory.Vram;
 
 public class BackgroundMap {
 	public static enum MapType {BACKGROUND, WINDOW}
-	private int[][] data = new int[32][32];
+	
+	/*
+	 * Contains the id of each tile to be displayed.
+	 */
+	private int[][] tileAddresses = new int[32][32];
 	MapType type;
 	
     public BackgroundMap(MapType tp) {
@@ -16,9 +20,8 @@ public class BackgroundMap {
     }
     
 	public void readBackground(MemoryInterface ram, LCDC lcdc) {
-		//read tile numbers
+		// find base address
 		int addr_base = 0;
-        
 		if (type == MapType.BACKGROUND) {
 			if (lcdc.bgTileMapSelect) {
 				addr_base = 0x9C00;
@@ -33,14 +36,22 @@ public class BackgroundMap {
 			}
 		}
 		
+		// read tile numbers
 		for (int i = 0; i < GB_MAP_H; i++) {
-			for (int j = 0; j < GB_MAP_W; j++) {
+			for (int j = 0; j < GB_MAP_W; j++, addr_base++) {
+				int pnr = ram.read(addr_base);
 				if ( lcdc.tileDataSelect ) {
-					data[i][j] = ram.read(addr_base);
+					tileAddresses[i][j] = pnr;
 				} else {
-					data[i][j] = (0x100 + (byte)ram.read(addr_base));
+					/*
+					 * i think the problem is here. 
+					 * pnr == 0 should translate to 0x9000 
+					 * 0x100 + (byte)pnr = 0x100. it will select tile[0x100] aka tile[256]. This will
+					 * correspond to memory 0x8000 + 256*16 = 0x8000 + 0x100*0x10 = 0x9000
+					 */
+					tileAddresses[i][j] = 0x100 + (byte)pnr; 
 				}
-				addr_base++;
+				
 			}
 		}
 		
@@ -77,14 +88,14 @@ public class BackgroundMap {
 //		Draw tiles
 		int dx, dy, datax, datay, tileId;
 		// For each row...
-		for ( int y = 0; y < GB_LCD_H/8; y += 1 ) {
+		for ( int y = 0; y < GB_LCD_H/8; y++ ) {
 			dy = (firstTileY+y)*8 - scy;
 			datay = (firstTileY+y) % 32;
 			// For each column...
-			for ( int x = 0; x < GB_LCD_W/8; x += 1 ) {
+			for ( int x = 0; x < GB_LCD_W/8; x++ ) {
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
-				tileId = data[datay][datax];
+				tileId = tileAddresses[datay][datax];
                 screen.blit(tiles[tileId], dx, dy, 0);
 			}
 		}
