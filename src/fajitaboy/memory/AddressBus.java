@@ -46,7 +46,7 @@ public class AddressBus implements MemoryInterface {
     /**
      * Work RAM bank 1.
      */
-    private Cartridge cartridge;
+    private ROM rom;
     /**
      * The Video RAM part of the memory.
      */
@@ -68,6 +68,8 @@ public class AddressBus implements MemoryInterface {
      * All the input/output addresses.
      */
     private IO io;
+    
+    private MemoryInterface mbc;
 
     /**
      * Creates the addressbus and all the parts of the memory.
@@ -79,9 +81,6 @@ public class AddressBus implements MemoryInterface {
         // All modules must be initialized here
         debug = new DebugMemory();
         initialize(debug, DEBUG_START, DEBUG_END);
-
-        interruptRegister = new InterruptRegister();
-        module[INTERRUPT_ADDRESS] = interruptRegister;
 
         io = new IO(IO_START, IO_END);
         initialize(io, IO_START, IO_END);
@@ -104,15 +103,29 @@ public class AddressBus implements MemoryInterface {
         eram = new Eram(ERAM_START, ERAM_END);
         initialize(eram, ERAM_START, ERAM_END);
 
-        cartridge = new Cartridge(CARTRIDGE_START, romPath);
-        initialize(cartridge, CARTRIDGE_START, CARTRIDGE_END);
-
         oam = new Oam(OAM_START, OAM_END, this);
         initialize(oam, OAM_START, OAM_END);
+        
+        rom = new ROM(CARTRIDGE_START, romPath);
+        mbc = setMBC();
+        
+        initialize(mbc, CARTRIDGE_START, CARTRIDGE_END);
+        
+        interruptRegister = new InterruptRegister();
+        module[INTERRUPT_ADDRESS] = interruptRegister;
 
         module[ADDRESS_DMA] = oam;
     }
 
+    private MemoryInterface setMBC(){
+        switch(rom.getMBC()){
+        case ROM: return rom;
+        case MBC1: return new MBC1(eram, rom);
+        case MBC1_RAM: return new MBC1(eram, rom);
+        case MBC1_RAM_BATTERY: return new MBC1(eram, rom);
+        default: return rom;
+        }
+    }
     /**
      * @param object
      *            The type of memory that should reside in specified part of
@@ -179,7 +192,7 @@ public class AddressBus implements MemoryInterface {
         raml.reset();
         echo.reset();
         ramh.reset();
-        cartridge.reset();
+        rom.reset();
         vram.reset();
         oam.reset();
         hram.reset();
@@ -188,7 +201,7 @@ public class AddressBus implements MemoryInterface {
     }
 
     /**
-     * 
+     * DJ_BISSE WAS HERE
      * @return Returns 
      */
     public Vram getVram() {
