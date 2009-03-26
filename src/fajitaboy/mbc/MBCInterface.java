@@ -1,7 +1,7 @@
 package fajitaboy.mbc;
 
-import fajitaboy.Cartridge;
-import fajitaboy.MemoryInterface;
+import fajitaboy.memory.Cartridge;
+import fajitaboy.memory.MemoryInterface;
 
 /**
  * Interface for Memory Bank Controllers

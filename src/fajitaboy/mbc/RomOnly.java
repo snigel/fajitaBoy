@@ -1,6 +1,6 @@
 package fajitaboy.mbc;
 
-import fajitaboy.Cartridge;
+import fajitaboy.memory.Cartridge;
 import static fajitaboy.constants.CartridgeConstants.*;
 
 /**
@@ -27,8 +27,8 @@ public class RomOnly implements MBCInterface {
 			j++;
 		}
 		
-		cart.setRomBankLo(romBankLo);
-		cart.setRomBankHi(romBankHi);
+		cart.setRomBankLow(romBankLo);
+		cart.setRomBankHigh(romBankHi);
 		cart.setRamBank(null);
 	}
 	
@@ -50,7 +50,7 @@ public class RomOnly implements MBCInterface {
 	 * {@inheritDoc}
 	 */
 	public void setRomBank() {
-		cart.setRomBankHi(romBankHi);
+		cart.setRomBankHigh(romBankHi);
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package fajitaboy.mbc;
 
-import fajitaboy.Cartridge;
+import fajitaboy.memory.Cartridge;
 import static fajitaboy.constants.CartridgeConstants.*;
 
 /**
@@ -93,8 +93,8 @@ public class MBC1 implements MBCInterface {
 			}
 		}
 		
-		cart.setRomBankLo(romBanks[0]);
-		cart.setRomBankHi(romBanks[1]);
+		cart.setRomBankLow(romBanks[0]);
+		cart.setRomBankHigh(romBanks[1]);
 		romBankNr = 1;
 		
 		// Initialise RAM banks
@@ -222,10 +222,10 @@ public class MBC1 implements MBCInterface {
 	public void setRomBank() {
 		if ( modeSelect ) {
 			// Only banks 0x01 - 0x1f available
-			cart.setRomBankHi(romBanks[romBankNr & 0x1F]);
+			cart.setRomBankHigh(romBanks[romBankNr & 0x1F]);
 		} else {
 			// All banks available
-			cart.setRomBankHi(romBanks[romBankNr]);
+			cart.setRomBankHigh(romBanks[romBankNr]);
 		}
 	}
 	

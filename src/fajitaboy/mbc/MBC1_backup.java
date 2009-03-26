@@ -1,6 +1,6 @@
 package fajitaboy.mbc;
 
-import memory.Cartridge;
+import fajitaboy.memory.Cartridge;
 import static fajitaboy.constants.CartridgeConstants.*;
 //Kommenterat bort ej kompilerande metoder. Alla commits ska kompilera!
 //adam.
