@@ -153,7 +153,34 @@ public final class Debugger implements DrawsGameboyScreen {
             }
             disassemble(cpu.getPC(), 1);
 
-        // Show output window
+            // Display tile
+        } else if (scLine.equals("tile")) {
+            if (in.hasNextInt(argRadix)) {
+                showTile(in.nextInt(argRadix));
+            } else {
+            	showDebugError("tile takes an adress to tile to display");
+            }
+        
+            // Display background tile numbers
+        } else if (scLine.equals("bg")) {
+            if (in.hasNextInt(argRadix)) {
+            	int addr = in.nextInt(argRadix);
+            	if (in.hasNextInt(argRadix)) {
+            		int scx = in.nextInt(argRadix);
+            		if (in.hasNextInt(argRadix)) {
+            			int scy = in.nextInt(argRadix);
+            			showBackgroundNumbers(addr, scx, scy);
+                    } else {
+                    	showDebugError("tile takes an adress to tile to display");
+                    }
+                } else {
+                	showDebugError("tile takes an adress to tile to display");
+                }
+            } else {
+            	showDebugError("tile takes an adress to tile to display");
+            }
+            
+            // Show output window
         } else if (scLine.equals("show")) {
             if (jfr== null) {
                 jfr = new JFrame("FajitaBoy Screen");
@@ -394,7 +421,36 @@ public final class Debugger implements DrawsGameboyScreen {
         }
     }
     
-    private void toggleKey(String key) {
+    private void showBackgroundNumbers(int addr, int scx, int scy) {
+    	for (int y = 0; y < GB_LCD_H/GB_TILE_H; y++) {
+    		for (int x = 0; x < GB_LCD_W/GB_TILE_W; x++) {
+    			int ay = (scy + y) % 32;
+    			int ax = (scx + x) % 32;
+    			int nr = addressBus.read(addr + ay*32 + ax);
+    			System.out.print(String.format("%02x ", nr));
+    		}
+    		System.out.print("\n");
+    	}
+	}
+
+	private void showTile(int addr) {
+		for (int i = 0; i < 16; i += 2) {
+			int hi = addressBus.read(addr + i);
+			int lo = addressBus.read(addr + i + 1);
+			
+			int pxl[] = LCD.convertToPixels(hi, lo);
+			for (int j : pxl) {
+				if (j != 0) {
+					System.out.print(j);
+				} else {
+					System.out.print(' ');
+				}
+			}
+			System.out.print("\n");
+		}
+	}
+
+	private void toggleKey(String key) {
         IO.JoyPad jp = addressBus.getJoyPad(); 
         if (key.equals("a")) {
             jp.setA(!jp.isA());
