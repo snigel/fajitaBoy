@@ -21,6 +21,7 @@ import javax.swing.WindowConstants;
 
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.IO;
+import fajitaboy.memory.RomWriteException;
 import static java.lang.Math.*;
 
 import static fajitaboy.constants.LCDConstants.*;
