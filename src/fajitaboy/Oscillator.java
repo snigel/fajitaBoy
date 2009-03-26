@@ -237,7 +237,7 @@ public class Oscillator implements Runnable{
             // Trigger LCDSTAT interrupt if LYC=LY Coincidence Interrupt is
             // enabled
             int stat = ram.read(ADDRESS_STAT);
-            if ((stat & 0x80) != 0) {
+            if ((stat & 0x40) != 0) {
                 ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x02);
             }
         }
