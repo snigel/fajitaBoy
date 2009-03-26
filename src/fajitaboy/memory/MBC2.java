@@ -17,11 +17,11 @@ package fajitaboy.memory;
   16/8 mode. S = 1 selects 4/32 mode.
  */
 
-public class MBC1 implements MemoryInterface {
+public class MBC2 implements MemoryInterface {
     Eram eram;
     ROM rom;
 
-    public MBC1 (Eram ram, ROM cartridge){
+    public MBC2 (Eram ram, ROM cartridge){
         eram=ram;
         rom=cartridge;
     }
@@ -39,20 +39,9 @@ public class MBC1 implements MemoryInterface {
     }
 
     public void reset() {
-        setRomBank(0);
-        setRamBank(0);
+        rom.setBank(0);
+        eram.setBank(0);
     }
-    private void setRomBank(int bank){
-        if(bank == 0){ //0 is not allowed on MBC1.
-            rom.setBank(1);
-        }
-        else
-            rom.setBank(bank);
-    }
-    private void setRamBank(int bank){
-        eram.setBank(bank);
-    }
-
 
     public void write(int address, int data) {
         System.out.println(address);

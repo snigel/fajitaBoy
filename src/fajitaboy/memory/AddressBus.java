@@ -100,9 +100,6 @@ public class AddressBus implements MemoryInterface {
         hram = new Hram(HRAM_START, HRAM_END);
         initialize(hram, HRAM_START, HRAM_END);
 
-        eram = new Eram(ERAM_START, ERAM_END);
-        initialize(eram, ERAM_START, ERAM_END);
-
         oam = new Oam(OAM_START, OAM_END, this);
         initialize(oam, OAM_START, OAM_END);
         
@@ -115,14 +112,18 @@ public class AddressBus implements MemoryInterface {
         module[INTERRUPT_ADDRESS] = interruptRegister;
 
         module[ADDRESS_DMA] = oam;
+        eram = new Eram(ERAM_START, ERAM_END);
+        initialize(eram, ERAM_START, ERAM_END);
     }
 
     private MemoryInterface setMBC(){
         switch(rom.getMBC()){
         case ROM: return rom;
-        case MBC1: return new MBC1(eram, rom);
+        case MBC1: return new MBC1(eram,rom);
         case MBC1_RAM: return new MBC1(eram, rom);
         case MBC1_RAM_BATTERY: return new MBC1(eram, rom);
+        case MBC2: return new MBC2(eram, rom);
+        case MBC2_BATTERY: return new MBC2(eram, rom);
         default: return rom;
         }
     }

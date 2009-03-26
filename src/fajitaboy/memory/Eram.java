@@ -14,7 +14,7 @@ public class Eram extends MemoryComponent {
     /**
      * This array holds the memory space of RAM.
      */
-    protected int[][] ram;
+    protected int[] ram;
 
     private int bank;
 
@@ -61,7 +61,7 @@ public class Eram extends MemoryComponent {
             throw new ArrayIndexOutOfBoundsException(String.format(
                     "MemoryComponent: could not read 0x%04x", address));
         }
-        return ram[addr][bank];
+        return ram[addr];
     }
 
     /**
@@ -73,7 +73,7 @@ public class Eram extends MemoryComponent {
             throw new ArrayIndexOutOfBoundsException(String.format(
                     "MemoryComponent: could not write 0x%04x", address));
         }
-        ram[addr][bank] = data;
+        ram[addr] = data;
     }
 
     /**
@@ -81,7 +81,7 @@ public class Eram extends MemoryComponent {
      */
     public void reset() {
         bank = 0;
-        ram = new int[length][4]; // 4 is max number.
+        ram = new int[length];
     }
 
     /**
@@ -92,7 +92,7 @@ public class Eram extends MemoryComponent {
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
         }
-        return ram[addr][bank];
+        return ram[addr];
     }
 
     /**
@@ -103,7 +103,7 @@ public class Eram extends MemoryComponent {
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
         }
-        ram[addr][bank] = data;
+        ram[addr] = data;
     }
 
 }

@@ -30,7 +30,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     private int bank;
 
     public void setBank(int bank) { // For MBC
-        this.bank = bank;
+            this.bank = bank;
     }
 
     /**
@@ -62,7 +62,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     }
 
     public void reset() {
-        // Reset not necessary ignore
+   // Reset not necessary ignore
     }
 
     public void write(int address, int data) {
