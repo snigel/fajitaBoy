@@ -4,13 +4,15 @@ import static fajitaboy.constants.AddressConstants.NR11_REGISTER;
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.AddressConstants.SOUND1_LOW;
 
+import java.util.Random;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-public class Audio {
+public class Audio3 {
 
     AudioFormat af;
 
@@ -30,11 +32,11 @@ public class Audio {
     int soundHigh;
     int length = (int) (samplerate*1);
     AddressBus ab;
+    Random random;
 
-    public Audio(AddressBus ab, int soundLow, int soundHigh) throws LineUnavailableException {
-        this.soundHigh = soundHigh;
-        this.soundLow = soundLow;
+    public Audio3(AddressBus ab) throws LineUnavailableException {
         this.ab = ab;
+        random = new Random();
         af = new AudioFormat(samplerate, 8, 1, true, false);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
         sdl = (SourceDataLine) AudioSystem.getLine(info);
@@ -55,7 +57,8 @@ public class Audio {
         }
         */
         calcFreq1();
-        if (oldFreq != 0) {
+        int nr44 = ab.read(NR44_REGISTER)& 0x40;
+        if ((oldFreq != 0) && (nr44 == 0)) {
             if(offset + samples > buffer1.length) {
                 end = buffer1.length - offset;
             }
@@ -84,32 +87,47 @@ public class Audio {
         }
     */
     }
-    
+
     private boolean calcFreq1() {
-        int low1 = ab.read(soundLow);
-        int high1 = ab.read(soundHigh)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
+        int nr43 = ab.read(NR43_REGISTER);
+        int s = (nr43 & 0xF0) >> 4;
+    //    System.out.println("s = " + s);
+        double r = nr43 & 0x7;
+        if(r == 0) {
+            r = 0.5;
+        }
+        int freq1 = (int)((524288 / r) / (2^(s+1)));
         if (freq1 == oldFreq) {
             return false;
         }
         else {
             buffer1 = new byte[length];
+            int k = 0;
+            int amp = random.nextInt(100);
             for(int i = 0; i < length; i++) {
                 double angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
-                buffer1[i] = (byte) (100 * Math.signum((Math.sin(angle1))));
+                buffer1[i] = (byte) (amp * Math.signum((Math.sin(angle1))));
+                k++;
+                if(k == 10) {
+                    amp = random.nextInt(100);
+                    //System.out.println("amp :" + amp);
+                    k = 0;
+                }
+//                buffer1[i] = (byte) (100 * Math.signum((Math.sin(angle1))));
+
             }
             oldFreq = freq1;
             offset = 0;
             end = samples;
             return true;
         }
-            
+
     }
-    
+
     private boolean calcFreq2() {
         int low1 = ab.read(SOUND2_LOW);
         int high1 = ab.read(SOUND2_HIGH)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
+        int freq1 = 65536/(2048-(high1+low1)&0x7ff);
         if (freq1 == oldFreq) {
             return false;
         }
@@ -123,7 +141,7 @@ public class Audio {
             offset = 0;
             end = samples;
             return true;
-        }         
+        }
     }
 
     private void mix(boolean ch1, boolean ch2) {
@@ -150,7 +168,6 @@ public class Audio {
         }
     }
     private void readLength() {
-        int length = ab.read(NR11_REGISTER);
         length = length & 0x3F;
         System.out.println("Gb length: " + length);
         //Längd i samples
@@ -171,7 +188,7 @@ public class Audio {
         }
         else {
             int nr14 = ab.read(NR14_REGISTER)& 0x40;
-            System.out.println("Nr14: " + nr14);            
+            System.out.println("Nr14: " + nr14);
             if (nr14 == 0) {
                 System.out.println("Nr14: oändlig längd");
             }

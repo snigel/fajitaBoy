@@ -16,6 +16,8 @@ public class AudioMain implements DrawsGameboyScreen {
 
     Audio au1;
     Audio au2;
+    Audio2 au3;
+    Audio3 au4;
 
     GamePanel gp;
 
@@ -31,9 +33,12 @@ public class AudioMain implements DrawsGameboyScreen {
 
         System.out.println("Running " + INSTRUCTIONS + " instructions");
 
-        au1 = new Audio();
-        au2 = new Audio();
-        ab = new AddressBus("/bombjack.gb");
+//        au2 = new Audio();
+        ab = new AddressBus("/home/johan/bombjack.gb");
+        au1 = new Audio(ab, SOUND1_LOW, SOUND1_HIGH);
+        au2 = new Audio(ab, SOUND2_LOW, SOUND2_HIGH);
+        au3 = new Audio2(ab, SOUND3_LOW, SOUND3_HIGH);
+        au4 = new Audio3(ab);
 
         Cpu cpu = new Cpu(ab);
         Oscillator oc = new Oscillator(cpu, ab, this);
@@ -73,15 +78,19 @@ public class AudioMain implements DrawsGameboyScreen {
         // TODO Auto-generated method stub
 
         //gp.drawGameboyScreen(data);
-        
-        int low1 = ab.read(SOUND1_LOW);
-        int high1 = ab.read(SOUND1_HIGH)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
-        au1.generateTone(freq1, duration, volume);
-        
-        int low2 = ab.read(SOUND1_LOW);
-        int high2 = ab.read(SOUND1_HIGH)*0x100;
+       // int low1 = ab.read(SOUND1_LOW);
+       // int high1 = ab.read(SOUND1_HIGH)*0x100;
+        // int freq1 = 131072/(2047-(high1+low1)&0x7ff);
+        au1.generateTone();
+          au2.generateTone();
+        au3.generateTone();
+        au4.generateTone();
+
+/*
+        int low2 = ab.read(SOUND2_LOW);
+        int high2 = ab.read(SOUND2_HIGH)*0x100;
         int freq2 = 131072/(2047-(high1+low1)&0x7ff);
         au2.generateTone(freq2, duration, volume);
+*/
     }
 }

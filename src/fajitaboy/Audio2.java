@@ -10,7 +10,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-public class Audio {
+public class Audio2 {
 
     AudioFormat af;
 
@@ -31,7 +31,7 @@ public class Audio {
     int length = (int) (samplerate*1);
     AddressBus ab;
 
-    public Audio(AddressBus ab, int soundLow, int soundHigh) throws LineUnavailableException {
+    public Audio2(AddressBus ab, int soundLow, int soundHigh) throws LineUnavailableException {
         this.soundHigh = soundHigh;
         this.soundLow = soundLow;
         this.ab = ab;
@@ -84,11 +84,12 @@ public class Audio {
         }
     */
     }
-    
+
     private boolean calcFreq1() {
         int low1 = ab.read(soundLow);
         int high1 = ab.read(soundHigh)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
+        int freq1 = 65536/(2047-(high1+low1)&0x7ff);
+        System.out.println("channel 3 freq: " + freq1);
         if (freq1 == oldFreq) {
             return false;
         }
@@ -103,13 +104,13 @@ public class Audio {
             end = samples;
             return true;
         }
-            
+
     }
-    
+
     private boolean calcFreq2() {
         int low1 = ab.read(SOUND2_LOW);
         int high1 = ab.read(SOUND2_HIGH)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
+        int freq1 = 65536/(2048-(high1+low1)&0x7ff);
         if (freq1 == oldFreq) {
             return false;
         }
@@ -123,7 +124,7 @@ public class Audio {
             offset = 0;
             end = samples;
             return true;
-        }         
+        }
     }
 
     private void mix(boolean ch1, boolean ch2) {
@@ -171,7 +172,7 @@ public class Audio {
         }
         else {
             int nr14 = ab.read(NR14_REGISTER)& 0x40;
-            System.out.println("Nr14: " + nr14);            
+            System.out.println("Nr14: " + nr14);
             if (nr14 == 0) {
                 System.out.println("Nr14: oändlig längd");
             }
