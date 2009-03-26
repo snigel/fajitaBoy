@@ -1,7 +1,10 @@
 package fajitaboy.mbc;
 
-import fajitaboy.Cartridge;
+import memory.Cartridge;
 import static fajitaboy.constants.CartridgeConstants.*;
+//Kommenterat bort ej kompilerande metoder. Alla commits ska kompilera!
+//adam.
+
 
 //public class MBC1_backup extends Cartridge {
 public class MBC1_backup extends Cartridge{
@@ -58,14 +61,14 @@ public class MBC1_backup extends Cartridge{
 		initialiseBanks();
 	}
 	
-	public MBC1_backup(int start, int[] data) {
+	/*public MBC1_backup(int start, int[] data) {
 		offset = start;
 		ram = data;
 		romSize = ram[0x148];
 		ramSize = ram[0x149];
 		initialiseBanks();
 		reset();
-	}
+	}*/
 	
 	private void initialiseBanks() {
 		// Initialise ROM banks;
@@ -131,7 +134,7 @@ public class MBC1_backup extends Cartridge{
 		ramBank = ramBanks[ramBankNr];
 	}
 	
-	public void reset() {
+	/*public void reset() {
 		romBankNr = 0x01;
 		ramBankNr = 0x00;
 		ramEnable = false;
@@ -181,9 +184,9 @@ public class MBC1_backup extends Cartridge{
         } else {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
         }
-    }
+    }*/
 	
-	public int read( int address ) {
+	/*public int read( int address ) {
 		if ( address >= 0x0000 && address < 0x4000 ) {
 			return romBanks[0][address];
 		} else if ( address >= 0x4000 && address < 0x8000 ) {
@@ -215,9 +218,9 @@ public class MBC1_backup extends Cartridge{
 		} else {
 	        throw new ArrayIndexOutOfBoundsException("RamLow.java");
 		}
-	}
+	}*/
 	
-	public int forceRead( int address ) {
+	/*public int forceRead( int address ) {
 		return read(address);
 	}
 	
@@ -230,7 +233,7 @@ public class MBC1_backup extends Cartridge{
 			romBank = romBanks[romBankNr];
 		}
 	}
-	
+	*/
 	private void setRamBank() {
 		if ( modeSelect ) {
 			ramBank = ramBanks[0];
