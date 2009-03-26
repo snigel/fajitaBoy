@@ -2,9 +2,9 @@ package fajitaboy.lcd;
 
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.LCDConstants.*;
-import fajitaboy.AddressBus;
-import fajitaboy.MemoryInterface;
-import fajitaboy.Vram;
+import fajitaboy.memory.AddressBus;
+import fajitaboy.memory.MemoryInterface;
+import fajitaboy.memory.Vram;
 
 public class BackgroundMap {
 	public static enum MapType {BACKGROUND, WINDOW}

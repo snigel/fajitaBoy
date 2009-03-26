@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import fajitaboy.lcd.LCD;
+import fajitaboy.memory.IO;
 import static java.lang.Math.*;
 
 import static fajitaboy.constants.LCDConstants.*;

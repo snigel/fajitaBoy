@@ -5,8 +5,8 @@ import static fajitaboy.constants.LCDConstants.*;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import fajitaboy.MemoryInterface;
-import fajitaboy.Vram;
+import fajitaboy.memory.MemoryInterface;
+import fajitaboy.memory.Vram;
 
 public class SpriteAttributeTable {
     

@@ -27,10 +27,15 @@ public final class AddressConstants {
     
     public static final int ADDRESS_JOYPAD = 0xFF00;
 
+    public static final int CARTRIDGE_TYPE = 0x147;
     public static final int DEBUG_START = 0x0000;
     public static final int DEBUG_END = 0x10000;
     public static final int CARTRIDGE_START = 0x0000;
     public static final int CARTRIDGE_END = 0x8000;
+    public static final int ROMLOW_START = 0x0000;
+    public static final int ROMLOW_END = 0x4000;
+    public static final int ROMHIGH_START = 0x4000;
+    public static final int ROMHIGH_END = 0x8000;
     public static final int VRAM_START = 0x8000;
     public static final int VRAM_END = 0xA000;
     public static final int ERAM_START = 0xA000;

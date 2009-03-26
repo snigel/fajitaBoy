@@ -1,6 +1,6 @@
 package fajitaboy.lcd;
 
-import fajitaboy.MemoryInterface;
+import fajitaboy.memory.MemoryInterface;
 
 public class SpriteAttribute implements Comparable {
     int x, y, patternNr;

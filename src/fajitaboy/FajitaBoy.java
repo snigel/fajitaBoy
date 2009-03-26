@@ -10,8 +10,9 @@ import java.awt.event.KeyListener;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
 
-import fajitaboy.IO.JoyPad;
 import fajitaboy.lcd.LCD;
+import fajitaboy.memory.AddressBus;
+import fajitaboy.memory.IO.JoyPad;
 
 import static fajitaboy.constants.HardwareConstants.*;
 

@@ -2,6 +2,8 @@ package fajitaboy;
 
 import java.util.List;
 import java.util.LinkedList;
+
+import fajitaboy.memory.MemoryInterface;
 import static fajitaboy.InstructionSet.*;
 
 /**

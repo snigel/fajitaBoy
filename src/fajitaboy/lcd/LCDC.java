@@ -1,6 +1,6 @@
 package fajitaboy.lcd;
 
-import fajitaboy.MemoryInterface;
+import fajitaboy.memory.MemoryInterface;
 import static fajitaboy.constants.AddressConstants.*;
 
 public class LCDC {

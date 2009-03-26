@@ -1,7 +1,7 @@
 package fajitaboy.lcd;
 
-import fajitaboy.MemoryComponent;
-import fajitaboy.MemoryInterface;
+import fajitaboy.memory.MemoryComponent;
+import fajitaboy.memory.MemoryInterface;
 
 public class Tile extends MemoryComponent {
 	public int data[] = new int[16];

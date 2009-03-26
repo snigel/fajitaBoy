@@ -5,6 +5,8 @@ import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.MessageConstants.*;
 import java.lang.Math.*;
 
+import fajitaboy.memory.MemoryInterface;
+
 /**
  * @author Tobias Svensson
  *

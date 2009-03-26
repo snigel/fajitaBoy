@@ -2,6 +2,7 @@ package fajitaboy;
 
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
+import fajitaboy.memory.MemoryInterface;
 
 /**
  * CPU class for emulating the Game Boy CPU.

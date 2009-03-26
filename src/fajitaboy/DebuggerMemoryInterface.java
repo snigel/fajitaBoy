@@ -3,6 +3,8 @@ package fajitaboy;
 import java.util.LinkedList;
 import java.util.List;
 
+import fajitaboy.memory.AddressBus;
+
 /**
  * DebuggerMemoryInterface works like a wrapper around an memory interface, but it
  * allows breakpoints to be added on address spaces. When someone calls read or

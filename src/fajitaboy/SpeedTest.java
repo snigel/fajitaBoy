@@ -1,5 +1,7 @@
 package fajitaboy;
 
+import fajitaboy.memory.AddressBus;
+
 /**
  * A simple benchmark for instructions.
  * @author arvid

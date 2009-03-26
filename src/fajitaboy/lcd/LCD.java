@@ -4,9 +4,9 @@ import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.MessageConstants.*;
 import static fajitaboy.constants.LCDConstants.*;
 
-import fajitaboy.AddressBus;
 import fajitaboy.ClockPulseReceiver;
-import fajitaboy.MemoryInterface;
+import fajitaboy.memory.AddressBus;
+import fajitaboy.memory.MemoryInterface;
 
 /**
  * @author Tobias Svensson
