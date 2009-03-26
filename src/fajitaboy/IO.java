@@ -111,22 +111,24 @@ public class IO extends MemoryComponent {
             
             int jp = ram[ADDRESS_JOYPAD - offset];
             
+            // bit 5: select button keys (0 = Select)
             boolean button = (jp & 0x20) == 0;
+            // bit 4: select direction keys (0 = Select)
             boolean direction = (jp & 0x10) == 0;
             
+            // reset lower nibble
+            jp &= 0xF0;
             if (!(button ^ direction)) {
                 // if neither direction nor button is selected
                 // or if both are selected, set lower nibble to 
                 // 1 == no button pressed
                 jp |= 0x0F;
             } else if (button) {
-                // ugly as hell. ocha här istället om false.
                 jp |= !a ? 0x01 : 0x00;
                 jp |= !b ? 0x02 : 0x00;
                 jp |= !select ? 0x04 : 0x00;
                 jp |= !start ? 0x08 : 0x00;
             } else if (direction) {
-                // ugly as hell.
                 jp |= !right ? 0x01 : 0x00;
                 jp |= !left ? 0x02 : 0x00;
                 jp |= !up ? 0x04 : 0x00;
