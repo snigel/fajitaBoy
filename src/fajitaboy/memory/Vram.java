@@ -1,7 +1,8 @@
 package fajitaboy.memory;
 
 import fajitaboy.lcd.Tile;
-
+import static fajitaboy.constants.LCDConstants.*;
+import static fajitaboy.constants.AddressConstants.*;
 /**
  * Represents the graphic ram, also known as VRAM.
  *
@@ -27,10 +28,11 @@ public class Vram extends MemoryComponent {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
-        } else if ( address < 0x9800 ) {
-        	return getTiles()[addr / 16].read(address);
+        } else if ( address < TILE_DATA_END ) {
+        	return tiles[addr / 16].read(address);
+        } else {
+        	return ram[addr];
         }
-        return ram[addr];
     }
 
     /**
@@ -40,10 +42,11 @@ public class Vram extends MemoryComponent {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
-        } else if ( address < 0x9800 ) {
-        	getTiles()[(addr & 0xFFF0) / 16].write(address, data);
+        } else if ( address < TILE_DATA_END ) {
+        	tiles[(addr & 0xFFF0) / 16].write(address, data);
+        } else {
+        	ram[addr] = data;
         }
-        ram[addr] = data;
     }
 
     /**
@@ -51,9 +54,10 @@ public class Vram extends MemoryComponent {
      */
     public void reset() {
         ram = new int[length];
-        tiles = new Tile[384];
-        for ( int i = 0; i < 384; i++ )
-        	getTiles()[i] = new Tile();
+        tiles = new Tile[2*GB_TILES];
+        for ( int i = 0; i < 2*GB_TILES; i++) {
+        	tiles[i] = new Tile();
+        }
     }
 
 
@@ -64,10 +68,11 @@ public class Vram extends MemoryComponent {
     	int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
-        } else if ( address < 0x9800 ) {
-        	return getTiles()[(addr & 0xFFF0) / 16].read(address);
+        } else if ( address < TILE_DATA_END ) {
+        	return tiles[(addr & 0xFFF0) / 16].read(address);
+        } else {
+        	return ram[addr];
         }
-        return ram[addr];
     }
 
     /**
@@ -77,10 +82,11 @@ public class Vram extends MemoryComponent {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
-        } else if ( address < 0x9800 ) {
-        	getTiles()[(addr & 0xFFF0) / 16].write(address, data);
+        } else if ( address < TILE_DATA_END ) {
+        	tiles[(addr & 0xFFF0) / 16].write(address, data);
+        } else {
+        	ram[addr] = data;
         }
-        ram[addr] = data;
     }
 
 	public Tile[] getTiles() {
