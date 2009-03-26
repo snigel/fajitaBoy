@@ -10,32 +10,50 @@ import fajitaboy.lcd.LCD;
  * devices to do different things at different clock cycles.
  * @author Tobias S
  */
-public class Oscillator {
+public class Oscillator implements Runnable{
 
+    /**
+     * Max number of frames to skip in a row.
+     * TODO move this constant to a proper constant class.
+     */
+    private final int MAX_FRAMESKIP = 10;
+    
+    private boolean running;
+    
+    /**
+     * if true the screen is not updated on vblank.
+     */
+    private boolean frameSkip;
+    
+    /**
+     * Next cycle to stop and wait if going too fast
+     */
+    private long nextHaltCycle;
+    
     /**
      * Cycles since Oscillator initialization.
      */
-    private int cycles;
+    private long cycles;
 
     /**
      * Next cycle at which the LCD will proceed to next line.
      */
-    private int nextLineInc;
+    private long nextLineInc;
 
     /**
      * Next cycle at which the LCD will change its mode.
      */
-    private int nextModeChange;
+    private long nextModeChange;
 
     /**
      * Previous cycle at which the Timer was incremented.
      */
-    private int prevTimerInc;
+    private long prevTimerInc;
 
     /**
      * Next cycle at which the Divider will be incremented.
      */
-    private int nextDividerInc;
+    private long nextDividerInc;
 
     /**
      * set to true if LY == LYC
@@ -81,11 +99,8 @@ public class Oscillator {
      *            Pointer to MemoryInterface instance.
      */
     public Oscillator(Cpu cpu, AddressBus ram, DrawsGameboyScreen dgs) {
-        this.cpu = cpu;
-        this.ram = ram;
-        lcd = new LCD(ram);
+        this(cpu,ram);
         this.dgs = dgs; 
-        reset();
     }
     
     /**
@@ -98,6 +113,9 @@ public class Oscillator {
         prevTimerInc = 0;
         nextDividerInc = GB_DIV_CLOCK;
         lycHit = false;
+        frameSkip = false;
+        nextHaltCycle = GB_CYCLES_PER_FRAME;
+        running = false;
     }
 
     /**
@@ -147,7 +165,7 @@ public class Oscillator {
             timerFreq = GB_TIMER_CLOCK_3;
             break;
         }
-
+        
         while (cycles >= prevTimerInc + timerFreq) {
             if ((tac & 0x04) != 0) {
                 int tima = ram.read(ADDRESS_TIMA);
@@ -183,7 +201,7 @@ public class Oscillator {
                 lcd.oscillatorMessage(MSG_LCD_VBLANK);
                 
                 //call draw
-                if (dgs != null) {
+                if (!frameSkip && dgs != null) {
                     dgs.drawGameboyScreen(lcd.getScreen());
                 }
                 
@@ -222,9 +240,64 @@ public class Oscillator {
             }
         }
     }
-    
+
     public LCD getLCD() {
-    	return lcd;
+        return lcd;
     }
-    
+
+    /**
+     * Starts the execution. Create a new thread and call start() to
+     * make this method run in a separate thread.
+     */
+    public final void run() {
+        running = true;
+        long sleepTime;
+        long nextUpdate = System.nanoTime();
+        int frameSkipCount = 0;
+        while (running) {
+            // Oscillator.step();
+            step();
+
+            if (cycles > nextHaltCycle) {
+                nextUpdate += GB_NANOS_PER_FRAME;
+                sleepTime = nextUpdate - System.nanoTime();
+                if (sleepTime >= 0) {
+                    frameSkip = false;
+                    frameSkipCount = 0;
+                    try {
+                        Thread.sleep(sleepTime / 1000000);
+                    } catch (InterruptedException e) {}
+                 // Thread.sleep is not 100% accurate so we have to
+                 // give some extra marginal before frame skip.
+                } else if (sleepTime < -GB_NANOS_PER_FRAME) {
+                    if (frameSkipCount >= MAX_FRAMESKIP) {
+                        frameSkip = false;
+                        frameSkipCount = 0;
+                        nextUpdate = System.nanoTime();
+                    } else {
+                        frameSkip = true;
+                        frameSkipCount++;
+                    }
+                }
+                nextHaltCycle += GB_CYCLES_PER_FRAME;
+            }
+        }
+        frameSkip = false;
+    }
+
+    /**
+     * Method to call to stop the run() loop.
+     */
+    public final void stop() {
+        running = false;
+    }
+
+    /**
+     * To know if run() is running.
+     * @return true if the Oscillator is running, otherwise false.
+     */
+    public final boolean isRunning() {
+        return running;
+    }
+
 }

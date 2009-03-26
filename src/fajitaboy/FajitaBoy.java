@@ -203,18 +203,19 @@ public class FajitaBoy extends JApplet {
         emulator = new Emulator(path);
 
         changeGameState(GameState.PLAYGAME);
-
-        gamePanel.addKeyListener(new KeyInputController(emulator.addressBus.getJoyPad()));
-        emulatorThread = new Thread(emulator);
+        gamePanel.addKeyListener(
+                new KeyInputController(
+                        emulator.addressBus.getJoyPad(),
+                        emulator.oscillator));
+        emulatorThread = new Thread(emulator.oscillator);
         emulatorThread.start();
-
     }
 
     /**
      * Encapsulates the emulator.
      * @author Marcus, Peter
      */
-    private final class Emulator implements Runnable {
+    private final class Emulator {
 
         /** Emulator addressbus. */
         private AddressBus addressBus;
@@ -224,11 +225,6 @@ public class FajitaBoy extends JApplet {
 
         /** Emulator oscillator. */
         private Oscillator oscillator;
-        
-        /** Oscillator cycles */
-        private int cycles;
-        private int nextHaltCycle;
-        private long nextNanos; 
 
         /**
          * To know if the emulation should keep running.
@@ -246,39 +242,6 @@ public class FajitaBoy extends JApplet {
             cpu = new Cpu(addressBus);
             oscillator = new Oscillator(cpu, addressBus, gamePanel);
             running = false;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public void run() {
-            showStatus("Game on!");
-            running = true;
-            /*
-             * This loop should probably be in the oscillator instead. This loop
-             * runs at full speed but it goes too slow anyway.
-             */
-            nextNanos = System.nanoTime() + GB_NANOS_PER_FRAME;
-            nextHaltCycle = GB_CYCLES_PER_FRAME;
-            cycles = 0;
-            long nanos;
-            while (running) {
-                cycles += oscillator.step();
-                
-                // Wait if running too fast....
-                while ( cycles > nextHaltCycle ) {
-                	nanos = System.nanoTime();
-                	if ( nanos > nextNanos ) {
-                		nextHaltCycle += GB_CYCLES_PER_FRAME;
-                		nextNanos += GB_NANOS_PER_FRAME;
-                	} else {
-                		try {
-                		    Thread.sleep(1);
-                		} catch ( Exception e ) {}
-                	}
-                }
-            }
-            // oscillator.run();
         }
 
         /**
