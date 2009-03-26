@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
-public class ROM implements MemoryInterface {
+public class ROM implements MemoryInterface, MemoryBankInterface {
 
     /**
      * The size of the ram array.
