@@ -15,7 +15,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     /**
      * This array holds the memory space of RAM.
      */
-    protected int[][] ram;
+    protected int[] ram;
 
     /**
      * The offset value is used for subtracting the high incoming addresses to a
@@ -55,11 +55,10 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     }
 
     public int read(int address) {
-       // System.out.println("neger "+address);
         if(address<0x4000)
-            return ram[address][0];
+            return ram[address];
         else
-            return ram[address-bank*0x4000][bank];
+            return ram[address+(bank-1)*0x4000];
     }
 
     public void reset() {
@@ -71,11 +70,11 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     }
 
     public int getMBC() {
-        return ram[CARTRIDGE_TYPE][0];
+        return ram[CARTRIDGE_TYPE];
     }
     
     public int getBanks(){
-        switch(ram[0x0148][0]){
+        switch(ram[0x0148]){
         case 0: return 2;
         case 1: return 4;
         case 2: return 8;
@@ -101,14 +100,12 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
         try {
             // Read ROM data from file
             File romFile = new File(romPath);
-            ram = new int[0x4000][getBanks()];
-
+            ram = new int[(int) romFile.length()];
             FileInputStream fis = new FileInputStream(romFile);
             DataInputStream dis = new DataInputStream(fis);
-            for (int j = 0; j < getBanks(); j++) {
-                for (int i = 0; i < 0x4000; i++) {
-                    ram[i][j] = dis.readUnsignedByte();
-                }
+
+            for (int i = 0; i < ram.length; i++) {
+                ram[i] = dis.readUnsignedByte();
             }
 
             fis.close();
