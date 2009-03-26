@@ -44,8 +44,6 @@ public class MBC2 implements MemoryInterface {
     }
 
     public void write(int address, int data) {
-        System.out.println(address);
-        System.out.println(data);
         if(address>=0x2000 && 0x4000>address){
             rom.setBank(data);
         }

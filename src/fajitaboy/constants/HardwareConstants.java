@@ -20,5 +20,7 @@ public final class HardwareConstants {
 	public static final int MBC1 = 0x01;
 	public static final int MBC1_RAM = 0x02;
 	public static final int MBC1_RAM_BATTERY = 0x03;
+	public static final int MBC2 = 0x05;
+	public static final int MBC2_BATTERY = 0x06;
 	
 }
