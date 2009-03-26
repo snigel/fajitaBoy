@@ -36,8 +36,12 @@ public final class AddressConstants {
     public static final int ROMLOW_END = 0x4000;
     public static final int ROMHIGH_START = 0x4000;
     public static final int ROMHIGH_END = 0x8000;
+    
     public static final int VRAM_START = 0x8000;
+    public static final int TILE_DATA_START = 0x8000;
+    public static final int TILE_DATA_END = 0x9800;
     public static final int VRAM_END = 0xA000;
+    
     public static final int ERAM_START = 0xA000;
     public static final int ERAM_END = 0xC000;
     public static final int RAML_START = 0xC000;
