@@ -3,6 +3,7 @@ package fajitaboy;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import fajitaboy.FajitaBoy.GameState;
 import fajitaboy.memory.IO.JoyPad;
 /**
  * Handles the key input.
@@ -18,15 +19,18 @@ public class KeyInputController implements KeyListener {
      * Oscillator reference, used to pause/resume.
      */
     private Oscillator osc;
+    
+    private FajitaBoy fajitaBoy;
 
     /**
      * Creates a new KeyInputController object that handles key input.
      * @param joypad the JoyPad object
      * @param oscillator the Oscillator object
      */
-    public KeyInputController(final JoyPad joypad, final Oscillator oscillator) {
+    public KeyInputController(final FajitaBoy fb, final JoyPad joypad, final Oscillator oscillator) {
+        fajitaBoy = fb;
         jp = joypad;
-        osc = oscillator;
+        osc = oscillator;        
     }
 
     /**
@@ -45,12 +49,20 @@ public class KeyInputController implements KeyListener {
 
         case KeyEvent.VK_P:
             if (osc.isRunning()) {
-                osc.stop();
+                fajitaBoy.changeGameState(GameState.PAUSE);
             } else {
-                Thread emulatorThread = new Thread(osc);
-                emulatorThread.start();
+                fajitaBoy.changeGameState(GameState.PLAYGAME);
             }
             break;
+            
+        case KeyEvent.VK_ESCAPE:
+            if(fajitaBoy.getGameState() == GameState.INGAME_MENU) {
+                fajitaBoy.changeGameState(GameState.PLAYGAME);
+            } else {
+                fajitaBoy.changeGameState(GameState.INGAME_MENU);
+            }
+            break;
+            
         default: /* Nothing */ break;
         }
     }

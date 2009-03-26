@@ -1,5 +1,6 @@
 package fajitaboy;
 
+import static fajitaboy.constants.LCDConstants.*;
 import java.awt.*;
 import java.awt.image.*;
 
@@ -12,12 +13,14 @@ import javax.swing.JPanel;
 public class GamePanel extends JPanel implements DrawsGameboyScreen {
     private int[] pixels;
     private int zoom;
+    private Image image;
 
     private ColorModel colorModel;
     private byte[] palette;
 
     public GamePanel(int zoom) {
         setIgnoreRepaint(true);
+        setPreferredSize(new Dimension(GB_LCD_W*zoom,GB_LCD_H*zoom));
 
         pixels = new int[160 * 144];
         this.zoom = zoom;
@@ -47,11 +50,14 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
         }
 
         // create image with new pixels
-        Image image = Toolkit.getDefaultToolkit().createImage(
+        image = Toolkit.getDefaultToolkit().createImage(
                 new MemoryImageSource(160, 144, colorModel, pixels, 0, 160));
-
         // draw the image
         Graphics g = getGraphics();
+        g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
+    }
+    
+    public void paint(Graphics g) {
         g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
     }
 }

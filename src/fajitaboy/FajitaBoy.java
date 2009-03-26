@@ -3,12 +3,21 @@ package fajitaboy;
 
 import java.applet.AudioClip;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.AddressBus;
@@ -70,7 +79,12 @@ public class FajitaBoy extends JApplet {
         MULTIPLAYER_DUNNOLOL,
 
         /** GamePanel. */
-        PLAYGAME
+        PLAYGAME,
+        
+        /** Ingame Menu */
+        INGAME_MENU,
+        
+        PAUSE;
     }
 
     // - Panels
@@ -85,6 +99,11 @@ public class FajitaBoy extends JApplet {
 
     /** Emulator panel, where the actual emulator screen is shown. */
     private GamePanel gamePanel;
+    
+    private LayeredGamePanel layeredGamePanel;
+    
+    /**  */
+    private IngameMenuPanel ingameMenuPanel;
 
     // ------------------------------------------------------------------------
     // - Applet overrides
@@ -94,6 +113,36 @@ public class FajitaBoy extends JApplet {
      * @inheritDoc
      */
     public final void init() {
+        //getGraphics().get
+        
+        new Thread() {public void run() {
+            while(true) {
+        System.out.println(
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }}
+        }
+        }.start();
+        try {
+            // Set cross-platform Java L&F (also called "Metal")
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+        } 
+        catch (UnsupportedLookAndFeelException e) {
+           // handle exception
+        }
+        catch (ClassNotFoundException e) {
+           // handle exception
+        }
+        catch (InstantiationException e) {
+           // handle exception
+        }
+        catch (IllegalAccessException e) {
+           // handle exception
+        }
 
         // Init paths to user home catalog
         romPath = System.getProperty("user.home");
@@ -102,8 +151,7 @@ public class FajitaBoy extends JApplet {
         // Init panels
         startScreen = new StartScreenPanel(this);
         singleplayerLoadscreen = new SingleplayerLoadPanel(this, fileChooser);
-
-        // emulatorThread = new Thread(emulator);
+        ingameMenuPanel = new IngameMenuPanel(this);
 
         // Appletviewer resize
         resize(frameSize);
@@ -152,6 +200,13 @@ public class FajitaBoy extends JApplet {
         switch (gameState) {
         case PLAYGAME:
             emulator.stop();
+            gamePanel.setIgnoreRepaint(false);
+            break;
+        case INGAME_MENU:
+            layeredGamePanel.removeOverlapingPane();
+            break;
+        case PAUSE:
+            layeredGamePanel.removeOverlapingPane();
             break;
         default:
             break;
@@ -161,35 +216,40 @@ public class FajitaBoy extends JApplet {
         switch (state) {
         case STARTSCREEN:
             setContentPane(startScreen);
-            startScreen.requestFocusInWindow();
             showStatus("Start Screen");
             break;
 
         case SINGLEPLAYER_LOADSCREEN:
-            setContentPane(singleplayerLoadscreen);
-            singleplayerLoadscreen.requestFocusInWindow();
+            setContentPane(singleplayerLoadscreen);;
             showStatus("Singleplayer Screen");
 
             break;
         case PLAYGAME:
-            setContentPane(gamePanel);
+            gamePanel.setIgnoreRepaint(true);
+            setContentPane(layeredGamePanel);
             showStatus("Emulator Screen");
-            // emulatorThread = new Thread(emulator);
-            // emulatorThread.start();
-            gamePanel.requestFocusInWindow();
+            emulatorThread = new Thread(emulator.oscillator);
+            emulatorThread.start();
+            break;
+            
+        case INGAME_MENU:
+            layeredGamePanel.setOverlapingPane(ingameMenuPanel);
+            showStatus("Ingame menu screen");
+            break;
+        case PAUSE:
+            JLabel pauseText = new JLabel(" PAUSED ");
+            //pauseText.setBackground(Color.white);
+            pauseText.setOpaque(true);
+            pauseText.setFont(new Font("Comic Sans MS", Font.PLAIN, 18 ));
+            pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+            layeredGamePanel.setOverlapingPane(pauseText);
             break;
         default:
             return; // Non-implemented state or something
         }
         gameState = state;
+        getContentPane().requestFocusInWindow();
         validate();
-
-        System.out.println("Applet has focus: " + this.hasFocus());
-
-        System.out.println("Start has focus: " + startScreen.hasFocus());
-
-        System.out.println("Single has focus: "
-                + singleplayerLoadscreen.hasFocus());
     }
 
     /**
@@ -201,15 +261,30 @@ public class FajitaBoy extends JApplet {
 
         showStatus("Loading...");
         gamePanel = new GamePanel(2);
+        layeredGamePanel = new LayeredGamePanel(gamePanel);
+        
         emulator = new Emulator(path);
 
+        KeyInputController kic = new KeyInputController(
+                this,
+                emulator.addressBus.getJoyPad(),
+                emulator.oscillator);
+        
+        gamePanel.addKeyListener(kic);
+        layeredGamePanel.addKeyListener(kic);
+        addKeyListener(kic);
+        
         changeGameState(GameState.PLAYGAME);
-        gamePanel.addKeyListener(
-                new KeyInputController(
-                        emulator.addressBus.getJoyPad(),
-                        emulator.oscillator));
-        emulatorThread = new Thread(emulator.oscillator);
-        emulatorThread.start();
+    }
+    
+    public void resetEmulator() {
+        emulator.addressBus.reset();
+        emulator.cpu.reset();
+        emulator.oscillator.reset();
+    }
+    
+    public GameState getGameState() {
+        return gameState;
     }
 
     /**
@@ -249,8 +324,7 @@ public class FajitaBoy extends JApplet {
          * Pauses the emulator.
          */
         public void stop() {
-            // oscillator.stop();
-            running = false;
+            oscillator.stop();
         }
 
         /**
