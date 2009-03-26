@@ -116,40 +116,17 @@ public class LCD implements ClockPulseReceiver {
     public static int[] convertToPixels(int bitsLo, int bitsHi) {
         int[] pixels = new int[8];
 
-        if ((bitsLo & 0x80) != 0)
-            pixels[0] += 1;
-        if ((bitsLo & 0x40) != 0)
-            pixels[1] += 1;
-        if ((bitsLo & 0x20) != 0)
-            pixels[2] += 1;
-        if ((bitsLo & 0x10) != 0)
-            pixels[3] += 1;
-        if ((bitsLo & 0x08) != 0)
-            pixels[4] += 1;
-        if ((bitsLo & 0x04) != 0)
-            pixels[5] += 1;
-        if ((bitsLo & 0x02) != 0)
-            pixels[6] += 1;
-        if ((bitsLo & 0x01) != 0)
-            pixels[7] += 1;
-
-        if ((bitsHi & 0x80) != 0)
-            pixels[0] += 2;
-        if ((bitsHi & 0x40) != 0)
-            pixels[1] += 2;
-        if ((bitsHi & 0x20) != 0)
-            pixels[2] += 2;
-        if ((bitsHi & 0x10) != 0)
-            pixels[3] += 2;
-        if ((bitsHi & 0x08) != 0)
-            pixels[4] += 2;
-        if ((bitsHi & 0x04) != 0)
-            pixels[5] += 2;
-        if ((bitsHi & 0x02) != 0)
-            pixels[6] += 2;
-        if ((bitsHi & 0x01) != 0)
-            pixels[7] += 2;
-
+        if ((bitsLo | bitsHi) == 0) {
+        	return pixels;
+        }
+       
+        for (int i = 7; i >= 0; i--) {
+        	pixels[i] = (bitsLo & 1 | (bitsHi << 1) & 2);
+            
+            bitsLo >>= 1;
+            bitsHi >>= 1;
+        }
+        
         return pixels;
     }
 
