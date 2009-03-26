@@ -113,20 +113,7 @@ public class FajitaBoy extends JApplet {
      * @inheritDoc
      */
     public final void init() {
-        //getGraphics().get
-        
-        new Thread() {public void run() {
-            while(true) {
-        System.out.println(
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner());
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }}
-        }
-        }.start();
+      
         try {
             // Set cross-platform Java L&F (also called "Metal")
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
