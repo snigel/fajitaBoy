@@ -47,7 +47,7 @@ public class Oam extends MemoryComponent {
     /**
      * {@inheritDoc}
      */
-    public int read(final int address, final int data) {
+    public int read(final int address) {
         int addr = address - offset;
         if (address == ADDRESS_DMA) {
             return 0x00;
