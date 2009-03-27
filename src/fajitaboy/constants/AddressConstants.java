@@ -94,6 +94,10 @@ public final class AddressConstants {
     public static final int OBP0_REGISTER = 0xFF48;
     public static final int OBP1_REGISTER = 0xFF49;
     
+	public static final int PALETTE_BG_DATA = 0xFF47;
+	public static final int PALETTE_SPRITE0_DATA = 0xFF48;
+	public static final int PALETTE_SPRITE1_DATA = 0xFF49;
+    
     //The real status register for the keypad
     public static final int KEYPAD_STATUS_REGISTER = 0xFF00;
     //The direction cross in the secret memory area
