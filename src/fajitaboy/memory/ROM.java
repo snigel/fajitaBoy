@@ -101,6 +101,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
             // Read ROM data from file
             File romFile = new File(romPath);
             ram = new int[(int) romFile.length()];
+            System.out.println("romfile length "+romFile.length());
             FileInputStream fis = new FileInputStream(romFile);
             DataInputStream dis = new DataInputStream(fis);
 

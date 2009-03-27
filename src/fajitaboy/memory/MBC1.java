@@ -5,6 +5,7 @@ package fajitaboy.memory;
  * 1. StŠlla in rŠtt bank fšr minne.
  * 2. Att stŠlla in minneslŠge
  * 3. Kšra eram genom MBC?
+ * RŠkna antalet banker och se till att den inte anropar fler.
  * @author snigel
  *
  */
@@ -20,10 +21,13 @@ package fajitaboy.memory;
 public class MBC1 implements MemoryInterface {
     Eram eram;
     ROM rom;
+    int banks;
 
     public MBC1 (Eram ram, ROM cartridge){
         eram=ram;
         rom=cartridge;
+        banks=rom.getBanks();
+        System.out.println("This rom has "+banks+" banks");
     }
 
     public int forceRead(int address) {
@@ -35,6 +39,7 @@ public class MBC1 implements MemoryInterface {
     }
 
     public int read(int address) {
+        //System.out.println("read from ad "+address);
         return rom.read(address);
     }
 
@@ -46,21 +51,21 @@ public class MBC1 implements MemoryInterface {
         if(bank == 0){ //0 is not allowed on MBC1.
             rom.setBank(1);
         }
-        else
-            rom.setBank(bank);
+        else{
+           rom.setBank(bank&(banks-1));
+        }
+        //System.out.println("rom bank set to "+(bank%banks));
     }
     private void setRamBank(int bank){
+        //System.out.println("ram bank set to "+bank);
         eram.setBank(bank);
     }
 
 
     public void write(int address, int data) {
         if(address>=0x2000 && 0x4000>address){
-            rom.setBank(data);
+            setRomBank(data);
         }
-       // if(address<1 && address>0){
-        //    eram.setBank(data);
-       // }
     }
 
 }
