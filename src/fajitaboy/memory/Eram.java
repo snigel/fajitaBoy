@@ -56,6 +56,7 @@ public class Eram extends MemoryComponent {
      * {@inheritDoc}
      */
     public int read(final int address) {
+        System.out.println("ERAM read: "+address);
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException(String.format(
@@ -68,6 +69,7 @@ public class Eram extends MemoryComponent {
      * {@inheritDoc}
      */
     public void write(final int address, final int data) {
+        System.out.println("ERAM write: "+address+" "+data);
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException(String.format(

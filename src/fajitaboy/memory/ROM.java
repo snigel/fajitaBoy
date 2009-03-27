@@ -114,13 +114,16 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
         try {
             // Read ROM data from file
 
-            // if zipfile
+            
             DataInputStream dis;
-            FileInputStream fis;
+            FileInputStream fis = fis = new FileInputStream(romPath);
             ZipInputStream zis;
+         // if zipfile
+            // InputStream in=url.openStream ();
+            
             if (romPath.substring(romPath.length() - 3, romPath.length())
                     .equals("zip")) {
-                zis = new ZipInputStream(new FileInputStream(romPath));
+                zis = new ZipInputStream(fis);
                 ZipEntry entry = zis.getNextEntry();
                 ram = new int[(int) entry.getSize()];
                 dis = new DataInputStream(zis);
@@ -132,7 +135,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
                 File romFile = new File(romPath);
                 ram = new int[(int) romFile.length()];
                 System.out.println("romfile length " + romFile.length());
-                fis = new FileInputStream(romFile);
+              
                 dis = new DataInputStream(fis);
                 for (int i = 0; i < ram.length; i++) {
                     ram[i] = dis.readUnsignedByte();

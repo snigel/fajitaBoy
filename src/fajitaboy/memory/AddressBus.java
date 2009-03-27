@@ -2,7 +2,6 @@ package fajitaboy.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
-import fajitaboy.memory.Cartridge;
 import fajitaboy.memory.DebugMemory;
 
 /**
