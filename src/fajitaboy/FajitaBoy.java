@@ -1,6 +1,5 @@
 package fajitaboy;
 
-
 import java.applet.AudioClip;
 
 import java.awt.Color;
@@ -8,14 +7,24 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -24,9 +33,11 @@ import fajitaboy.memory.AddressBus;
 import fajitaboy.memory.IO.JoyPad;
 
 import static fajitaboy.constants.HardwareConstants.*;
+import static fajitaboy.constants.PanelConstants.*;
 
 /**
  * An applet a day keeps the doctor away.
+ * 
  * @author Marcus Johansson, Peter Olsson
  */
 @SuppressWarnings("serial")
@@ -54,8 +65,8 @@ public class FajitaBoy extends JApplet {
     private Dimension frameSize = new Dimension(320, 288);
 
     /**
-     * The fileChooser that is being used whenever the user
-     * browse the file system.
+     * The fileChooser that is being used whenever the user browse the file
+     * system.
      */
     private JFileChooser fileChooser;
 
@@ -80,10 +91,10 @@ public class FajitaBoy extends JApplet {
 
         /** GamePanel. */
         PLAYGAME,
-        
+
         /** Ingame Menu */
         INGAME_MENU,
-        
+
         PAUSE;
     }
 
@@ -99,9 +110,9 @@ public class FajitaBoy extends JApplet {
 
     /** Emulator panel, where the actual emulator screen is shown. */
     private GamePanel gamePanel;
-    
+
     private LayeredGamePanel layeredGamePanel;
-    
+
     /**  */
     private IngameMenuPanel ingameMenuPanel;
 
@@ -113,22 +124,19 @@ public class FajitaBoy extends JApplet {
      * @inheritDoc
      */
     public final void init() {
-      
+
         try {
             // Set cross-platform Java L&F (also called "Metal")
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-        } 
-        catch (UnsupportedLookAndFeelException e) {
-           // handle exception
-        }
-        catch (ClassNotFoundException e) {
-           // handle exception
-        }
-        catch (InstantiationException e) {
-           // handle exception
-        }
-        catch (IllegalAccessException e) {
-           // handle exception
+            UIManager
+                    .setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+        } catch (UnsupportedLookAndFeelException e) {
+            // handle exception
+        } catch (ClassNotFoundException e) {
+            // handle exception
+        } catch (InstantiationException e) {
+            // handle exception
+        } catch (IllegalAccessException e) {
+            // handle exception
         }
 
         // Init paths to user home catalog
@@ -151,7 +159,7 @@ public class FajitaBoy extends JApplet {
         setContentPane(startScreen);
         getContentPane().validate();
 
-        //addKeyListener(this);
+        // addKeyListener(this);
     }
 
     /**
@@ -178,6 +186,7 @@ public class FajitaBoy extends JApplet {
 
     /**
      * Changes what panel to show.
+     * 
      * @param state
      *            the state/panel
      */
@@ -207,7 +216,7 @@ public class FajitaBoy extends JApplet {
             break;
 
         case SINGLEPLAYER_LOADSCREEN:
-            setContentPane(singleplayerLoadscreen);;
+            setContentPane(singleplayerLoadscreen);
             showStatus("Singleplayer Screen");
 
             break;
@@ -218,17 +227,18 @@ public class FajitaBoy extends JApplet {
             emulatorThread = new Thread(emulator.oscillator);
             emulatorThread.start();
             break;
-            
+
         case INGAME_MENU:
             layeredGamePanel.setOverlapingPane(ingameMenuPanel);
             showStatus("Ingame menu screen");
             break;
         case PAUSE:
             JLabel pauseText = new JLabel(" PAUSED ");
-            //pauseText.setBackground(Color.white);
+            // pauseText.setBackground(Color.white);
             pauseText.setOpaque(true);
-            pauseText.setFont(new Font("Comic Sans MS", Font.PLAIN, 18 ));
-            pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+            pauseText.setFont(FB_INGAMEFONT);
+            pauseText
+                    .setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
             layeredGamePanel.setOverlapingPane(pauseText);
             break;
         default:
@@ -241,6 +251,7 @@ public class FajitaBoy extends JApplet {
 
     /**
      * Changes to game view and starts emulation of the rom with given path.
+     * 
      * @param path
      *            filepath to rom
      */
@@ -249,33 +260,101 @@ public class FajitaBoy extends JApplet {
         showStatus("Loading...");
         gamePanel = new GamePanel(2);
         layeredGamePanel = new LayeredGamePanel(gamePanel);
-        
+
         emulator = new Emulator(path);
 
-        KeyInputController kic = new KeyInputController(
-                this,
-                emulator.addressBus.getJoyPad(),
-                emulator.oscillator);
-        
+        KeyInputController kic = new KeyInputController(this,
+                emulator.addressBus.getJoyPad());
+
         gamePanel.addKeyListener(kic);
         layeredGamePanel.addKeyListener(kic);
         addKeyListener(kic);
-        
+
         changeGameState(GameState.PLAYGAME);
     }
-    
+
     public void resetEmulator() {
         emulator.addressBus.reset();
         emulator.cpu.reset();
         emulator.oscillator.reset();
     }
-    
+
     public GameState getGameState() {
         return gameState;
     }
 
+    /*
+     * public void saveState() { File state; int retVal =
+     * stateChooser.showSaveDialog(null);
+     * 
+     * if (retVal != JFileChooser.APPROVE_OPTION) { return; } state =
+     * stateChooser.getSelectedFile();
+     * 
+     * if (!state.exists()) { try { if (!state.createNewFile()) {
+     * errorMsg("File creation error!"); return; } } catch (IOException e) {
+     * errorMsg("IO FAIL"); e.printStackTrace(); } } else {
+     * errorMsg("Uhoh, this file exists. \n Too scared to overwrite!"); return;
+     * }
+     * 
+     * if (!state.canWrite()) { errorMsg("File writing error"); return; }
+     * 
+     * try { FileOutputStream fos = new FileOutputStream(state);
+     * ObjectOutputStream oos = new ObjectOutputStream(fos);
+     * oos.writeObject(emulator); } catch (FileNotFoundException e) {
+     * errorMsg("File could not be found."); } catch (IOException e) {
+     * errorMsg("Unknown IO exception! FORMATING C:\\"); // TODO less //
+     * dramatic e.printStackTrace(); }
+     * 
+     * }
+     * 
+     * public void loadState() { File state; int retVal =
+     * stateChooser.showOpenDialog(null);
+     * 
+     * if (retVal != JFileChooser.APPROVE_OPTION) { return; } state =
+     * stateChooser.getSelectedFile();
+     * 
+     * if (!checkFile(state)) { return; }
+     * 
+     * Object obj; try { FileInputStream fis = new FileInputStream(state);
+     * ObjectInputStream ois = new ObjectInputStream(fis); obj =
+     * ois.readObject();
+     * 
+     * if (obj instanceof Emulator) { emulator = (Emulator) obj; } } catch
+     * (FileNotFoundException e) { e.printStackTrace(); } catch (IOException e)
+     * { e.printStackTrace(); } catch (ClassNotFoundException e) {
+     * e.printStackTrace(); } }
+     */
+    public static boolean checkFile(File file) {
+        if (!file.exists()) {
+            errorMsg("File doesn't exist, try again.");
+            return false;
+        }
+        if (!file.isFile()) {
+            errorMsg("No file selected, try again.");
+            return false;
+        }
+        if (!file.canRead()) {
+            errorMsg("File cannot be read, try again.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Shows an error message.
+     * 
+     * @param msg
+     *            What to show in the box
+     */
+    public static void errorMsg(final String msg) {
+        Toolkit.getDefaultToolkit().beep();
+        JOptionPane.showMessageDialog(null, msg, "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
     /**
      * Encapsulates the emulator.
+     * 
      * @author Marcus, Peter
      */
     private final class Emulator {
@@ -296,6 +375,7 @@ public class FajitaBoy extends JApplet {
 
         /**
          * Standard constructor.
+         * 
          * @param path
          *            Rom path
          */
@@ -316,6 +396,7 @@ public class FajitaBoy extends JApplet {
 
         /**
          * Returns the emulator screen.
+         * 
          * @return LCD the screen.
          */
         public LCD getLCD() {

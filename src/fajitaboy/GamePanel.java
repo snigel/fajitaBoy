@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 
 /**
  * The panel in which the emulator screen will be shown.
- *
+ * 
  */
 public class GamePanel extends JPanel implements DrawsGameboyScreen {
     private int[] pixels;
@@ -20,7 +20,7 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
 
     public GamePanel(int zoom) {
         setIgnoreRepaint(true);
-        setPreferredSize(new Dimension(GB_LCD_W*zoom,GB_LCD_H*zoom));
+        setPreferredSize(new Dimension(GB_LCD_W * zoom, GB_LCD_H * zoom));
 
         pixels = new int[160 * 144];
         this.zoom = zoom;
@@ -35,6 +35,7 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
 
     /**
      * Draws the screen on the panel.
+     * 
      * @param data
      *            The screen matrix to draw
      */
@@ -56,7 +57,7 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
         Graphics g = getGraphics();
         g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
     }
-    
+
     public void paint(Graphics g) {
         g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
     }

@@ -49,6 +49,8 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
         startGameButton = new JButton("Start Game");
         fileStringField = new JTextField(20);
 
+        setOpaque(true);
+
         loadFileButton.addActionListener(this);
         startGameButton.addActionListener(this);
         fileStringField.addActionListener(this);
@@ -85,34 +87,11 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
                 || e.getSource() == fileStringField) {
             File path = new File(fileStringField.getText());
 
-            if (!path.exists()) {
-                errorMsg("File doesn't exist, try again.");
-                return;
+            if (FajitaBoy.checkFile(path)) {
+                fajitaBoy.startGame(fileStringField.getText());
             }
-            if (!path.isFile()) {
-                errorMsg("No file selected, try again.");
-                return;
-            }
-            if (!path.canRead()) {
-                errorMsg("File cannot be read, try again.");
-                return;
-            }
-
-            fajitaBoy.startGame(fileStringField.getText());
         }
 
-    }
-
-    /**
-     * Shows an error message.
-     * 
-     * @param msg
-     *            What to show in the box
-     */
-    private void errorMsg(final String msg) {
-        Toolkit.getDefaultToolkit().beep();
-        JOptionPane.showMessageDialog(this, msg, "Error",
-                JOptionPane.ERROR_MESSAGE);
     }
 
 }

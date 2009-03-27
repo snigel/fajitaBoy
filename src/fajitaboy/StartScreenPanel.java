@@ -34,6 +34,8 @@ public class StartScreenPanel extends JPanel implements ActionListener {
     public StartScreenPanel(final FajitaBoy fb) {
         fajitaBoy = fb;
 
+        setOpaque(true);
+
         singleplayerButton = new JButton("Singleplayer");
         multiplayerButton = new JButton("Multiplayer");
 
