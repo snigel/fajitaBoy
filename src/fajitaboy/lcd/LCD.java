@@ -68,17 +68,20 @@ public class LCD implements ClockPulseReceiver {
         
         if (lcdc.lcdDisplayEnable) {
             // Read OAM (Sprites, Tiles, Background Map...)
-            /* Måla objekt i följande ordning:
-             * 1. Sprites som ligger under bg & window (bit7=1 i sprite attribute)
-             *    Skall målas i ordning efter ökande x-position.
-             * 2. Background. BG color 0 is always behind Sprite :S
-             * 3. Window. Tror inte samma som gäller för background gäller för window
-             * 4. Sprites som ligger över bg & window. (bit7=0 i sprite attribute)
-             *    Skall målas i ordning efter ökande x-position.
-             */
+        	
+        	/* Paint objects in the following order:
+        	 * 1. Sprites that are under background & window. (bit7=1 in sprite attribute)
+        	 *    Will be painted in order of ascending x-position.
+        	 * 2. Background.  
+        	 *    BG color 0 is always behind OBJ (Sprite). This means, that color 0 
+        	 *    should only be painted, if that pixel is not painted by an sprite in step 1.
+        	 * 3. Window.
+        	 * 4. Sprites that are above bg & window (bit7=0 in sprite attribute)
+        	 *    Will be painted in order of ascending x-position.
+        	 */
 
             // Read and draw sprites that are behind bg&window, if sprites enabled.
-            //System.out.print(String.format("lcd enabled: %02x", ram.read(LCDC_REGISTER)));
+            
             
             if (lcdc.objSpriteDisplay) {
                 sat.readSpriteAttributes(ram);
@@ -99,9 +102,16 @@ public class LCD implements ClockPulseReceiver {
             
             // Read and draw sprites that are above bg & window, if sprites enabled.
             if (lcdc.objSpriteDisplay) {
-                sat.readSpriteAttributes(ram);
                 sat.draw(screen, false, ram, lcdc, ram.getVram());
             }
+            
+            /*
+            System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
+            				lcdc.objSpriteDisplay ? 's' : '#',
+            				lcdc.bgDisplay ? 'b' : '#',
+            				lcdc.windowDisplayEnable ? 'w' : '#',
+            				lcdc.objSpriteDisplay ? 's' : '#'));
+            */
         }
     }
 
