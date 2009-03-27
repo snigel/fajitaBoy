@@ -1,6 +1,7 @@
 package fajitaboy.lcd;
 
 import fajitaboy.memory.MemoryInterface;
+import static fajitaboy.constants.AddressConstants.*;
 
 public class SpriteAttribute implements Comparable {
     int x, y, patternNr;
@@ -19,7 +20,7 @@ public class SpriteAttribute implements Comparable {
         behindBG = (flags & 0x80) > 0;
         flipY = (flags & 0x40) > 0;
         flipY = (flags & 0x20) > 0; 
-        paletteAddr = (flags % 0x10) > 0 ? 0xFF48 : 0xFF49;
+        paletteAddr = (flags % 0x10) > 0 ? PALETTE_SPRITE0_DATA : PALETTE_SPRITE1_DATA;
     }
     
     public int compareTo(Object other) {
