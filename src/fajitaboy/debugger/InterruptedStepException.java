@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.debugger;
 
 public class InterruptedStepException extends Exception {
     private String msg;

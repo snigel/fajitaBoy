@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.debugger;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -19,6 +19,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import fajitaboy.Cpu;
+import fajitaboy.DrawsGameboyScreen;
+import fajitaboy.GamePanel;
+import fajitaboy.Oscillator;
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.IO;
 import fajitaboy.memory.RomWriteException;

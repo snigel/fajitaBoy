@@ -1,10 +1,10 @@
-package fajitaboy;
+package fajitaboy.debugger;
 
 import java.util.List;
 import java.util.LinkedList;
 
 import fajitaboy.memory.MemoryInterface;
-import static fajitaboy.InstructionSet.*;
+import static fajitaboy.debugger.InstructionSet.*;
 
 /**
  * A class for disassembling game boy cpu instructions. Since this class hold no

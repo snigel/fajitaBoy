@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.debugger;
 
 import java.util.LinkedList;
 import java.util.List;
