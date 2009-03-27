@@ -124,7 +124,7 @@ public class AddressBus implements MemoryInterface {
         case MBC1_RAM_BATTERY: return new MBC1(eram, rom);
         case MBC2: return new MBC2(eram, rom);
         case MBC2_BATTERY: return new MBC2(eram, rom);
-        default: return rom;
+        default: System.out.println("MBC not supported!");return rom;
         }
     }
     /**
@@ -147,8 +147,8 @@ public class AddressBus implements MemoryInterface {
      * {@inheritDoc}
      */
     public int read(final int address) {
-        if (address < 0 || address > module.length) {
-            throw new ArrayIndexOutOfBoundsException("Addressbus.java");
+        if (address < 0 || address > module.length-1) {
+            throw new ArrayIndexOutOfBoundsException("AddressBus.java: "+address);
         }
         return module[address].read(address);
     }
@@ -158,8 +158,8 @@ public class AddressBus implements MemoryInterface {
      * {@inheritDoc}
      */
     public void write(final int address, final int data) {
-        if (address < 0 || address > module.length) {
-            throw new ArrayIndexOutOfBoundsException("AddressBus.java");
+        if (address < 0 || address > module.length-1) {
+            throw new ArrayIndexOutOfBoundsException("AddressBus.java: "+address);
         }
         module[address].write(address, data);
     }
