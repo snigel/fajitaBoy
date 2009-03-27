@@ -36,6 +36,7 @@ public class Screen {
 		
 		// Exit if sprite outside screen
 		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
+			assert (true) : "Trying to blit outside of screen"; 
 			return;
 		}
 		
