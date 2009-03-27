@@ -94,12 +94,12 @@ public class BackgroundMap {
 			// For each column...
 
 			// we probably want to write one more tile to the right, but i want
-			// to confirm it's a bug.
-			for ( int x = 0; x < GB_LCD_W/8; x++ ) {
+			// to confirm it's a bug. (can be confirmed alien
+			for ( int x = 0; x < GB_LCD_W/8 + 1; x++ ) {
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
 				tileId = tileAddresses[datay][datax];
-                screen.blit(tiles[tileId], dx, dy, 0); 
+                screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, 0); 
 			}
 		}
 	}
