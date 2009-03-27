@@ -3,6 +3,9 @@ package fajitaboy.memory;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import static fajitaboy.constants.AddressConstants.*;
 
 public class ROM implements MemoryInterface, MemoryBankInterface {
@@ -30,7 +33,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     private int bank;
 
     public void setBank(int bank) { // For MBC
-            this.bank = bank;
+        this.bank = bank;
     }
 
     /**
@@ -55,14 +58,14 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     }
 
     public int read(int address) {
-        if(address<0x4000)
+        if (address < 0x4000)
             return ram[address];
         else
-            return ram[address+(bank-1)*0x4000];
+            return ram[address + (bank - 1) * 0x4000];
     }
 
     public void reset() {
-   // Reset not necessary ignore
+        // Reset not necessary ignore
     }
 
     public void write(int address, int data) {
@@ -72,20 +75,31 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
     public int getMBC() {
         return ram[CARTRIDGE_TYPE];
     }
-    
-    public int getBanks(){
-        switch(ram[0x0148]){
-        case 0: return 2;
-        case 1: return 4;
-        case 2: return 8;
-        case 3: return 16;
-        case 4: return 32;
-        case 5: return 64;
-        case 6: return 128;
-        case 52: return 72;
-        case 53: return 80;
-        case 54: return 96;
-        default: return 0;
+
+    public int getBanks() {
+        switch (ram[0x0148]) {
+        case 0:
+            return 2;
+        case 1:
+            return 4;
+        case 2:
+            return 8;
+        case 3:
+            return 16;
+        case 4:
+            return 32;
+        case 5:
+            return 64;
+        case 6:
+            return 128;
+        case 52:
+            return 72;
+        case 53:
+            return 80;
+        case 54:
+            return 96;
+        default:
+            return 0;
         }
     }
 
@@ -95,21 +109,36 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
      *            is a text string containing the path to a game boy rom,
      *            located in file system.
      */
-    
+
     private void readRom(final String romPath) {
         try {
             // Read ROM data from file
-            File romFile = new File(romPath);
-            ram = new int[(int) romFile.length()];
-            System.out.println("romfile length "+romFile.length());
-            FileInputStream fis = new FileInputStream(romFile);
-            DataInputStream dis = new DataInputStream(fis);
 
-            for (int i = 0; i < ram.length; i++) {
-                ram[i] = dis.readUnsignedByte();
+            // if zipfile
+            DataInputStream dis;
+            FileInputStream fis;
+            ZipInputStream zis;
+            if (romPath.substring(romPath.length() - 3, romPath.length())
+                    .equals("zip")) {
+                zis = new ZipInputStream(new FileInputStream(romPath));
+                ZipEntry entry = zis.getNextEntry();
+                ram = new int[(int) entry.getSize()];
+                dis = new DataInputStream(zis);
+                for (int i = 0; i < ram.length; i++) {
+                    ram[i] = dis.readUnsignedByte();
+                }
+                zis.close();
+            } else {
+                File romFile = new File(romPath);
+                ram = new int[(int) romFile.length()];
+                System.out.println("romfile length " + romFile.length());
+                fis = new FileInputStream(romFile);
+                dis = new DataInputStream(fis);
+                for (int i = 0; i < ram.length; i++) {
+                    ram[i] = dis.readUnsignedByte();
+                }
+                fis.close();
             }
-
-            fis.close();
 
         } catch (Exception e) {
             System.out.println("Exception: " + e);

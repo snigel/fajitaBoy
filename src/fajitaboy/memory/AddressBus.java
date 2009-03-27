@@ -118,12 +118,12 @@ public class AddressBus implements MemoryInterface {
 
     private MemoryInterface setMBC(){
         switch(rom.getMBC()){
-        case ROM: return rom;
-        case MBC1: return new MBC1(eram,rom);
-        case MBC1_RAM: return new MBC1(eram, rom);
-        case MBC1_RAM_BATTERY: return new MBC1(eram, rom);
-        case MBC2: return new MBC2(eram, rom);
-        case MBC2_BATTERY: return new MBC2(eram, rom);
+        case ROM: System.out.println("MBC: None"); return rom;
+        case MBC1:System.out.println("MBC: MBC1");  return new MBC1(eram,rom);
+        case MBC1_RAM: System.out.println("MBC: MBC1+RAM");  return new MBC1(eram, rom);
+        case MBC1_RAM_BATTERY:System.out.println("MBC: MBC1+RAM+BAT");  return new MBC1(eram, rom);
+        case MBC2: System.out.println("MBC: MBC2"); return new MBC2(eram, rom);
+        case MBC2_BATTERY: System.out.println("MBC: MBC2"); return new MBC2(eram, rom);
         default: System.out.println("MBC not supported!");return rom;
         }
     }

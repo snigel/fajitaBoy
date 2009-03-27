@@ -54,10 +54,10 @@ public class MBC1 implements MemoryInterface {
         else{
            rom.setBank(bank&(banks-1));
         }
-        //System.out.println("rom bank set to "+(bank%banks));
+        //System.out.println("rom bank set to "+(bank%banks)+" tried "+bank);
     }
     private void setRamBank(int bank){
-        //System.out.println("ram bank set to "+bank);
+        System.out.println("ram bank set to "+bank);
         eram.setBank(bank);
     }
 
@@ -65,6 +65,14 @@ public class MBC1 implements MemoryInterface {
     public void write(int address, int data) {
         if(address>=0x2000 && 0x4000>address){
             setRomBank(data);
+        }
+        else
+            System.out.println("address: "+address+" data: "+data);
+        if(address>=0x4000 && 0x6000>address){
+            System.out.println("ram bank change :D");
+        }
+        if(address>=0x6000 && 0x8000>address){
+            System.out.println("mode change :D");
         }
     }
 
