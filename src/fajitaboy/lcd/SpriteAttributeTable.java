@@ -50,15 +50,17 @@ public class SpriteAttributeTable {
         
         for (SpriteAttribute sa : toDraw) {
             int id = sa.patternNr;
+            int palette = ram.read(sa.paletteAddr);
+            
             if ( lcdc.objSpriteSize ) {
                 // 8x16 sprite
                 int idLo = id & 0xFE;
                 int idHi = id | 0x01;
-                screen.blit(tiles[idLo], sa.x - 8, sa.y - 16, 0);
-                screen.blit(tiles[idHi], sa.x - 8, sa.y - 8, 0);
+                screen.blit(tiles[idLo], palette, sa.x - 8, sa.y - 16, 0);
+                screen.blit(tiles[idHi], palette, sa.x - 8, sa.y - 8, 0);
             } else {
                 // 8x8 sprite
-                screen.blit(tiles[id], sa.x - 8, sa.y - 16, 0);
+                screen.blit(tiles[id], palette, sa.x - 8, sa.y - 16, 0);
             }
         }
 	}

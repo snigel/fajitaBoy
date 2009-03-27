@@ -1,7 +1,6 @@
 package fajitaboy.lcd;
 
-import static fajitaboy.constants.LCDConstants.GB_LCD_H;
-import static fajitaboy.constants.LCDConstants.GB_LCD_W;
+import static fajitaboy.constants.LCDConstants.*;
 
 public class Screen {
 	public int bits[][];
@@ -26,9 +25,8 @@ public class Screen {
 	 * @param y Y-coordinate to draw tile at (minus 16)
 	 * @throws Exception
 	 */
-	public void blit(Sprite s, int x, int y) {
-//		Prepare variables
-		int lcdLeft, lcdTop, lcdRight, lcdBottom, sLeft, sTop, sRight, sBottom, lcdx, lcdy, sx, sy;
+	public void blit(Sprite s, int palette, int x, int y) {
+		int lcdLeft, lcdTop, lcdRight, lcdBottom;
 		lcdLeft = Math.max(0, x - 8);
 		lcdRight = Math.min(x, GB_LCD_W);
 		lcdTop = Math.max(0, y - 16);
@@ -40,32 +38,17 @@ public class Screen {
 			return;
 		}
 		
-		sLeft = Math.max(0, -(x-8));
-		sRight = Math.min(8, GB_LCD_W - (x-8));
-		sTop = Math.max(0, -(y-16));
-		sBottom = Math.min(8, GB_LCD_H - (y-16)); 
+		int sx, sy, sw, sh;
+		sy = lcdTop - y + 16;
+		sx = lcdLeft - x + 8;
+		sw = lcdRight - lcdLeft;
+		sh = lcdBottom - lcdTop;
 		
-		// Exit if sprite outside screen
-		if ( sLeft >= sRight || sTop >= sBottom ) {
-			return;
-		}
+		assert lcdLeft < lcdRight && lcdBottom < lcdTop : 
+			"Trying to blit, left smaller than right, or top smaller than bottom";  
+		assert sw != 0 && sh != 0 : "Trying to blit very small sprite";
 		
-//		Blit sprite to screen
-		sy = sTop;
-		// For each line...
-		for ( lcdy = lcdTop; lcdy < lcdBottom; lcdy++ ) {
-			sx = sLeft;
-			// For each pixel...
-			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
-                int pxl = s.bits[sy][sx];
-                // pxl == 0 -> transparens
-                if (pxl != 0) { 
-                    bits[lcdy][lcdx] = pxl;
-                }
-				sx++;
-			}
-			sy++;
-		}
+		blitIgnore(s.bits, palette, lcdLeft, lcdTop, sx, sy, sw, sh, 0);
 	}
 	
 	/**
@@ -76,43 +59,98 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int x, int y, int ignore) {
-//		Prepare variables
-		int lcdLeft, lcdTop, lcdRight, lcdBottom, tLeft, tTop, tRight, tBottom, lcdx, lcdy, tx, ty;
+	public void blit(Tile t, int palette, int x, int y, int ignore) {
+		
+		int lcdLeft, lcdTop, lcdRight, lcdBottom;
 		lcdLeft = Math.max(0, x);
-		lcdRight = Math.min(x + 8, GB_LCD_W);
 		lcdTop = Math.max(0, y);
-		lcdBottom = Math.min(y + 8, GB_LCD_H);
 		
-		// Exit if sprite outside screen
-		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
+		if (lcdLeft > GB_LCD_W || lcdTop > GB_LCD_H) 
 			return;
-		}
+
+		lcdRight = Math.min(x + GB_TILE_W, GB_LCD_W);
+		lcdBottom = Math.min(y + GB_TILE_H, GB_LCD_H);
 		
-		tLeft = Math.max(0, -x);
-		tRight = Math.min(8, GB_LCD_W - x);
-		tTop = Math.max(0, -y);
-		tBottom = Math.min(8, GB_LCD_H - y); 
+		int tx, ty, tw, th;
+		ty = lcdTop - y;
+		tx = lcdLeft - x;
+		tw = lcdRight - lcdLeft;
+		th = lcdBottom - lcdTop;
+
 		
-		// Exit if sprite outside screen
-		if ( tLeft >= tRight || tTop >= tBottom ) {
-			return;
-		}
+		assert lcdLeft < lcdRight && lcdBottom < lcdTop : 
+			"Trying to blit, left smaller than right, or top smaller than bottom";  
+		assert tw != 0 && th != 0 : "Trying to blit very small sprite";
 		
-//		Blit sprite to screen
-		ty = tTop;
-		// For each line...
-		for ( lcdy = lcdTop; lcdy < lcdBottom; lcdy++ ) {
-			tx = tLeft;
-			// For each pixel...
-			for ( lcdx = lcdLeft; lcdx < lcdRight; lcdx++ ) {
-                int pxl = t.bits[ty][tx];
-                if (pxl != ignore) {
-                    bits[lcdy][lcdx] = pxl;
-                }
-				tx++;
+		blitIgnore(t.bits, palette, lcdLeft, lcdTop, tx, ty, tw, th, ignore);
+		
+	}
+	
+	/**
+	 * @param data 
+	 * 		data to blit
+	 * @param palette
+	 * 		palette to use
+	 * @param sx
+	 * 		start x value in screen
+	 * @param sy
+	 * 		start y value in screen
+	 * @param dx
+	 * 		start x value in data
+	 * @param dy
+	 * 		start y value in data
+	 * @param dw
+	 * 		width of data to blit
+	 * @param dh
+	 * 		height of data to blit
+	 * @param ignore
+	 * 		data value to ignore
+	 */
+	private void blitIgnore(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh, int ignore) {
+		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
+			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
+				// TODO do something with palette
+				int pxl = data[cdy][cdx];
+                //if (pxl != ignore) {
+                    // bits[csy][csx] = pxl;
+                	int clr = 0x03 & palette >> pxl*2; 
+                    bits[csy][csx] = clr;
+                //}
 			}
-			ty++;
+		}
+	}
+	
+	/**
+	 * @param data 
+	 * 		data to blit
+	 * @param palette
+	 * 		palette to use
+	 * @param sx
+	 * 		start x value in screen
+	 * @param sy
+	 * 		start y value in screen
+	 * @param dx
+	 * 		start x value in data
+	 * @param dy
+	 * 		start y value in data
+	 * @param dw
+	 * 		width of data to blit
+	 * @param dh
+	 * 		height of data to blit
+	 * @param ignore
+	 * 		data value to ignore
+	 */
+	private void blitExclusive(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh, int exclusive) {
+		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
+			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
+				// TODO do something with palette
+				int pxl = data[cdy][cdx];
+                if (pxl == exclusive) {
+                    bits[csy][csx] = pxl;
+                	int clr = 0x03 & palette >> pxl*2; 
+                    bits[csy][csx] = clr;
+                }
+			}
 		}
 	}
 	
