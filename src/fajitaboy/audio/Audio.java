@@ -17,167 +17,95 @@ public class Audio {
     AudioFormat af;
 
     byte[] buffer1;
-    byte[] buffer2;
-    byte[] bufferMix;
     SourceDataLine sdl;
 
     float samplerate = 44100;
-
-    int samples = 735;
+    int samples;
     int offset = 0;
-    int end = samples;
     int oldFreq = 0;
-    int oldFreq2 = 0;
+    int amp = 32;
     int soundLow;
     int soundHigh;
-    int length = (int) (samplerate*1);
+    int length = (int) (samplerate*3);
     AddressBus ab;
+    int freq;
 
-    public Audio(AddressBus ab, int soundLow, int soundHigh) throws LineUnavailableException {
+    private int oldNr12 = 0;
+
+    public Audio(AddressBus ab, int soundLow, int soundHigh, int samples)
+            throws LineUnavailableException {
         this.soundHigh = soundHigh;
         this.soundLow = soundLow;
         this.ab = ab;
-        af = new AudioFormat(samplerate, 8, 1, true, false);
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
-        sdl = (SourceDataLine) AudioSystem.getLine(info);
-     //   sdl = AudioSystem.getSourceDataLine(af);
+        this.samples = samples;
         buffer1 = null;
-        buffer2 = null;
-        sdl.open(af);
-        sdl.start();
-
     }
 
-    public void generateTone() {
-        /*
-        boolean ch1 = calcFreq1();
-        boolean ch2 = calcFreq2();
-        if (ch1 || ch2) {
-            mic
-        }
-        */
-        calcFreq1();
+    public byte[] generateTone(byte[] destBuff) {
+        calcFreq();
+
         if (oldFreq != 0) {
-            if(offset + samples > buffer1.length) {
-                end = buffer1.length - offset;
+            if (offset + samples > buffer1.length) {
+                fillBuffer();
+                 System.out.println("Filling buffer");
+                // end = buffer1.length - offset;
             }
-            sdl.write(buffer1, offset, end);
-            offset += samples;
-        }
-        /*
-        if(buffer1 != null) {
-            int i = 0;
-            int j;
-            for(j = offset; offset < end; j++) {
-                buffer2[i] = buffer1[j];
-                i++;
-            }
-            offset = j;
-            sdl.write(buffer2, 0, i);
-            end += samples;
-            if(end >= buffer1.length) {
-                buffer1 = null;
-                offset = 0;
-                end = samples;
-            }
-        }
-        else {
-            readLength();
-        }
-    */
-    }
-    
-    private boolean calcFreq1() {
-        int low1 = ab.read(soundLow);
-        int high1 = ab.read(soundHigh)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
-        if (freq1 == oldFreq) {
-            return false;
-        }
-        else {
-            buffer1 = new byte[length];
-            for(int i = 0; i < length; i++) {
-                double angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
-                buffer1[i] = (byte) (100 * Math.signum((Math.sin(angle1))));
-            }
-            oldFreq = freq1;
-            offset = 0;
-            end = samples;
-            return true;
-        }
-            
-    }
-    
-    private boolean calcFreq2() {
-        int low1 = ab.read(SOUND2_LOW);
-        int high1 = ab.read(SOUND2_HIGH)*0x100;
-        int freq1 = 131072/(2047-(high1+low1)&0x7ff);
-        if (freq1 == oldFreq) {
-            return false;
-        }
-        else {
-            buffer2 = new byte[length];
-            for(int i = 0; i < length; i++) {
-                double angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
-                buffer2[i] = (byte) (100 * Math.signum((Math.sin(angle1))));
-            }
-            oldFreq2 = freq1;
-            offset = 0;
-            end = samples;
-            return true;
-        }         
-    }
-
-    private void mix(boolean ch1, boolean ch2) {
-        if (ch1 && ch2 ) {
-            for (int i = 0; i < length; i++) {
-                bufferMix[i] = (byte) (buffer1[i] + buffer2[i]);
-            }
-        }
-        else if (ch1) {
-            int k = 0;
-            while (offset < buffer2.length) {
-                bufferMix[k] = (byte)(buffer2[offset] + buffer1[k]);
-                k++;
-                offset++;
-            }
-        }
-        else if (ch2) {
+            // System.arraycopy(buffer1, offset, destBuff, 0, end);
             int j = 0;
-            while (offset < buffer1.length) {
-                bufferMix[j] = (byte) (buffer1[offset] + buffer2[j]);
-                offset++;
+            for (int i = offset; i < (samples + offset); i++) {
+                // System.out.println("loop");
+                destBuff[j] += buffer1[i];
                 j++;
             }
+            // System.out.println("j =  " + j);
+            // sdl.write(destBuff, 0, end);
+            // sdl.write(buffer1, offset, end);
+            offset += samples;
         }
+        return destBuff;
     }
-    private void readLength() {
-        int length = ab.read(NR11_REGISTER);
-        length = length & 0x3F;
-        System.out.println("Gb length: " + length);
-        //Längd i samples
-        length = (int)((64-length)*(1/256)*samplerate);
-        if(length < end) {
-            end = length;
-        }
-        if(length != 0 ) {
-            buffer1 = new byte[length];
-            int low1 = ab.read(SOUND2_LOW);
-            int high1 = ab.read(SOUND2_HIGH)*0x100;
-            int freq1 = 131072/(2047-(high1+low1)&0x7ff);
 
-            for(int i = 0; i < length; i++) {
-                double angle1 = i / (samplerate/freq1) * 2.0 * Math.PI;
-                buffer1[i] = (byte) (100 * Math.signum((Math.sin(angle1))));
-            }
-        }
-        else {
-            int nr14 = ab.read(NR14_REGISTER)& 0x40;
-            System.out.println("Nr14: " + nr14);            
-            if (nr14 == 0) {
-                System.out.println("Nr14: oändlig längd");
-            }
+    private boolean calcFreq() {
+        int low1 = ab.read(soundLow);
+        int high1 = ab.read(soundHigh) * 0x100;
+        freq = 131072 / (2047 - (high1 + low1) & 0x7ff);
+        // System.out.println("freq " + freq);
+        if (freq == oldFreq) {
+            return false;
+        } else {
+            fillBuffer();
+            oldFreq = freq;
+            offset = 0;
+            return true;
         }
 
+    }
+
+    private void fillBuffer() {
+        buffer1 = new byte[length];
+
+        int step;
+        int nr12 = ab.read(NR12_REGISTER);
+        amp = ((nr12 & 0xF0 )>> 4) * 2;
+        int stepLength = nr12 & 0x7;
+        int direction = nr12 & 0x8;
+        if (direction == 0) {
+            step = -2;
+        } else {
+            step = 2;
+        }
+        for (int i = 0; i < length; i++) {
+            if (stepLength != 0) {
+                if ((i % (stepLength * samples)) == 0) {
+    //                System.out.println("amp " + amp);
+                    if ((amp > 0) && (amp < 32)) {
+                        amp += step;
+                    }
+                }
+            }
+            double angle1 = i / (samplerate / freq) * 2.0 * Math.PI;
+            buffer1[i] = (byte) (amp * Math.signum((Math.sin(angle1))));
+        }
+        offset = 0;
     }
 }
