@@ -118,5 +118,6 @@ public final class AddressConstants {
     public static final int SOUND_OUTPUT_SELECT = 0xFF25;
     public static final int SOUND_ON_OFF= 0xFF26;
 
+    public static final int SPRITE_ATTRIBUTE_TABLE = 0xFE00;
 
 }

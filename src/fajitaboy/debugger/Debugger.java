@@ -29,6 +29,7 @@ import fajitaboy.memory.RomWriteException;
 import static java.lang.Math.*;
 
 import static fajitaboy.constants.LCDConstants.*;
+import static fajitaboy.constants.AddressConstants.*;
 
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
@@ -228,6 +229,7 @@ public final class Debugger implements DrawsGameboyScreen {
             } else {
                 if (traceWriter != null) {
                     System.out.println("Stopped trace.");
+                    traceWriter.flush();
                     traceWriter.close();
                     traceWriter = null;
                 }
@@ -433,7 +435,15 @@ public final class Debugger implements DrawsGameboyScreen {
     }
 
     private void spriteTable() {
-    	
+    	for (int i = 0; i < GB_SPRITE_ATTRIBUTES; i++) {
+    		int addr = SPRITE_ATTRIBUTE_TABLE + i * 4;
+    		int y = addressBus.read(addr);
+    		int x = addressBus.read(addr + 1);
+    		int id = addressBus.read(addr + 2);
+    		int fl = addressBus.read(addr + 3);
+    		
+    		System.out.println(String.format("%03d : %03d, id: %02x, flags: %02x", x, y, id, fl));
+    	}
     }
     
     private void showBackgroundNumbers(int addr, int scx, int scy) {
