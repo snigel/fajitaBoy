@@ -16,19 +16,42 @@ public class LCD implements ClockPulseReceiver {
     /**
      * Pointer to MemoryInterface class.
      */
-    AddressBus ram;
+    private AddressBus ram;
 
-    BackgroundMap bgm = new BackgroundMap(BackgroundMap.MapType.BACKGROUND);
+    /**
+     * Contains the Background.
+     */
+    private BackgroundMap bgm = new BackgroundMap(BackgroundMap.MapType.BACKGROUND);
 
-    BackgroundMap wnd = new BackgroundMap(BackgroundMap.MapType.WINDOW);
+    /**
+     * Contains the Window.
+     */
+    private BackgroundMap wnd = new BackgroundMap(BackgroundMap.MapType.WINDOW);
 
-    SpriteAttributeTable sat = new SpriteAttributeTable();
+    /**
+     * Contains the Sprite Attribute Table.
+     */
+    private SpriteAttributeTable sat = new SpriteAttributeTable();
 
-    Screen screen = new Screen();
+    /**
+     * Contains the screen pixels.
+     */
+    private Screen screen = new Screen();
 
-    LCDC lcdc;
+    /**
+     * Contains the LCDC flags.
+     */
+    private LCDC lcdc;
 
-    boolean newScreen = false;
+    /**
+     * Flag is true if a new screen has been rendered.
+     */
+    private boolean newScreen = false;
+    
+    /**
+     * If true, frame will not be rendered.
+     */
+    public boolean frameSkip = false;
 
     /*
      * (non-Javadoc)
@@ -57,19 +80,33 @@ public class LCD implements ClockPulseReceiver {
      * Draws the GameBoy screen once.
      */
     private void drawScreen() {
+    	// Abort if Frame Skip is activated
+    	if ( frameSkip )
+    		return;
+    	
+    	// Read OAM (Sprites, Tiles, Background Map...)
         lcdc.readLCDC();
-        
-        /*
-         * om bg enabled cleara med bg color idx 0
-         * sedan. rita aldrig upp idx 0
-         */
         
         if (lcdc.lcdDisplayEnable) {
             
-            int bgclr = ram.read(PALETTE_BG_DATA) & 0x03;
+        	/*
+        	 * Draw graphic objects
+        	 */
+        	int bgclr = ram.read(PALETTE_BG_DATA) & 0x03;
             int ly = ram.read(ADDRESS_LY);
             screen.clearLine(bgclr, ly);
             
+            
+            /* Paint objects in the following order:
+        	 * 1. Sprites that are under background & window. (bit7=1 in sprite attribute)
+        	 *    Will be painted in order of ascending x-position.
+        	 * 2. Background.  
+        	 *    BG color 0 is always behind OBJ (Sprite). This means, that color 0 
+        	 *    should only be painted, if that pixel is not painted by an sprite in step 1.
+        	 * 3. Window.
+        	 * 4. Sprites that are above bg & window (bit7=0 in sprite attribute)
+        	 *    Will be painted in order of ascending x-position.
+        	 */
             if (lcdc.objSpriteDisplay) {
                 sat.readSpriteAttributes(ram);
                 sat.draw(screen, true, ram, lcdc, ram.getVram(), ly);
@@ -91,39 +128,6 @@ public class LCD implements ClockPulseReceiver {
             if (lcdc.objSpriteDisplay) {
                 sat.draw(screen, false, ram, lcdc, ram.getVram(), ly);
             }
-            
-            
-            /*System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
-    				lcdc.objSpriteDisplay ? 's' : '#',
-    				lcdc.bgDisplay ? 'b' : '#',
-    				lcdc.windowDisplayEnable ? 'w' : '#',
-    				lcdc.objSpriteDisplay ? 's' : '#'));*/
-            
-        	// Read OAM (Sprites, Tiles, Background Map...)
-
-        	/*
-        	 * Draw graphic objects
-        	 */
-        	/* Paint objects in the following order:
-        	 * 1. Sprites that are under background & window. (bit7=1 in sprite attribute)
-        	 *    Will be painted in order of ascending x-position.
-        	 * 2. Background.  
-        	 *    BG color 0 is always behind OBJ (Sprite). This means, that color 0 
-        	 *    should only be painted, if that pixel is not painted by an sprite in step 1.
-        	 * 3. Window.
-        	 * 4. Sprites that are above bg & window (bit7=0 in sprite attribute)
-        	 *    Will be painted in order of ascending x-position.
-        	 */
-
-        	
-            /*
-            System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
-            				lcdc.objSpriteDisplay ? 's' : '#',
-            				lcdc.bgDisplay ? 'b' : '#',
-            				lcdc.windowDisplayEnable ? 'w' : '#',
-            				lcdc.objSpriteDisplay ? 's' : '#'));
-            */
-            
         }
     }
 

@@ -257,6 +257,7 @@ public class Oscillator implements Runnable{
                 sleepTime = nextUpdate - System.nanoTime();
                 if (sleepTime >= 0) {
                     frameSkip = false;
+                    lcd.frameSkip = false;
                     frameSkipCount = 0;
                     try {
                         Thread.sleep(sleepTime / 1000000);
@@ -266,10 +267,12 @@ public class Oscillator implements Runnable{
                 } else if (sleepTime < -GB_NANOS_PER_FRAME) {
                     if (frameSkipCount >= MAX_FRAMESKIP) {
                         frameSkip = false;
+                        lcd.frameSkip = false;
                         frameSkipCount = 0;
                         nextUpdate = System.nanoTime();
                     } else {
                         frameSkip = true;
+                        lcd.frameSkip = true;
                         frameSkipCount++;
                     }
                 }

@@ -54,11 +54,16 @@ public class SpriteAttributeTable {
                 // 8x16 sprite
                 int idLo = id & 0xFE;
                 int idHi = id | 0x01;
-                screen.blit(tiles[idLo], palette, sa.x - 8, sa.y - 16, ly);
-                screen.blit(tiles[idHi], palette, sa.x - 8, sa.y - 8, ly);
+                if ( sa.flipY ) {
+                	screen.blit(tiles[idLo], palette, sa.x - 8, sa.y - 8, ly, sa.flipX, sa.flipY);
+                	screen.blit(tiles[idHi], palette, sa.x - 8, sa.y - 16, ly, sa.flipX, sa.flipY);
+                } else {
+                	screen.blit(tiles[idLo], palette, sa.x - 8, sa.y - 16, ly, sa.flipX, sa.flipY);
+                	screen.blit(tiles[idHi], palette, sa.x - 8, sa.y - 8, ly, sa.flipX, sa.flipY);
+                }
             } else {
                 // 8x8 sprite
-                screen.blit(tiles[id], palette, sa.x - 8, sa.y - 16, ly);
+                screen.blit(tiles[id], palette, sa.x - 8, sa.y - 16, ly, sa.flipX, sa.flipY);
             }
         }
 	}

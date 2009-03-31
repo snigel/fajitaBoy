@@ -105,7 +105,12 @@ A postion of WX=7, WY=0 locates the window at upper left, it is then completly c
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
 				tileId = tileAddresses[datay][datax];
-                screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly); 
+				if ( type == MapType.WINDOW ) {
+					screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, false, false);	
+				} else {
+					screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, false, false);
+				}
+                 
 			}
 		}
 	}
