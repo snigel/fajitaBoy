@@ -19,8 +19,8 @@ public class SpriteAttribute implements Comparable {
         int flags = ram.read(addr + 3);
         behindBG = (flags & 0x80) > 0;
         flipY = (flags & 0x40) > 0;
-        flipY = (flags & 0x20) > 0; 
-        paletteAddr = (flags % 0x10) > 0 ? PALETTE_SPRITE0_DATA : PALETTE_SPRITE1_DATA;
+        flipX = (flags & 0x20) > 0; 
+        paletteAddr = (flags & 0x10) > 0 ? PALETTE_SPRITE1_DATA : PALETTE_SPRITE0_DATA;
     }
     
     public int compareTo(Object other) {
