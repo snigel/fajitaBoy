@@ -274,7 +274,7 @@ public final class Cpu {
             break;
         case 0x09: // ADD HL,BC
             temp = getHL() + getBC();
-            setH(((getHL() & 0x0F) + (getBC() & 0x0F)) > 0x0F);
+            setH(((getHL() & 0x0FFF) + (getBC() & 0x0FFF)) > 0x0FFF);
             setHL(temp);
             setN(0);
             setC(temp > 0xFFFF);
@@ -307,11 +307,11 @@ public final class Cpu {
             cycleTime += 8;
             break;
         case 0x0f: // RRCA
-            setC((a & 0x01) == 1);
-            a = a >>> 1;
-            if (getC() == 1) {
-                a = a | 0x80;
+        	if (getC() == 1) {
+                a = a | 0x0100;
             }
+        	setC(a & 0x01);
+            a = a >>> 1;
             setZ(0);
             setN(0);
             setH(0);
@@ -358,12 +358,10 @@ public final class Cpu {
             setN(0);
             setH(0);
             a = a << 1;
-            if (getC() == 1) {
-                a++;
-            }
+            a += getC();
             if (a > 0xFF) {
                 setC(1);
-                a = (a & 0xFF);
+                a = a & 0xFF;
             } else {
                 setC(0);
             }
@@ -376,7 +374,7 @@ public final class Cpu {
             break;
         case 0x19: // ADD HL,DE
             temp = getHL() + getDE();
-            setH(((getHL() & 0x0F) + (getDE() & 0x0F)) > 0x0F);
+            setH(((getHL() & 0x0FFF) + (getDE() & 0x0FFF)) > 0x0FFF);
             setHL(temp);
             setN(0);
             setC(temp > 0xFFFF);
@@ -415,7 +413,7 @@ public final class Cpu {
             if (getC() == 1) {
                 a = a | 0x100;
             }
-            setC((a & 0x01) == 1);
+            setC(a & 0x01);
             a = a >>> 1;
             pc++;
             cycleTime += 4;
@@ -496,8 +494,8 @@ public final class Cpu {
             break;
 
         case 0x29: // ADD HL,HL
-            temp = getHL() * 2;
-            calcH(getHL(), getHL());
+            temp = getHL() + getHL();
+            setH(((getHL() & 0x0FFF) + (getHL() & 0x0FFF)) > 0x0FFF);
             setN(0);
             setC(temp > 0xFFFF);
             setHL(temp);
@@ -596,7 +594,7 @@ public final class Cpu {
             break;
         case 0x39: // ADD HL,SP
             temp = getHL() + sp;
-            calcH(getHL(), sp);
+            setH(((getHL() & 0x0FFF) + (sp & 0x0FFF)) > 0x0FFF);
             setHL(temp);
             setN(0);
             setC(temp > 0xFFFF);
@@ -673,6 +671,7 @@ public final class Cpu {
             break;
         case 0x47: // LD B,A
             b = a;
+            cycleTime += 4;
             pc++;
             break;
         case 0x48: // LD C,B
@@ -752,6 +751,7 @@ public final class Cpu {
             break;
         case 0x57: // LD D,A
             d = a;
+            cycleTime += 4;
             pc++;
             break;
         case 0x58: // LD E,B
@@ -805,7 +805,7 @@ public final class Cpu {
             cycleTime += 4;
             break;
         case 0x62: // LD H,D
-            d = c;
+            h = d;
             pc++;
             cycleTime += 4;
             break;
@@ -867,7 +867,7 @@ public final class Cpu {
         case 0x6e: // LD L,(HL)
             l = ram.read(getHL());
             pc++;
-            cycleTime += 4;
+            cycleTime += 8;
             break;
         case 0x6f: // LD L,A
             l = a;
@@ -987,7 +987,7 @@ public final class Cpu {
             cycleTime += 4;
             break;
         case 0x86: // ADD A,(HL)
-            add(ram.read(getHL()));
+            add(ram.read(getHL()) & 0xFF);
             pc++;
             cycleTime += 8;
             break;
@@ -1028,7 +1028,7 @@ public final class Cpu {
             cycleTime += 4;
             break;
         case 0x8e: // ADC A,(HL)
-            add(ram.read(getHL()) + getC());
+            add((ram.read(getHL()) & 0xff) + getC());
             pc++;
             cycleTime += 8;
             break;
@@ -1110,7 +1110,7 @@ public final class Cpu {
             cycleTime += 4;
             break;
         case 0x9e: // SBC A,(HL)
-            sub(ram.read(getHL()) + getC());
+            sub((ram.read(getHL()) & 0xFF) + getC());
             pc++;
             cycleTime += 8;
             break;
@@ -1691,11 +1691,7 @@ public final class Cpu {
             cycleTime += 4;
             break;
         case 0xFE: // CP, n
-            int cpa = a - readn();
-            setN(1);
-            setZ(cpa == 0);
-            setC(cpa < 0);
-            setH((cpa & 0xF0) != (a & 0xF0));
+        	cp(readn());
             pc += 2;
             cycleTime += 8;
             break;
