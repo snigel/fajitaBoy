@@ -65,7 +65,7 @@ public class BackgroundMap {
 		 */
 	}
 	
-	public void draw(Screen screen, MemoryInterface ram, Vram vram, BlendStrategy bs ) {
+	public void draw(Screen screen, MemoryInterface ram, Vram vram) {
 // 		Prepare variables
 		int scx, scy, firstTileX, firstTileY;
 		Tile[] tiles = vram.getTiles();
@@ -74,12 +74,17 @@ public class BackgroundMap {
             scx = ram.read(ADDRESS_SCX);
             scy = ram.read(ADDRESS_SCY);
         } else { //WINDOW 
+        	/*
+        	 * 
+The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
+A postion of WX=7, WY=0 locates the window at upper left, it is then completly covering normal background.
+        	 */
             scx = ram.read(ADDRESS_WX);
             scy = ram.read(ADDRESS_WY);
             if (scx < 0 || scx > 166 || scy < 0 || scy > 143) {
                 return;
             }
-            scy -= 7;
+            scx -= 7;
         }
         
 		firstTileX = (int)(scx/8);
@@ -100,7 +105,7 @@ public class BackgroundMap {
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
 				tileId = tileAddresses[datay][datax];
-                screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, bs); 
+                screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy); 
 			}
 		}
 	}

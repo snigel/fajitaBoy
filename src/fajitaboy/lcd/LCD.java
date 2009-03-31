@@ -57,34 +57,49 @@ public class LCD implements ClockPulseReceiver {
      * Draws the GameBoy screen once.
      */
     private void drawScreen() {
-
-        // om jag fÃ¶rstÃ¥r det rÃ¤tt!
         lcdc.readLCDC();
-
-        
-        // om lcdDisplayEnable Ã¤r false skall skÃ¤rmen vara vit. 
-        // Clear screen
         screen.clear();
         
+        /*
+         * om bg enabled cleara med bg color idx 0
+         * sedan. rita aldrig upp idx 0
+         */
+        
         if (lcdc.lcdDisplayEnable) {
-            // Read OAM (Sprites, Tiles, Background Map...)
-        	
-
-        	
-        	
-        	/*
-        	 * Read graphics objects
-        	 */
-        	if (lcdc.objSpriteDisplay) {
-        		sat.readSpriteAttributes(ram);
-        	}
-        	if (lcdc.bgDisplay) {
+            
+            int bgclr = ram.read(PALETTE_BG_DATA) & 0x03; 
+            screen.clear(bgclr);
+            
+            if (lcdc.objSpriteDisplay) {
+                sat.readSpriteAttributes(ram);
+                sat.draw(screen, true, ram, lcdc, ram.getVram());
+            }
+            
+            // Read and draw background if enabled.            
+            if (lcdc.bgDisplay) {
                 bgm.readBackground(ram, lcdc);
-        	}
-        	if (lcdc.windowDisplayEnable) {
-        		wnd.readBackground(ram, lcdc);
-        	}
-        	
+                bgm.draw(screen, ram, ram.getVram());
+            }
+
+            // Read and draw window if enabled.
+            if (lcdc.windowDisplayEnable) {
+                wnd.readBackground(ram, lcdc);
+                wnd.draw(screen, ram, ram.getVram());
+            }
+            
+            // Read and draw sprites that are above bg & window, if sprites enabled.
+            if (lcdc.objSpriteDisplay) {
+                sat.draw(screen, false, ram, lcdc, ram.getVram());
+            }
+            
+            System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
+    				lcdc.objSpriteDisplay ? 's' : '#',
+    				lcdc.bgDisplay ? 'b' : '#',
+    				lcdc.windowDisplayEnable ? 'w' : '#',
+    				lcdc.objSpriteDisplay ? 's' : '#'));
+            
+        	// Read OAM (Sprites, Tiles, Background Map...)
+
         	/*
         	 * Draw graphic objects
         	 */
@@ -100,70 +115,14 @@ public class LCD implements ClockPulseReceiver {
         	 */
 
         	
-        	/* 1. måla bakgrunden
-        	   2. om bg är disabled, måla behind sprites, men bara färg 0 (observant)
-        	      annars måla behind sprites vanligt (ignorera färg 0)
-        	   3. måla window
-        	   4. måla above sprites, ignorera färg 0 
-        	*/
-            // Read and draw sprites that are behind bg&window, if sprites enabled.
-        	
-        	if (lcdc.bgDisplay) {
-        		bgm.draw(screen, ram, ram.getVram(), new Blend());
-        	}
-        	
-        	if (lcdc.bgDisplay && lcdc.objSpriteDisplay) {
-        		// observe 0
-                sat.draw(screen, true, ram, lcdc, ram.getVram(), new ObservantBlend(0));
-        	} else if (lcdc.objSpriteDisplay) {
-        		// ignore 0
-        		sat.draw(screen, true, ram, lcdc, ram.getVram(), new Blend());
-        		//sat.draw(screen, true, ram, lcdc, ram.getVram(), new IgnorantBlend(0));
-        	}
-        	
-        	if (lcdc.windowDisplayEnable) {
-        		wnd.draw(screen, ram, ram.getVram(), new IgnorantBlend(0));
-        	}
-        	
-        	if (lcdc.objSpriteDisplay) {
-        		sat.draw(screen, false, ram, lcdc, ram.getVram(), new Blend());
-                //sat.draw(screen, false, ram, lcdc, ram.getVram(), new IgnorantBlend(0));
-            }
-        	
-        	/*
-        	// ignorant blend, ignore 0
-            if (lcdc.objSpriteDisplay) {
-                sat.readSpriteAttributes(ram);
-                sat.draw(screen, true, ram, lcdc, ram.getVram());
-            }
-            
-            // ignorant blend, ignore 0
-            // Read and draw background if enabled.            
-            if (lcdc.bgDisplay) {
-                bgm.readBackground(ram, lcdc);
-                bgm.draw(screen, ram, ram.getVram());
-            }
-
-            // ignorant blend, ignore 0
-            // Read and draw window if enabled.
-            if (lcdc.windowDisplayEnable) {
-                wnd.readBackground(ram, lcdc);
-                wnd.draw(screen, ram, ram.getVram());
-            }
-            
-            // Read and draw sprites that are above bg & window, if sprites enabled.
-            if (lcdc.objSpriteDisplay) {
-                sat.draw(screen, false, ram, lcdc, ram.getVram());
-            }
-            */
-            
-        	/*
+            /*
             System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
             				lcdc.objSpriteDisplay ? 's' : '#',
             				lcdc.bgDisplay ? 'b' : '#',
             				lcdc.windowDisplayEnable ? 'w' : '#',
             				lcdc.objSpriteDisplay ? 's' : '#'));
             */
+            
         }
     }
 

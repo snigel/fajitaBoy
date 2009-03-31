@@ -17,37 +17,12 @@ public class Screen {
 		}
 	}
 	
-	/**
-	 * Blits a sprite onto the screen.
-	 * 
-	 * @param s Sprite to be drawn.
-	 * @param x X-coordinate to draw tile at (minus 8)
-	 * @param y Y-coordinate to draw tile at (minus 16)
-	 * @throws Exception
-	 */
-	public void blit(Sprite s, int palette, int x, int y) {
-		int lcdLeft, lcdTop, lcdRight, lcdBottom;
-		lcdLeft = Math.max(0, x - 8);
-		lcdRight = Math.min(x, GB_LCD_W);
-		lcdTop = Math.max(0, y - 16);
-		lcdBottom = Math.min(y - 8, GB_LCD_H);
-		
-		// Exit if sprite outside screen
-		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
-			return;
+	public void clear(int clr) {
+		for ( int x = 0; x < GB_LCD_W; x++ ) {
+			for ( int y = 0; y < GB_LCD_H; y++ ) {
+				bits[y][x] = clr;
+			}
 		}
-		
-		int sx, sy, sw, sh;
-		sy = lcdTop - y + 16;
-		sx = lcdLeft - x + 8;
-		sw = lcdRight - lcdLeft;
-		sh = lcdBottom - lcdTop;
-		
-		assert lcdLeft < lcdRight && lcdBottom < lcdTop : 
-			"Trying to blit, left smaller than right, or top smaller than bottom";  
-		assert sw != 0 && sh != 0 : "Trying to blit very small sprite";
-		
-		blit(s.bits, palette, lcdLeft, lcdTop, sx, sy, sw, sh, new IgnorantBlend(0));
 	}
 	
 	/**
@@ -58,7 +33,7 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int palette, int x, int y, BlendStrategy bs) {
+	public void blit(Tile t, int palette, int x, int y) {
 		
 		int lcdLeft, lcdTop, lcdRight, lcdBottom;
 		lcdLeft = Math.max(0, x);
@@ -80,7 +55,7 @@ public class Screen {
 			"Trying to blit, left smaller than right, or top smaller than bottom";  
 		assert tw != 0 && th != 0 : "Trying to blit very small sprite";
 		
-		blit(t.bits, palette, lcdLeft, lcdTop, tx, ty, tw, th, bs);
+		blit(t.bits, palette, lcdLeft, lcdTop, tx, ty, tw, th);
 		
 	}
 	
@@ -104,13 +79,13 @@ public class Screen {
 	 * @param ignore
 	 * 		data value to ignore
 	 */
-	private void blit(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh, BlendStrategy bs) {
+	private void blit(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh) {
 		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
 			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
-				int oldpxl = bits[csy][csx];
-				// skriv om med lookup istället
-				int newpxl = 0x03 & palette >> data[cdy][cdx]*2;
-		       	bits[csy][csx] = bs.blend(oldpxl, newpxl);
+				int newidx = data[cdy][cdx];
+				if (newidx != 0) {
+					bits[csy][csx] = 0x03 & palette >> newidx*2;
+				}
 			}
 		}
 	}
