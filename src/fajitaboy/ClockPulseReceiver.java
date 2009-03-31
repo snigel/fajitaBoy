@@ -16,5 +16,5 @@ public interface ClockPulseReceiver {
      *            a constant or the current clock pulse.
      * 
      */
-	public int oscillatorMessage(int message);
+	public boolean oscillatorMessage(int message);
 }

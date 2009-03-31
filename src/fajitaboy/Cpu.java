@@ -201,7 +201,7 @@ public final class Cpu {
     private void handleInterrupts() {
         if (executeInterrupt) {
         	ifReg = ram.read(ADDRESS_IF);
-        	ram.write(ADDRESS_IF, ifReg & interruptBit);
+        	ram.write(ADDRESS_IF, ifReg & interruptBit); // clear interrupt bit
             ime = false;
             stop = false;
             push(pc);

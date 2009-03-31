@@ -58,11 +58,6 @@ public class Oscillator implements Runnable{
     private long nextDividerInc;
 
     /**
-     * set to true if LY == LYC
-     */
-    private boolean lycHit;
-
-    /**
      * Pointer to CPU instance.
      */
     private Cpu cpu;
@@ -114,7 +109,6 @@ public class Oscillator implements Runnable{
         nextModeChange = GB_CYCLES_PER_LINE;
         prevTimerInc = 0;
         nextDividerInc = GB_DIV_CLOCK;
-        lycHit = false;
         frameSkip = false;
         nextHaltCycle = GB_CYCLES_PER_FRAME;
         running = false;
@@ -188,14 +182,12 @@ public class Oscillator implements Runnable{
      */
     private void updateLCD() {
         int ly;
+        boolean lycHit = false;
+        
         if (cycles > nextLineInc) {
-            int returnMsg = lcd.oscillatorMessage(MSG_LCD_NEXT_LINE);
+        	lycHit = lcd.oscillatorMessage(MSG_LCD_NEXT_LINE); // lyc hit!?
+        	
             nextLineInc += GB_CYCLES_PER_LINE;
-            if ((returnMsg & MSG_LCD_LYC_HIT) != 0) {
-                lycHit = true;
-            } else {
-                lycHit = false;
-            }
 
             // Check line # for VBlank and reset to 0
             ly = ram.read(ADDRESS_LY);
