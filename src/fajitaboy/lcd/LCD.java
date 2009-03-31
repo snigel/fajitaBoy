@@ -169,9 +169,7 @@ public class LCD implements ClockPulseReceiver {
                                                                                 // with
                                                                                 // forcedWrite
             //drawScreen();
-        }
-
-        if (message == MSG_LCD_CHANGE_MODE) {
+        } else if (message == MSG_LCD_CHANGE_MODE) {
             int stat = ram.read(ADDRESS_STAT);
             int mode = stat & 0x03;
             stat = stat & 0xFC;
@@ -199,9 +197,7 @@ public class LCD implements ClockPulseReceiver {
             }
 
             ram.forceWrite(ADDRESS_STAT, stat);
-        }
-
-        if (message == MSG_LCD_NEXT_LINE) {
+        } else if (message == MSG_LCD_NEXT_LINE) {
             // Increment LY by one
             int ly = ram.read(ADDRESS_LY) + 0x01;
             int lyc = ram.read(ADDRESS_LYC);
