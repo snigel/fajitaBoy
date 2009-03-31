@@ -58,7 +58,6 @@ public class LCD implements ClockPulseReceiver {
      */
     private void drawScreen() {
         lcdc.readLCDC();
-        screen.clear();
         
         /*
          * om bg enabled cleara med bg color idx 0
@@ -67,29 +66,30 @@ public class LCD implements ClockPulseReceiver {
         
         if (lcdc.lcdDisplayEnable) {
             
-            int bgclr = ram.read(PALETTE_BG_DATA) & 0x03; 
-            screen.clear(bgclr);
+            int bgclr = ram.read(PALETTE_BG_DATA) & 0x03;
+            int ly = ram.read(ADDRESS_LY);
+            screen.clearLine(bgclr, ly);
             
             if (lcdc.objSpriteDisplay) {
                 sat.readSpriteAttributes(ram);
-                sat.draw(screen, true, ram, lcdc, ram.getVram());
+                sat.draw(screen, true, ram, lcdc, ram.getVram(), ly);
             }
             
             // Read and draw background if enabled.            
             if (lcdc.bgDisplay) {
                 bgm.readBackground(ram, lcdc);
-                bgm.draw(screen, ram, ram.getVram());
+                bgm.draw(screen, ram, ram.getVram(), ly);
             }
 
             // Read and draw window if enabled.
             if (lcdc.windowDisplayEnable) {
                 wnd.readBackground(ram, lcdc);
-                wnd.draw(screen, ram, ram.getVram());
+                wnd.draw(screen, ram, ram.getVram(), ly);
             }
             
             // Read and draw sprites that are above bg & window, if sprites enabled.
             if (lcdc.objSpriteDisplay) {
-                sat.draw(screen, false, ram, lcdc, ram.getVram());
+                sat.draw(screen, false, ram, lcdc, ram.getVram(), ly);
             }
             
             System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
@@ -168,7 +168,7 @@ public class LCD implements ClockPulseReceiver {
             ram.forceWrite(ADDRESS_STAT, (ram.read(ADDRESS_STAT) & 0xFC) + 1); // Replace
                                                                                 // with
                                                                                 // forcedWrite
-            drawScreen();
+            //drawScreen();
         }
 
         if (message == MSG_LCD_CHANGE_MODE) {
@@ -191,8 +191,8 @@ public class LCD implements ClockPulseReceiver {
             case 3:
                 // Trigger LCDSTAT interrupt if Mode 0 HBlank interrupt is
                 // enabled
+            	drawScreen();
                 if ((stat & 0x08) != 0) {
-
                     ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x02);
                 }
                 break;

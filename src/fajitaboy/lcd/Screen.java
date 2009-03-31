@@ -25,6 +25,12 @@ public class Screen {
 		}
 	}
 	
+	public void clearLine(int clr, int ly) {
+		for ( int x = 0; x < GB_LCD_W; x++ ) {
+			bits[ly][x] = clr;
+		}
+	}
+	
 	/**
 	 * Blits a tile onto the screen
 	 * 
@@ -33,30 +39,29 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int palette, int x, int y) {
+	public void blit(Tile t, int palette, int x, int y, int ly) {
 		
-		int lcdLeft, lcdTop, lcdRight, lcdBottom;
-		lcdLeft = Math.max(0, x);
-		lcdTop = Math.max(0, y);
-		lcdRight = Math.min(x + GB_TILE_W, GB_LCD_W);
-		lcdBottom = Math.min(y + GB_TILE_H, GB_LCD_H);
-
-		if (lcdLeft > GB_LCD_W || lcdTop > GB_LCD_H) 
+		if ( y > ly || y + 8 <= ly || x <= -8 || x >= 160 )
 			return;
 		
-		int tx, ty, tw, th;
-		ty = lcdTop - y;
-		tx = lcdLeft - x;
-		tw = lcdRight - lcdLeft;
-		th = lcdBottom - lcdTop;
-
+		int sx, sy, tx, ty;
+		sy = ly;
+		sx = Math.max(0, x);
+		if ( x < 0 ) {
+			tx = -x;
+		} else {
+			tx = 0;
+		}
+		ty = ly - y;
 		
-		assert lcdLeft < lcdRight && lcdBottom < lcdTop : 
-			"Trying to blit, left smaller than right, or top smaller than bottom";  
-		assert tw != 0 && th != 0 : "Trying to blit very small sprite";
-		
-		blit(t.bits, palette, lcdLeft, lcdTop, tx, ty, tw, th);
-		
+		while( sx < 160 && tx < 8 ) {
+			int newidx = t.bits[ty][tx];
+			if (newidx != 0) {
+				bits[sy][sx] = 0x03 & palette >> newidx*2;
+			}
+			sx++;
+			tx++;
+		}	
 	}
 	
 	/**
@@ -79,7 +84,7 @@ public class Screen {
 	 * @param ignore
 	 * 		data value to ignore
 	 */
-	private void blit(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh) {
+/*	private void blit(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh) {
 		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
 			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
 				int newidx = data[cdy][cdx];
@@ -88,7 +93,7 @@ public class Screen {
 				}
 			}
 		}
-	}
+	} */
 	
 	public int[][] getBits() {
 		return bits;

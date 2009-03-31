@@ -36,7 +36,7 @@ public class SpriteAttributeTable {
 		}
 	}
 	
-	public void draw(Screen screen, boolean drawBehindBG, MemoryInterface ram, LCDC lcdc, Vram vram) {
+	public void draw(Screen screen, boolean drawBehindBG, MemoryInterface ram, LCDC lcdc, Vram vram, int ly) {
 	    Queue<SpriteAttribute> toDraw;
         if (drawBehindBG) {
             toDraw = behindBG;
@@ -54,11 +54,11 @@ public class SpriteAttributeTable {
                 // 8x16 sprite
                 int idLo = id & 0xFE;
                 int idHi = id | 0x01;
-                screen.blit(tiles[idLo], palette, sa.x - 8, sa.y - 16);
-                screen.blit(tiles[idHi], palette, sa.x - 8, sa.y - 8);
+                screen.blit(tiles[idLo], palette, sa.x - 8, sa.y - 16, ly);
+                screen.blit(tiles[idHi], palette, sa.x - 8, sa.y - 8, ly);
             } else {
                 // 8x8 sprite
-                screen.blit(tiles[id], palette, sa.x - 8, sa.y - 16);
+                screen.blit(tiles[id], palette, sa.x - 8, sa.y - 16, ly);
             }
         }
 	}
