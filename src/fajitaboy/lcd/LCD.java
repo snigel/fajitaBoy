@@ -69,6 +69,25 @@ public class LCD implements ClockPulseReceiver {
         if (lcdc.lcdDisplayEnable) {
             // Read OAM (Sprites, Tiles, Background Map...)
         	
+
+        	
+        	
+        	/*
+        	 * Read graphics objects
+        	 */
+        	if (lcdc.objSpriteDisplay) {
+        		sat.readSpriteAttributes(ram);
+        	}
+        	if (lcdc.bgDisplay) {
+                bgm.readBackground(ram, lcdc);
+        	}
+        	if (lcdc.windowDisplayEnable) {
+        		wnd.readBackground(ram, lcdc);
+        	}
+        	
+        	/*
+        	 * Draw graphic objects
+        	 */
         	/* Paint objects in the following order:
         	 * 1. Sprites that are under background & window. (bit7=1 in sprite attribute)
         	 *    Will be painted in order of ascending x-position.
@@ -80,20 +99,52 @@ public class LCD implements ClockPulseReceiver {
         	 *    Will be painted in order of ascending x-position.
         	 */
 
+        	
+        	/* 1. måla bakgrunden
+        	   2. om bg är disabled, måla behind sprites, men bara färg 0 (observant)
+        	      annars måla behind sprites vanligt (ignorera färg 0)
+        	   3. måla window
+        	   4. måla above sprites, ignorera färg 0 
+        	*/
             // Read and draw sprites that are behind bg&window, if sprites enabled.
-            
-            
+        	
+        	if (lcdc.bgDisplay) {
+        		bgm.draw(screen, ram, ram.getVram(), new Blend());
+        	}
+        	
+        	if (lcdc.bgDisplay && lcdc.objSpriteDisplay) {
+        		// observe 0
+                sat.draw(screen, true, ram, lcdc, ram.getVram(), new ObservantBlend(0));
+        	} else if (lcdc.objSpriteDisplay) {
+        		// ignore 0
+        		sat.draw(screen, true, ram, lcdc, ram.getVram(), new Blend());
+        		//sat.draw(screen, true, ram, lcdc, ram.getVram(), new IgnorantBlend(0));
+        	}
+        	
+        	if (lcdc.windowDisplayEnable) {
+        		wnd.draw(screen, ram, ram.getVram(), new IgnorantBlend(0));
+        	}
+        	
+        	if (lcdc.objSpriteDisplay) {
+        		sat.draw(screen, false, ram, lcdc, ram.getVram(), new Blend());
+                //sat.draw(screen, false, ram, lcdc, ram.getVram(), new IgnorantBlend(0));
+            }
+        	
+        	/*
+        	// ignorant blend, ignore 0
             if (lcdc.objSpriteDisplay) {
                 sat.readSpriteAttributes(ram);
                 sat.draw(screen, true, ram, lcdc, ram.getVram());
             }
             
+            // ignorant blend, ignore 0
             // Read and draw background if enabled.            
             if (lcdc.bgDisplay) {
                 bgm.readBackground(ram, lcdc);
                 bgm.draw(screen, ram, ram.getVram());
             }
 
+            // ignorant blend, ignore 0
             // Read and draw window if enabled.
             if (lcdc.windowDisplayEnable) {
                 wnd.readBackground(ram, lcdc);
@@ -104,8 +155,9 @@ public class LCD implements ClockPulseReceiver {
             if (lcdc.objSpriteDisplay) {
                 sat.draw(screen, false, ram, lcdc, ram.getVram());
             }
+            */
             
-            /*
+        	/*
             System.out.print(String.format("lcd enabled: %c%c%c%c\n", 
             				lcdc.objSpriteDisplay ? 's' : '#',
             				lcdc.bgDisplay ? 'b' : '#',

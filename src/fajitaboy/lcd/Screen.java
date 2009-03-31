@@ -34,7 +34,6 @@ public class Screen {
 		
 		// Exit if sprite outside screen
 		if ( lcdLeft >= lcdRight || lcdTop >= lcdBottom ) {
-			assert (true) : "Trying to blit outside of screen"; 
 			return;
 		}
 		
@@ -48,7 +47,7 @@ public class Screen {
 			"Trying to blit, left smaller than right, or top smaller than bottom";  
 		assert sw != 0 && sh != 0 : "Trying to blit very small sprite";
 		
-		blitIgnore(s.bits, palette, lcdLeft, lcdTop, sx, sy, sw, sh, 0);
+		blit(s.bits, palette, lcdLeft, lcdTop, sx, sy, sw, sh, new IgnorantBlend(0));
 	}
 	
 	/**
@@ -59,17 +58,16 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int palette, int x, int y, int ignore) {
+	public void blit(Tile t, int palette, int x, int y, BlendStrategy bs) {
 		
 		int lcdLeft, lcdTop, lcdRight, lcdBottom;
 		lcdLeft = Math.max(0, x);
 		lcdTop = Math.max(0, y);
-		
-		if (lcdLeft > GB_LCD_W || lcdTop > GB_LCD_H) 
-			return;
-
 		lcdRight = Math.min(x + GB_TILE_W, GB_LCD_W);
 		lcdBottom = Math.min(y + GB_TILE_H, GB_LCD_H);
+
+		if (lcdLeft > GB_LCD_W || lcdTop > GB_LCD_H) 
+			return;
 		
 		int tx, ty, tw, th;
 		ty = lcdTop - y;
@@ -82,7 +80,7 @@ public class Screen {
 			"Trying to blit, left smaller than right, or top smaller than bottom";  
 		assert tw != 0 && th != 0 : "Trying to blit very small sprite";
 		
-		blitIgnore(t.bits, palette, lcdLeft, lcdTop, tx, ty, tw, th, ignore);
+		blit(t.bits, palette, lcdLeft, lcdTop, tx, ty, tw, th, bs);
 		
 	}
 	
@@ -106,50 +104,13 @@ public class Screen {
 	 * @param ignore
 	 * 		data value to ignore
 	 */
-	private void blitIgnore(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh, int ignore) {
+	private void blit(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh, BlendStrategy bs) {
 		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
 			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
-				// TODO do something with palette
-				int pxl = data[cdy][cdx];
-                //if (pxl != ignore) {
-                    // bits[csy][csx] = pxl;
-                	int clr = 0x03 & palette >> pxl*2; 
-                    bits[csy][csx] = clr;
-                //}
-			}
-		}
-	}
-	
-	/**
-	 * @param data 
-	 * 		data to blit
-	 * @param palette
-	 * 		palette to use
-	 * @param sx
-	 * 		start x value in screen
-	 * @param sy
-	 * 		start y value in screen
-	 * @param dx
-	 * 		start x value in data
-	 * @param dy
-	 * 		start y value in data
-	 * @param dw
-	 * 		width of data to blit
-	 * @param dh
-	 * 		height of data to blit
-	 * @param ignore
-	 * 		data value to ignore
-	 */
-	private void blitExclusive(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh, int exclusive) {
-		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
-			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
-				// TODO do something with palette
-				int pxl = data[cdy][cdx];
-                if (pxl == exclusive) {
-                    bits[csy][csx] = pxl;
-                	int clr = 0x03 & palette >> pxl*2; 
-                    bits[csy][csx] = clr;
-                }
+				int oldpxl = bits[csy][csx];
+				// skriv om med lookup istället
+				int newpxl = 0x03 & palette >> data[cdy][cdx]*2;
+		       	bits[csy][csx] = bs.blend(oldpxl, newpxl);
 			}
 		}
 	}

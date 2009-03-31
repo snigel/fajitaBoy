@@ -65,7 +65,7 @@ public class BackgroundMap {
 		 */
 	}
 	
-	public void draw(Screen screen, MemoryInterface ram, Vram vram) {
+	public void draw(Screen screen, MemoryInterface ram, Vram vram, BlendStrategy bs ) {
 // 		Prepare variables
 		int scx, scy, firstTileX, firstTileY;
 		Tile[] tiles = vram.getTiles();
@@ -88,18 +88,19 @@ public class BackgroundMap {
 //		Draw tiles
 		int dx, dy, datax, datay, tileId;
 		// For each row...
+		
 		for ( int y = 0; y < GB_LCD_H/8 + 1; y++ ) {
 			dy = (firstTileY+y)*8 - scy;
 			datay = (firstTileY+y) % 32;
 			// For each column...
 
 			// we probably want to write one more tile to the right, but i want
-			// to confirm it's a bug. (can be confirmed alien
+			// to confirm it's a bug. (can be confirmed in alien3)
 			for ( int x = 0; x < GB_LCD_W/8 + 1; x++ ) {
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
 				tileId = tileAddresses[datay][datax];
-                screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, 0); 
+                screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, bs); 
 			}
 		}
 	}
