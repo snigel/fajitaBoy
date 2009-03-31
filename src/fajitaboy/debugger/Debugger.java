@@ -168,6 +168,7 @@ public final class Debugger implements DrawsGameboyScreen {
 
             // Display background tile numbers
         } else if (scLine.equals("bg")) {
+            String err = "bg takes an address to map to display and scroll x, scroll y";
             if (in.hasNextInt(argRadix)) {
                 int addr = in.nextInt(argRadix);
                 if (in.hasNextInt(argRadix)) {
@@ -176,13 +177,13 @@ public final class Debugger implements DrawsGameboyScreen {
                         int scy = in.nextInt(argRadix);
                         showBackgroundNumbers(addr, scx, scy);
                     } else {
-                        showDebugError("tile takes an adress to tile to display");
+                        showDebugError(err);
                     }
                 } else {
-                    showDebugError("tile takes an adress to tile to display");
+                    showDebugError(err);
                 }
             } else {
-                showDebugError("tile takes an adress to tile to display");
+                showDebugError(err);
             }
 
             // Show output window
