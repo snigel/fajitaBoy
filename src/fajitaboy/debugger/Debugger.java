@@ -78,15 +78,16 @@ public final class Debugger implements DrawsGameboyScreen {
      * @param path
      *            ROM-file to load into the CPU.
      */
-    
+
     private PrintWriter traceWriter;
+
     private boolean tracingToFile = false;
-    
-    
+
     private JFrame jfr;
+
     // private boolean showFrame;
     private GamePanel panelScreen;
-    
+
     private Debugger(final String path) {
         pcLog = new LinkedList<Integer>();
         addressBus = new DebuggerMemoryInterface(path);
@@ -148,7 +149,7 @@ public final class Debugger implements DrawsGameboyScreen {
             } else {
                 debugNSteps(false, 1);
             }
-        // Step and disassemble
+            // Step and disassemble
         } else if (scLine.equals("td")) {
             if (in.hasNextInt(argRadix)) {
                 debugNSteps(false, in.nextInt(argRadix));
@@ -162,70 +163,71 @@ public final class Debugger implements DrawsGameboyScreen {
             if (in.hasNextInt(argRadix)) {
                 showTile(in.nextInt(argRadix));
             } else {
-            	showDebugError("tile takes an adress to tile to display");
+                showDebugError("tile takes an adress to tile to display");
             }
-        
+
             // Display background tile numbers
         } else if (scLine.equals("bg")) {
             if (in.hasNextInt(argRadix)) {
-            	int addr = in.nextInt(argRadix);
-            	if (in.hasNextInt(argRadix)) {
-            		int scx = in.nextInt(argRadix);
-            		if (in.hasNextInt(argRadix)) {
-            			int scy = in.nextInt(argRadix);
-            			showBackgroundNumbers(addr, scx, scy);
+                int addr = in.nextInt(argRadix);
+                if (in.hasNextInt(argRadix)) {
+                    int scx = in.nextInt(argRadix);
+                    if (in.hasNextInt(argRadix)) {
+                        int scy = in.nextInt(argRadix);
+                        showBackgroundNumbers(addr, scx, scy);
                     } else {
-                    	showDebugError("tile takes an adress to tile to display");
+                        showDebugError("tile takes an adress to tile to display");
                     }
                 } else {
-                	showDebugError("tile takes an adress to tile to display");
+                    showDebugError("tile takes an adress to tile to display");
                 }
             } else {
-            	showDebugError("tile takes an adress to tile to display");
+                showDebugError("tile takes an adress to tile to display");
             }
-            
+
             // Show output window
         } else if (scLine.equals("show")) {
-            if (jfr== null) {
+            if (jfr == null) {
                 jfr = new JFrame("FajitaBoy Screen");
                 jfr.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-                
+
                 int zoom = 2;
                 panelScreen = new GamePanel(zoom);
-                panelScreen.setPreferredSize(
-                		new Dimension(zoom*GB_LCD_W,zoom*GB_LCD_H));
+                panelScreen.setPreferredSize(new Dimension(zoom * GB_LCD_W,
+                        zoom * GB_LCD_H));
                 jfr.setContentPane(panelScreen);
-                
+
                 jfr.pack();
             }
-            
+
             jfr.setVisible(!jfr.isVisible());
 
-        // Draw to output window
+            // Draw to output window
         } else if (scLine.equals("draw")) {
             drawScreen();
-            
-        // Start tracing to file.
+
+            // Start tracing to file.
         } else if (scLine.equals("trf")) {
             tracingToFile = !tracingToFile;
-        	if (tracingToFile) {
-            	try {
-            		System.out.println("Writing trace to file.");
-            		traceWriter = new PrintWriter(new BufferedWriter(new FileWriter("trace.log")));
-            	} catch (IOException e) {
-            		System.out.println("Could not open output-file for trace!");
-            		tracingToFile = false;
-            		return;
-            	}
-            	
+            if (tracingToFile) {
+                try {
+                    System.out.println("Writing trace to file.");
+                    traceWriter = new PrintWriter(new BufferedWriter(
+                            new FileWriter("trace.log")));
+                } catch (IOException e) {
+                    System.out.println("Could not open output-file for trace!");
+                    tracingToFile = false;
+                    return;
+                }
+
             } else {
-            	if (traceWriter != null) {
-            		System.out.println("Stopped trace.");
-            		traceWriter.close();
-            		traceWriter = null;
-            	}
+                if (traceWriter != null) {
+                    System.out.println("Stopped trace.");
+                    traceWriter.close();
+                    traceWriter = null;
+                }
             }
-            
+
             // step over
         } else if (scLine.equals("to")) {
             stepOver();
@@ -389,7 +391,7 @@ public final class Debugger implements DrawsGameboyScreen {
                 toggleKey(key);
             } else {
                 showDebugError("k requires a key argument");
-            }            
+            }
 
         } else if (scLine.equals("tr")) {
             if (in.hasNextInt()) {
@@ -424,38 +426,38 @@ public final class Debugger implements DrawsGameboyScreen {
             showDebugError("Invalid command!");
         }
     }
-    
+
     private void showBackgroundNumbers(int addr, int scx, int scy) {
-    	for (int y = 0; y < GB_LCD_H/GB_TILE_H; y++) {
-    		for (int x = 0; x < GB_LCD_W/GB_TILE_W; x++) {
-    			int ay = (scy + y) % 32;
-    			int ax = (scx + x) % 32;
-    			int nr = addressBus.read(addr + ay*32 + ax);
-    			System.out.print(String.format("%02x ", nr));
-    		}
-    		System.out.print("\n");
-    	}
-	}
+        for (int y = 0; y < GB_LCD_H / GB_TILE_H; y++) {
+            for (int x = 0; x < GB_LCD_W / GB_TILE_W; x++) {
+                int ay = (scy + y) % 32;
+                int ax = (scx + x) % 32;
+                int nr = addressBus.read(addr + ay * 32 + ax);
+                System.out.print(String.format("%02x ", nr));
+            }
+            System.out.print("\n");
+        }
+    }
 
-	private void showTile(int addr) {
-		for (int i = 0; i < 16; i += 2) {
-			int hi = addressBus.read(addr + i);
-			int lo = addressBus.read(addr + i + 1);
-			
-			int pxl[] = LCD.convertToPixels(hi, lo);
-			for (int j : pxl) {
-				if (j != 0) {
-					System.out.print(j);
-				} else {
-					System.out.print(' ');
-				}
-			}
-			System.out.print("\n");
-		}
-	}
+    private void showTile(int addr) {
+        for (int i = 0; i < 16; i += 2) {
+            int hi = addressBus.read(addr + i);
+            int lo = addressBus.read(addr + i + 1);
 
-	private void toggleKey(String key) {
-        IO.JoyPad jp = addressBus.getJoyPad(); 
+            int pxl[] = LCD.convertToPixels(hi, lo);
+            for (int j : pxl) {
+                if (j != 0) {
+                    System.out.print(j);
+                } else {
+                    System.out.print(' ');
+                }
+            }
+            System.out.print("\n");
+        }
+    }
+
+    private void toggleKey(String key) {
+        IO.JoyPad jp = addressBus.getJoyPad();
         if (key.equals("a")) {
             jp.setA(!jp.isA());
         } else if (key.equals("b")) {
@@ -476,7 +478,7 @@ public final class Debugger implements DrawsGameboyScreen {
             System.out.println("Unknown key " + key);
         }
     }
-    
+
     private void drawScreen() {
         panelScreen.drawGameboyScreen(osc.getLCD().getScreen());
     }
@@ -706,11 +708,11 @@ public final class Debugger implements DrawsGameboyScreen {
                 + "Execute len instructions starting at current PC [1]\n"
                 + "g\t\t"
                 + "Execute forever\n"
-                + "[Unimplemented] o\t\t"
+                + "show\t\t"
                 + "Output Gameboy screen to applet window\n"
                 + "b addr\t\t"
                 + "Set breakpoint at addr\n"
-                + "[Unimplemented] k [keyname]\t\t"
+                + "key [keyname]\t\t"
                 + "Toggle Gameboy key\n"
                 + "[Unimplemented] m bank\t\t"
                 + "_M_ap to ROM bank\n"
@@ -782,7 +784,8 @@ public final class Debugger implements DrawsGameboyScreen {
 
     /**
      * Logs a pc value in the pc log, pruning the log if necessary.
-     * @param pc pc value to log
+     * @param pc
+     *            pc value to log
      */
     private void logPC(final int pc) {
         if (pcLog.add(pc)) {
@@ -805,10 +808,11 @@ public final class Debugger implements DrawsGameboyScreen {
     private int debugStep() throws InterruptedStepException {
         int c = 0;
         try {
-        	int pc = cpu.getPC();
-        	if (tracingToFile) {
-        		traceWriter.println(Disassembler.dsmInstruction(addressBus, pc, true));
-        	}
+            int pc = cpu.getPC();
+            if (tracingToFile) {
+                traceWriter.println(Disassembler.dsmInstruction(addressBus, pc,
+                        true));
+            }
             logPC(pc);
             c += osc.step();
         } catch (RomWriteException e) {
@@ -876,9 +880,9 @@ public final class Debugger implements DrawsGameboyScreen {
             }
         }
         System.out.print("\nCycles run: " + c + "\n");
-        
+
         if (tracingToFile) {
-        	traceWriter.flush();
+            traceWriter.flush();
         }
     }
 
@@ -887,7 +891,7 @@ public final class Debugger implements DrawsGameboyScreen {
             panelScreen.drawGameboyScreen(data);
         }
     }
-    
+
     /**
      * Prints the list of dirty actions that the addressbus has accumulated.
      */
@@ -900,10 +904,11 @@ public final class Debugger implements DrawsGameboyScreen {
 
     private void stepOver() {
         int pc = cpu.getPC();
-        Disassembler.DisassembledInstruction instr = Disassembler.dsmInstruction(addressBus, pc, false);
+        Disassembler.DisassembledInstruction instr = Disassembler
+                .dsmInstruction(addressBus, pc, false);
         runForever(pc + instr.getData().size());
     }
-    
+
     /**
      * Steps the program forever, or until some kind of breakpoint is reached.
      */
@@ -924,7 +929,7 @@ public final class Debugger implements DrawsGameboyScreen {
             toggleBreakpoint(stop);
         }
     }
-    
+
     /**
      * Starts the debugger with a specified ROM-filepath.
      * @param args
