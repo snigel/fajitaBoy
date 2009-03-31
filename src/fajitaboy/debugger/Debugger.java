@@ -149,6 +149,10 @@ public final class Debugger implements DrawsGameboyScreen {
             } else {
                 debugNSteps(false, 1);
             }
+            // Dump sprite table
+        } else if (scLine.equals("sprites")) {
+            spriteTable();
+            
             // Step and disassemble
         } else if (scLine.equals("td")) {
             if (in.hasNextInt(argRadix)) {
@@ -197,7 +201,7 @@ public final class Debugger implements DrawsGameboyScreen {
                 panelScreen.setPreferredSize(new Dimension(zoom * GB_LCD_W,
                         zoom * GB_LCD_H));
                 jfr.setContentPane(panelScreen);
-
+                jfr.addKeyListener(new SimpleKeyInputController(addressBus.getJoyPad()));
                 jfr.pack();
             }
 
@@ -428,6 +432,10 @@ public final class Debugger implements DrawsGameboyScreen {
         }
     }
 
+    private void spriteTable() {
+    	
+    }
+    
     private void showBackgroundNumbers(int addr, int scx, int scy) {
         for (int y = 0; y < GB_LCD_H / GB_TILE_H; y++) {
             for (int x = 0; x < GB_LCD_W / GB_TILE_W; x++) {
