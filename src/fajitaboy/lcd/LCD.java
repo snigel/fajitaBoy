@@ -21,12 +21,12 @@ public class LCD implements ClockPulseReceiver {
     /**
      * Contains the Background.
      */
-    private BackgroundMap bgm = new BackgroundMap(BackgroundMap.MapType.BACKGROUND);
+    private BackgroundMap bgm = new BackgroundMap();
 
     /**
      * Contains the Window.
      */
-    private BackgroundMap wnd = new BackgroundMap(BackgroundMap.MapType.WINDOW);
+    private WindowMap wnd = new WindowMap();
 
     /**
      * Contains the Sprite Attribute Table.
@@ -120,7 +120,7 @@ public class LCD implements ClockPulseReceiver {
 
             // Read and draw window if enabled.
             if (lcdc.windowDisplayEnable) {
-                wnd.readBackground(ram, lcdc);
+                wnd.readWindow(ram, lcdc);
                 wnd.draw(screen, ram, ram.getVram(), ly);
             }
             
