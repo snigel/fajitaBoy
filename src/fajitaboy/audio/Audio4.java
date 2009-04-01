@@ -1,111 +1,97 @@
 package fajitaboy.audio;
 
-import static fajitaboy.constants.AddressConstants.NR11_REGISTER;
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.AddressConstants.SOUND1_LOW;
 
 import java.util.Random;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-
 import fajitaboy.memory.AddressBus;
 
 public class Audio4 {
-
-    AudioFormat af;
-    byte[] buffer1;
-
-    float samplerate = 44100;
-
-    int samples;
-    int offset = 0;
-    int oldFreq = 0;
+    float sampleRate;
+    int oldFreq;
     int freq;
-    int length = (int) (samplerate);
+    int finalFreq;
     AddressBus ab;
     Random random;
-    int amp = 32;
+    int amp;
+    int step;
+    int stepLength;
 
-    public Audio4(AddressBus ab, int samples) throws LineUnavailableException {
+    public Audio4(AddressBus ab, float sampleRate) {
         this.ab = ab;
-        this.samples = samples;
+        this.sampleRate = sampleRate;
         random = new Random();
-        buffer1 = null;
+        amp = 32;
+        oldFreq = 0;
     }
 
-    public byte[] generateTone(byte[] destBuff) {
+    public byte[] generateTone(byte[] destBuff, boolean left, boolean right, int samples) {
         calcFreq();
-        int nr44 = ab.read(NR44_REGISTER)& 0x40;
-        if ((oldFreq != 0) && (nr44 == 0))  {
-        
-            if(offset + samples > buffer1.length) {
-                fillBuffer();
-            }
-            int j = 0;
-            for(int i = offset; i < (samples + offset); i++) {
-                //   System.out.println("loop");
-                   destBuff[j] += buffer1[i];
-                   j++;
-               }
+        int finalAmp = amp;
+        int k = 0;
+        for(int i = 0; i < samples; i++) {
+          if (stepLength != 0) {
+              //Envelope
+              if ((i % (stepLength * samples)) == 0) {
+                  if ((amp > 0) && (amp < 32)) {
+                      amp += step;
+                  }
+              }
+          }
 
-            offset += samples;
-        }
+          if(left) {
+              destBuff[k] += (byte) finalAmp;
+          }
+          k++;
+          if(right) {
+              destBuff[k] += (byte) finalAmp;
+          }
+          k++;
+
+          if(i % finalFreq  == 0) {
+             boolean j = random.nextBoolean();
+             if(j)
+                 finalAmp = amp;
+             else {
+                 finalAmp = -amp;
+             }
+          }
+      }
         return destBuff;
     }
 
-    private boolean calcFreq() {
+    private void calcFreq() {
         int nr43 = ab.read(NR43_REGISTER);
-        System.out.println("nr43 " + nr43 );
         int s = (nr43 & 0xF0) >> 4 ;
-        System.out.println("s: " + s);    
-    //    System.out.println("s = " + s);
         double r = nr43 & 0x7;
         if(r == 0) {
             r = 0.5;
         }
         freq = (int)((524288 / r) / (Math.pow(2, (s+1))));
-        //freq = (int) (52488 / (r)) >> (s + 1);
-       System.out.println("freq : " + freq);
         if (freq == oldFreq) {
-            return false;
+            return;
         }
         else {
-            fillBuffer();
-            oldFreq = freq;
-            return true;
-        }
-    }
-    
-    private void fillBuffer() {
-        buffer1 = new byte[length];
-        int k = 0;
-        for(int i = 0; i < length; i++) {
-            double angle1 = i / (samplerate/freq) * 2.0 * Math.PI;
-            buffer1[i] = (byte) (amp * Math.signum((Math.sin(angle1))));
-            k++;
-            if(k == 10) {
-              amp = random.nextInt(64)-32;
-         //   calcAmp();
-                k = 0;
+            finalFreq = (int) (sampleRate/freq);
+            if (finalFreq == 0) {
+                finalFreq = 1;
             }
-            
+            calcEnvelope();
+            oldFreq = freq;
         }
-        offset = 0 ;
-        
     }
-    private void calcAmp() {
-       // amp =(int) ((Math.random() * 32 * 2) - 32);
-        /*
-        boolean a = random.nextBoolean();
-        if (a) {
-            amp = -32;
+
+    /**
+     *
+     */
+    private void calcEnvelope() {
+        int nr12 = ab.read(NR12_REGISTER);
+        amp = ((nr12 & 0xF0 )>> 4) * 2;
+        stepLength = nr12 & 0x7;
+        int direction = nr12 & 0x8;
+        if (direction == 0) {
+            step = -2;
+        } else {
+            step = 2;
         }
-        else {
-            amp = 32;
-        }*/
     }
 }

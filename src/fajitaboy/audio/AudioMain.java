@@ -1,7 +1,6 @@
 package fajitaboy.audio;
 
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.BitmaskConstants.*;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -22,22 +21,29 @@ import fajitaboy.memory.AddressBus;
  */
 public class AudioMain implements DrawsGameboyScreen {
 
-    AddressBus ab;
-    Audio au1;
-    Audio2 au2;
-    Audio3 au3;
-    Audio4 au4;
-
-    GamePanel gp;
-
-    float samplerate = 44100;
-    int samples = 1100;
-    byte[] destBuff = new byte[samples];
-    AudioFormat af;
-    SourceDataLine sdl;
+    private AddressBus ab;
+    private Audio au1;
+    private Audio2 au2;
+    private Audio3 au3;
+    private Audio4 au4;
+    private boolean ch1Left;
+    private boolean ch1Right;
+    private boolean ch2Left;
+    private boolean ch2Right;
+    private boolean ch3Left;
+    private boolean ch3Right;
+    private boolean ch4Left;
+    private boolean ch4Right;
+    private GamePanel gp;
+    private float sampleRate = 44100;
+    private int samples = 735;
+    private int finalSamples;
+    private byte[] destBuff;
+    private AudioFormat af;
+    private SourceDataLine sdl;
 
     public AudioMain() throws LineUnavailableException {
-        af = new AudioFormat(samplerate, 8, 1, true, false);
+        af = new AudioFormat(sampleRate, 8, 2, true, false);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
         sdl = (SourceDataLine) AudioSystem.getLine(info);
         sdl.open(af);
@@ -50,10 +56,10 @@ public class AudioMain implements DrawsGameboyScreen {
 
 
         ab = new AddressBus("/bombjack.gb");
-        au1 = new Audio(ab, SOUND1_LOW, SOUND1_HIGH, samples);
-        au2 = new Audio2(ab, SOUND2_LOW, SOUND2_HIGH, samples);
-        au3 = new Audio3(ab, SOUND3_LOW, SOUND3_HIGH, samples);
-        au4 = new Audio4(ab, samples);
+        au1 = new Audio(ab, sampleRate);
+        au2 = new Audio2(ab, sampleRate);
+        au3 = new Audio3(ab, sampleRate);
+        au4 = new Audio4(ab, sampleRate);
 
         Cpu cpu = new Cpu(ab);
         Oscillator oc = new Oscillator(cpu, ab, this);
@@ -80,12 +86,34 @@ public class AudioMain implements DrawsGameboyScreen {
     }
 
     public void drawGameboyScreen(int[][] data) {
-        destBuff = new byte[samples];
-        //gp.drawGameboyScreen(data);
-         au1.generateTone(destBuff);
-         au2.generateTone(destBuff);
-        au3.generateTone(destBuff);
-      //   au4.generateTone(destBuff);
-         sdl.write(destBuff, 0, samples);
+        if(sdl.available()*2 < samples*2) {
+            destBuff = new byte[sdl.available()*2];
+            finalSamples = sdl.available();
+        }
+        else {
+            destBuff = new byte[samples*2];
+            finalSamples = samples;
+        }
+        stereoSelect();
+        gp.drawGameboyScreen(data);
+        au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
+        au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
+        au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
+        au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
+
+        sdl.write(destBuff, 0, destBuff.length);
+    }
+
+    private void stereoSelect() {
+        int nr51 = ab.read(NR51_REGISTER);
+        ch1Left = ((nr51 & 0x1) > 0);
+        ch2Left = ((nr51 & 0x2) > 0);
+        ch3Left = ((nr51 & 0x4) > 0);
+        ch4Left = ((nr51 & 0x8) > 0);
+        ch1Right = ((nr51 & 0x10) > 0);
+        ch2Right = ((nr51 & 0x20)  > 0);
+        ch3Right = ((nr51 & 0x40) > 0);
+        ch4Right = ((nr51 & 0x80) > 0);
     }
 }
+

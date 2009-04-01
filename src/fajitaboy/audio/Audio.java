@@ -1,111 +1,173 @@
 package fajitaboy.audio;
 
-import static fajitaboy.constants.AddressConstants.NR11_REGISTER;
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.AddressConstants.SOUND1_LOW;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 
 import fajitaboy.memory.AddressBus;
 
 public class Audio {
+    private float sampleRate;
+    private int oldFreq;
+    private int amp;
+    private AddressBus ab;
+    private int freq;
+    private int pos;
+    private int waveLength;
+    private int dutyLength;
+    private int step;
+    private int stepLength;
+    private int sweepLength;
+    private int sweepSteps;
+    private int sweepDirection;
+    private int sweepNr;
 
-    AudioFormat af;
-
-    byte[] buffer1;
-    SourceDataLine sdl;
-
-    float samplerate = 44100;
-    int samples;
-    int offset = 0;
-    int oldFreq = 0;
-    int amp = 32;
-    int soundLow;
-    int soundHigh;
-    int length = (int) (samplerate*3);
-    AddressBus ab;
-    int freq;
-
-    private int oldNr12 = 0;
-
-    public Audio(AddressBus ab, int soundLow, int soundHigh, int samples)
-            throws LineUnavailableException {
-        this.soundHigh = soundHigh;
-        this.soundLow = soundLow;
+    public Audio(AddressBus ab,float sampleRate) throws LineUnavailableException {
         this.ab = ab;
-        this.samples = samples;
-        buffer1 = null;
+        this.sampleRate = sampleRate;
+        pos = 0;
+        oldFreq = 0;
+        amp = 32;
     }
 
-    public byte[] generateTone(byte[] destBuff) {
+    public byte[] generateTone(byte[] destBuff, boolean left, boolean right, int samples) {
         calcFreq();
+        int finalAmp;
+        int k = 0;
+        for (int i = 0; i < samples; i++) {
 
-        if (oldFreq != 0) {
-            if (offset + samples > buffer1.length) {
-                fillBuffer();
-                 System.out.println("Filling buffer");
-                // end = buffer1.length - offset;
+            //Envelope
+            if (stepLength != 0) {
+                if ((i % (stepLength * samples)) == 0) {
+                    if ((amp > 0) && (amp < 32)) {
+                        amp += step;
+                    }
+                }
             }
-            // System.arraycopy(buffer1, offset, destBuff, 0, end);
-            int j = 0;
-            for (int i = offset; i < (samples + offset); i++) {
-                // System.out.println("loop");
-                destBuff[j] += buffer1[i];
-                j++;
+            //Sweep
+            if(sweepLength != 0) {
+                if (((i % (sweepLength * samples)) == 0) && (sweepNr < sweepSteps)) {
+                    System.out.println("Sweeping");
+                    if(sweepDirection == 0) {
+                        freq =  freq + (int)(freq / (Math.pow(2, sweepNr)));
+                    }
+                    else {
+                        freq = freq - (int)(freq / (Math.pow(2, sweepNr)));
+                    }
+                }
+                calcWavePattern();
             }
-            // System.out.println("j =  " + j);
-            // sdl.write(destBuff, 0, end);
-            // sdl.write(buffer1, offset, end);
-            offset += samples;
+
+            if(pos < dutyLength) {
+                finalAmp = -amp;
+            }
+
+            else {
+                finalAmp = amp;
+            }
+            if(left) {
+                destBuff[k] += (byte) finalAmp;
+            }
+            k++;
+            if(right) {
+                destBuff[k] += (byte) finalAmp;
+            }
+            k++;
+            pos = (pos + 1) % waveLength;
         }
         return destBuff;
     }
 
-    private boolean calcFreq() {
-        int low1 = ab.read(soundLow);
-        int high1 = ab.read(soundHigh) * 0x100;
-        freq = 131072 / (2047 - (high1 + low1) & 0x7ff);
-        // System.out.println("freq " + freq);
-        if (freq == oldFreq) {
-            return false;
-        } else {
-            fillBuffer();
-            oldFreq = freq;
-            offset = 0;
-            return true;
-        }
-
-    }
-
-    private void fillBuffer() {
-        buffer1 = new byte[length];
-
-        int step;
+    private void calcEnvelope() {
         int nr12 = ab.read(NR12_REGISTER);
         amp = ((nr12 & 0xF0 )>> 4) * 2;
-        int stepLength = nr12 & 0x7;
+        stepLength = nr12 & 0x7;
         int direction = nr12 & 0x8;
         if (direction == 0) {
             step = -2;
         } else {
             step = 2;
         }
-        for (int i = 0; i < length; i++) {
-            if (stepLength != 0) {
-                if ((i % (stepLength * samples)) == 0) {
-    //                System.out.println("amp " + amp);
-                    if ((amp > 0) && (amp < 32)) {
-                        amp += step;
-                    }
-                }
-            }
-            double angle1 = i / (samplerate / freq) * 2.0 * Math.PI;
-            buffer1[i] = (byte) (amp * Math.signum((Math.sin(angle1))));
+
+    }
+
+
+    private void calcFreq() {
+        int low1 = ab.read(SOUND1_LOW);
+        int high1 = ab.read(SOUND1_HIGH) * 0x100;
+        freq = 131072 / (2047 - (high1 + low1) & 0x7ff);
+        if (freq == oldFreq) {
+            return;
+        } else {
+            calcSweepLength();
+            calcEnvelope();
+            dutyLength = calcWavePattern();
+            oldFreq = freq;
         }
-        offset = 0;
+    }
+
+    /**
+     * @return
+     */
+    private void calcSweepLength() {
+        sweepNr = 0;
+        int nr10 = ab.read(NR10_REGISTER);
+        sweepSteps =  nr10 & 0x7;
+        sweepDirection = nr10 & 8;
+        int sweepTime = ((nr10 & 0x70) >> 4);
+
+        switch(sweepTime) {
+        case 0:
+            sweepLength = 0;
+            break;
+        case 1:
+            sweepLength = (int)((sampleRate / 1000) * 7.8);
+            break;
+        case 2:
+            sweepLength = (int)((sampleRate / 1000) * 15.6);
+            break;
+        case 3:
+            sweepLength = (int)((sampleRate / 1000) * 23.4);
+            break;
+        case 4:
+            sweepLength = (int)((sampleRate / 1000) * 31.3);
+            break;
+        case 5:
+            sweepLength = (int)((sampleRate / 1000) * 39.1);
+            break;
+        case 6:
+            sweepLength = (int)((sampleRate / 1000) * 46.9);
+            break;
+        case 7:
+            sweepLength = (int)((sampleRate / 1000) * 54.7);
+            break;
+        default:
+            sweepLength = 0;
+            break;
+        }
+
+    }
+
+    /**
+     *
+     */
+    private int calcWavePattern() {
+        waveLength = (int)((sampleRate) / (float)freq);
+        if (waveLength == 0) {
+            waveLength = 1;
+        }
+        int nr11 = ((ab.read(NR11_REGISTER) & 0xC0) >> 6);
+        switch(nr11) {
+        case 0:
+            return (int)((float)waveLength * 0.125);
+        case 1:
+            return (int)((float)waveLength * 0.25);
+        case 2:
+            return (int)((float)waveLength * 0.50);
+        case 3:
+            return (int)((float)waveLength * 0.75);
+        default:
+            return 0;
+        }
     }
 }
