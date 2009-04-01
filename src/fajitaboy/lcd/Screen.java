@@ -41,7 +41,43 @@ public class Screen {
 	 * @param transparent If true, palette index 0 is not rendered. 
 	 * @throws Exception
 	 */
-	public void blit(Tile t, int palette, int x, int y, int ly, boolean xFlip, boolean yFlip ) {
+	public void blitTile(Tile t, int palette, int x, int y, int ly, boolean transp ) {
+		// Abort if no blitting occurs
+		if ( y > ly || y + 8 <= ly || x <= -8 || x >= 160 )
+			return;
+		
+		// Prepare variables
+		int sx, sy, tx, ty;
+		sy = ly;
+		sx = Math.max(0, x);
+		if ( x < 0 ) {
+			tx = -x;
+		} else {
+			tx = 0;
+		}
+		ty = ly - y;
+
+		// Blit pixels to screen
+		if ( transp ) {
+			while( sx < 160 && tx < 8 ) {
+				int newidx = t.bits[ty][tx];
+				if (newidx != 0) {
+					bits[sy][sx] = 0x03 & palette >> newidx*2;
+				}
+				sx++;
+				tx++;
+			}
+		} else {
+			while( sx < 160 && tx < 8 ) {
+				int newidx = t.bits[ty][tx];
+				bits[sy][sx] = 0x03 & palette >> newidx*2;
+				sx++;
+				tx++;
+			}	
+		}
+	}
+	
+	public void blitSprite(Tile t, int palette, int x, int y, int ly, boolean xFlip, boolean yFlip ) {
 		// Abort if no blitting occurs
 		if ( y > ly || y + 8 <= ly || x <= -8 || x >= 160 )
 			return;
@@ -81,9 +117,9 @@ public class Screen {
 				tx++;
 			}
 		}
-		
-
 	}
+	
+	
 	
 	/**
 	 * @param data 

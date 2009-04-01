@@ -75,16 +75,15 @@ public class BackgroundMap {
             scy = ram.read(ADDRESS_SCY);
         } else { //WINDOW 
         	/*
-        	 * 
-The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
-A postion of WX=7, WY=0 locates the window at upper left, it is then completly covering normal background.
+        	 * The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
+			 * A postion of WX=7, WY=0 locates the window at upper left, it is then completly covering normal background.
         	 */
             scx = ram.read(ADDRESS_WX);
             scy = ram.read(ADDRESS_WY);
             if (scx < 0 || scx > 166 || scy < 0 || scy > 143) {
                 return;
             }
-            scx -= 7;
+            scx -= 8;
         }
         
 		firstTileX = (int)(scx/8);
@@ -106,9 +105,10 @@ A postion of WX=7, WY=0 locates the window at upper left, it is then completly c
 				datax = (firstTileX+x) % 32;
 				tileId = tileAddresses[datay][datax];
 				if ( type == MapType.WINDOW ) {
-					screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, false, false);	
+					if ( dx >= scx && dy >= scy  ) // Fulhacket number one
+						screen.blitTile(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, false);	
 				} else {
-					screen.blit(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, false, false);
+					screen.blitTile(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, true);
 				}
                  
 			}

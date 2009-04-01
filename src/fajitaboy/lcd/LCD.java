@@ -187,7 +187,7 @@ public class LCD implements ClockPulseReceiver {
             	
                 stat += 2;
                 // Trigger LCDSTAT interrupt if Mode 2 OAM interrupt is enabled
-                if ((stat & 0x020) != 0) {
+                if ((stat & 0x20) != 0) {
                     ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x02);
                 }
                 break;
