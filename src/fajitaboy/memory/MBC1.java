@@ -52,7 +52,7 @@ public class MBC1 implements MemoryInterface {
             rom.setBank(1);
         }
         else{
-           rom.setBank(bank&(banks-1));
+           rom.setBank(bank&banks-1);
         }
         //System.out.println("rom bank set to "+(bank%banks)+" tried "+bank);
     }
