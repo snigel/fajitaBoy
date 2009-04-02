@@ -3,36 +3,27 @@ package fajitaboy;
 import java.applet.AudioClip;
 
 import java.awt.Color;
-import java.awt.Component;
+
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.KeyboardFocusManager;
+
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+
 
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.AddressBus;
-import fajitaboy.memory.IO.JoyPad;
-
-import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.PanelConstants.*;
 
 /**
@@ -111,6 +102,7 @@ public class FajitaBoy extends JApplet {
     /** Emulator panel, where the actual emulator screen is shown. */
     private GamePanel gamePanel;
 
+    /** Contains the gamePanel and an optional menu.  */
     private LayeredGamePanel layeredGamePanel;
 
     /**  */
@@ -159,7 +151,7 @@ public class FajitaBoy extends JApplet {
         setContentPane(startScreen);
         getContentPane().validate();
 
-        // addKeyListener(this);
+        addMouseListener(new MouseController());
     }
 
     /**
@@ -369,11 +361,6 @@ public class FajitaBoy extends JApplet {
         private Oscillator oscillator;
 
         /**
-         * To know if the emulation should keep running.
-         */
-        private boolean running;
-
-        /**
          * Standard constructor.
          * 
          * @param path
@@ -384,7 +371,6 @@ public class FajitaBoy extends JApplet {
             addressBus = new AddressBus(path);
             cpu = new Cpu(addressBus);
             oscillator = new Oscillator(cpu, addressBus, gamePanel);
-            running = false;
         }
 
         /**
@@ -403,6 +389,18 @@ public class FajitaBoy extends JApplet {
             return oscillator.getLCD();
         }
 
+    }
+
+    /**
+     * Handles the applet mouse events.
+     */
+    private class MouseController extends MouseAdapter {
+        /**
+         * Makes sure that the applet can regain the focus by clicking on it.
+         */
+        public void mousePressed(final MouseEvent e) {
+            requestFocus();
+        }
     }
 
 }
