@@ -330,5 +330,13 @@ public class Oscillator implements Runnable{
     public final boolean isRunning() {
         return running;
     }
+    
+    public void enableAudio() {
+    	audioEnabled = true;
+    }
+    
+    public void disableAudio() {
+    	audioEnabled = false;
+    }
 
 }
