@@ -370,7 +370,7 @@ public class FajitaBoy extends JApplet {
 
             addressBus = new AddressBus(path);
             cpu = new Cpu(addressBus);
-            oscillator = new Oscillator(cpu, addressBus, gamePanel);
+            oscillator = new Oscillator(cpu, addressBus, gamePanel, true);
         }
 
         /**

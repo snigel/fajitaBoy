@@ -62,7 +62,7 @@ public class AudioMain implements DrawsGameboyScreen {
         au4 = new Audio4(ab, sampleRate);
 
         Cpu cpu = new Cpu(ab);
-        Oscillator oc = new Oscillator(cpu, ab, this);
+        Oscillator oc = new Oscillator(cpu, ab, this, true);
 
         for (int i = 0; i < INSTRUCTIONS; i++) {
             oc.step();

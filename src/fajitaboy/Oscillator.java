@@ -74,7 +74,7 @@ public class Oscillator implements Runnable{
     private DrawsGameboyScreen dgs; 
     
     /**
-     * 
+     * Audio is disabled by default.
      */
     private boolean audioEnabled;
     
@@ -113,15 +113,19 @@ public class Oscillator implements Runnable{
     }
 
     /**
-     * Creates a new Oscillator with default values.
+     * Creates a new Oscillator with a screen rendering instance and possibility to enable audio.
      * @param cpu
      *            Pointer to CPU instance.
      * @param ram
      *            Pointer to MemoryInterface instance.
+     * @param dgs
+     * 			  Pointer to DrawsGameboyScreen instance.
      */
-    public Oscillator(Cpu cpu, AddressBus ram, DrawsGameboyScreen dgs) {
+    public Oscillator(Cpu cpu, AddressBus ram, DrawsGameboyScreen dgs, boolean enableAudio ) {
         this(cpu,ram);
         this.dgs = dgs; 
+        if ( enableAudio )
+        	enableAudio();
     }
     
     /**
@@ -133,7 +137,7 @@ public class Oscillator implements Runnable{
         nextDividerInc = GB_DIV_CLOCK;
         nextHaltCycle = GB_CYCLES_PER_FRAME;
         running = false;
-        audioEnabled = true;
+        disableAudio();
         resetAudio();
     }
     
@@ -289,20 +293,6 @@ public class Oscillator implements Runnable{
                     try {
                         Thread.sleep(sleepTime / 1000000);
                     } catch (InterruptedException e) {}
-                    
-                 /* Thread.sleep is not 100% accurate so we have to
-                    give some extra marginal before frame skip. */
-                // TODO Examine this if case later when sober... could this cause jerkiness in emulation?
-                /*} else if (sleepTime < -GB_NANOS_PER_FRAME) {
-                    if (frameSkipCount >= MAX_FRAMESKIP) {
-                        lcd.disableFrameSkip();
-                        frameSkipCount = 0;
-                        nextUpdate = System.nanoTime();
-                    } else {
-                        lcd.enableFrameSkip();
-                        frameSkipCount++;
-                    }
-                }*/
                 } else if (frameSkipCount >= MAX_FRAMESKIP) {
                 	lcd.disableFrameSkip();
                 	frameSkipCount = 0;
@@ -332,7 +322,10 @@ public class Oscillator implements Runnable{
     }
     
     public void enableAudio() {
-    	audioEnabled = true;
+    	if ( audioEnabled == false ) {
+    		audioEnabled = true;
+    		resetAudio();
+    	}
     }
     
     public void disableAudio() {

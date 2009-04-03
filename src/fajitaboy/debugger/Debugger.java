@@ -94,7 +94,7 @@ public final class Debugger implements DrawsGameboyScreen {
         addressBus = new DebuggerMemoryInterface(path);
         breakPoints = new HashSet<Integer>();
         cpu = new Cpu(addressBus);
-        osc = new Oscillator(cpu, addressBus, this);
+        osc = new Oscillator(cpu, addressBus, this, false);
         prompt();
     }
 

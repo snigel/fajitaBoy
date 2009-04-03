@@ -30,7 +30,7 @@ public class SimpleClient {
             
             AddressBus  a = new AddressBus(path);
             Cpu c = new Cpu(a);
-            final Oscillator o = new Oscillator(c, a, panelScreen);
+            final Oscillator o = new Oscillator(c, a, panelScreen, false);
             
             KeyListener kc = new SimpleKeyInputController(a.getJoyPad());
             panelScreen.addKeyListener(kc);
