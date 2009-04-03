@@ -112,8 +112,8 @@ public class LCD {
 
 			// Read and draw background if enabled.            
 			if (lcdc.bgDisplay) {
-				bgm.readBackground(ram, lcdc);
-				bgm.draw(screen, ram, ram.getVram(), ly);
+				bgm.readBackgroundWholeLine(ly, ram, lcdc);
+            	bgm.drawLine(screen, ram, ram.getVram(), ly);
 			}
 
 			// Read and draw window if enabled.

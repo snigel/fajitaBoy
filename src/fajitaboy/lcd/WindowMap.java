@@ -41,6 +41,116 @@ public class WindowMap {
 			}
 		}
 	}
+	
+	public void readWindowLine(int ly, MemoryInterface ram, LCDC lcdc) {
+		int scx, scy;
+
+		scx = ram.read(ADDRESS_WX);
+		scy = ram.read(ADDRESS_WY);
+		
+		// The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
+		// A postion of WX=7, WY=0 locates the window at upper left, it is then completely covering normal background.
+		if (scx < 0 || scx > 166 || scy < 0 || scy > 143 || scy > ly) {
+			return;
+		}
+		scx -= 7;
+		
+		// vi borde inte behöva köra modulus här
+		int firstTileY = ((scy + ly) / 8);
+		int firstTileX = (scx / 8);
+		
+		if (firstTileY < 0 || firstTileY >= 32 || firstTileX < 0 || firstTileX >= 32) {
+			System.out.println("not supposed to happen");
+		}
+		
+		int addr_base = 0;
+		if (lcdc.windowTileMapSelect) {
+			addr_base = 0x9C00;
+		} else {
+			addr_base = 0x9800;
+		}
+		
+		// read tile-numbers
+		for (int cx = 0; cx < GB_MAP_VISIBLE_W + 1; cx++) {
+			int ty = (firstTileY + (firstTileX + cx)/GB_MAP_H) % GB_MAP_H; 
+			int tx = (firstTileX + cx) % GB_MAP_W;
+			
+			// addr, where we read the tile pattern nr.
+			int addr = addr_base + ty * GB_MAP_W + tx; 
+			
+			int pnr = ram.read(addr);
+			if ( lcdc.tileDataSelect ) {
+				tileAddresses[ty][tx] = pnr;
+			} else {
+				// signed
+				tileAddresses[ty][tx] = 0x100 + (byte)pnr; 
+			} 
+		}
+		
+		/*
+		 * int scx, scy, firstTileX, firstTileY;
+		
+		scx = ram.read(ADDRESS_SCX);
+		scy = ram.read(ADDRESS_SCY);
+
+		firstTileX = scx/8;
+		
+		/*
+		 * krånglar när scy == 255 och mindre
+		 */
+		//firstTileY = ((scy + ly) / 8) % 32;
+		
+		/*
+		if (ly == 0) {
+			System.out.printf("%03d, %03d\n", firstTileX, firstTileY);
+		}
+		*/
+		
+		
+		/*int addr_base = 0;
+		if (lcdc.bgTileMapSelect) {
+			addr_base = 0x9C00;
+		} else {
+			addr_base = 0x9800;
+		}
+		*/
+		
+		// addr_base += firstTileY * GB_MAP_H + firstTileX;
+		
+		/*
+		 * We have to read (GB_MAP_VISIBLE_W + 1) nr of tiles,
+		 * since we could need an extra partial tile. we could
+		 * figure out when we dont need that extra tile and save
+		 * some cycles.
+		 */
+		/*
+		for (int cx = 0; cx < GB_MAP_VISIBLE_W + 1; cx++) {
+			/*
+			 * ty & tx, the index in the background array.
+			 * ty should be firstTileY or firstTileY + 1
+			 */
+		/*
+			int ty = (firstTileY + (firstTileX + cx)/GB_MAP_H) % GB_MAP_H; 
+			int tx = (firstTileX + cx) % GB_MAP_W;
+			//int addr = addr_base + cx % (GB_MAP_H * GB_MAP_W);
+			
+			// addr, where we read the tile pattern nr.
+			int addr = addr_base + ty * GB_MAP_W + tx;
+			assert lcdc.bgTileMapSelect && addr >= 0x9C00 && addr < 0x9C00 + (GB_MAP_H - 1)*GB_MAP_W
+					|| !lcdc.bgTileMapSelect && addr >= 0x9800 && addr < 0x9800 + (GB_MAP_H - 1)*GB_MAP_W
+				: "trying to read tile from fu place"; 
+			
+			int pnr = ram.read(addr);
+			if ( lcdc.tileDataSelect ) {
+				tileAddresses[ty][tx] = pnr;
+			} else {
+				// signed
+				tileAddresses[ty][tx] = 0x100 + (byte)pnr; 
+			} 
+		}
+		*/
+	}
+	
 
 	public void draw(Screen screen, MemoryInterface ram, Vram vram, int ly) {
 		// 		Prepare variables

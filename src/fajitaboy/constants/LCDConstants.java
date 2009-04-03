@@ -13,4 +13,7 @@ public final class LCDConstants {
 	public static final int GB_TILE_W = 8;
 	public static final int GB_TILE_H = 8;
 	
+	public static final int GB_MAP_VISIBLE_W = GB_LCD_W/GB_TILE_W;
+	public static final int GB_MAP_VISIBLE_H = GB_LCD_H/GB_TILE_H;
+	
 }
