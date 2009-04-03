@@ -55,7 +55,7 @@ public class AudioMain implements DrawsGameboyScreen {
         jfr.setVisible(true);
 
 
-        ab = new AddressBus("D:\\eclipse\\workspace\\linksawakening.gb");
+        ab = new AddressBus("/bombjack.gb"); 
         au1 = new Audio(ab, sampleRate);
         au2 = new Audio2(ab, sampleRate);
         au3 = new Audio3(ab, sampleRate);
