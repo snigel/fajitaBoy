@@ -22,11 +22,6 @@ public class Oscillator implements Runnable{
     private boolean running;
     
     /**
-     * if true the screen is not updated on vblank.
-     */
-    private boolean frameSkip;
-    
-    /**
      * Next cycle to stop and wait if going too fast
      */
     private long nextHaltCycle;
@@ -35,16 +30,6 @@ public class Oscillator implements Runnable{
      * Cycles since Oscillator initialization.
      */
     private long cycles;
-
-    /**
-     * Next cycle at which the LCD will proceed to next line.
-     */
-    private long nextLineInc;
-
-    /**
-     * Next cycle at which the LCD will change its mode.
-     */
-    private long nextModeChange;
 
     /**
      * Previous cycle at which the Timer was incremented.
@@ -104,11 +89,8 @@ public class Oscillator implements Runnable{
      */
     public void reset() {
         cycles = 0;
-        nextLineInc = GB_CYCLES_PER_LINE;
-        nextModeChange = GB_CYCLES_PER_LINE;
         prevTimerInc = 0;
         nextDividerInc = GB_DIV_CLOCK;
-        frameSkip = false;
         nextHaltCycle = GB_CYCLES_PER_FRAME;
         running = false;
     }
@@ -125,8 +107,13 @@ public class Oscillator implements Runnable{
         
         updateDiv();
         updateTimer();
-        updateLCD();
-
+        
+        // Update LCD
+        lcd.updateLCD(cycleInc);
+        if ( dgs != null && lcd.newScreenAvailable() ) {
+        	dgs.drawGameboyScreen(lcd.getScreen());
+        }
+        
         return cycleInc;
     }
 
@@ -176,61 +163,6 @@ public class Oscillator implements Runnable{
 
     }
 
-    /**
-     * Check for LCD register status change.
-     */
-    private void updateLCD() {
-        int ly;
-        boolean lycHit = false;
-        
-        if (cycles > nextLineInc) {
-        	lycHit = lcd.nextLine();
-        	
-            nextLineInc += GB_CYCLES_PER_LINE;
-
-            // Check line # for VBlank and reset to 0
-            ly = ram.read(ADDRESS_LY);
-            if (ly == GB_VBLANK_LINE) {
-                lcd.vblank();
-                
-                //call draw
-                if (!frameSkip && dgs != null) {
-                    dgs.drawGameboyScreen(lcd.getScreen());
-                }  
-            }
-        }
-
-        if (cycles > nextModeChange) {
-            ly = ram.read(ADDRESS_LY);
-            if (ly < 144) {
-                lcd.changeMode();
-
-                // Read current mode and determine wait time from that
-                int mode = ram.read(ADDRESS_STAT) & 0x03;
-                if (mode == 0) {
-                    nextModeChange += GB_HBLANK_PERIOD;
-                } else if (mode == 2) {
-                    nextModeChange += GB_LCD_OAMSEARCH_PERIOD;
-                } else if (mode == 3) {
-                    nextModeChange += GB_LCD_TRANSFER_PERIOD;
-                }
-            } else {
-                // This line nothing happens, see what happens next line...
-                nextModeChange += GB_CYCLES_PER_LINE;
-            }
-        }
-
-        // Handle LYC hit
-        if (lycHit) {
-            // Trigger LCDSTAT interrupt if LYC=LY Coincidence Interrupt is
-            // enabled
-            int stat = ram.read(ADDRESS_STAT);
-            if ((stat & 0x40) != 0) {
-                ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x02);
-            }
-        }
-    }
-
     public LCD getLCD() {
         return lcd;
     }
@@ -245,37 +177,44 @@ public class Oscillator implements Runnable{
         long nextUpdate = System.nanoTime();
         int frameSkipCount = 0;
         while (running) {
-            // Oscillator.step();
             step();
 
             if (cycles > nextHaltCycle) {
                 nextUpdate += GB_NANOS_PER_FRAME;
                 sleepTime = nextUpdate - System.nanoTime();
+                
+                // Sleep if running too fast
                 if (sleepTime >= 0) {
-                    frameSkip = false;
-                    lcd.frameSkip = false;
+                    lcd.disableFrameSkip();
                     frameSkipCount = 0;
                     try {
                         Thread.sleep(sleepTime / 1000000);
                     } catch (InterruptedException e) {}
-                 // Thread.sleep is not 100% accurate so we have to
-                 // give some extra marginal before frame skip.
-                } else if (sleepTime < -GB_NANOS_PER_FRAME) {
+                    
+                 /* Thread.sleep is not 100% accurate so we have to
+                    give some extra marginal before frame skip. */
+                // TODO Examine this if case later when sober... could this cause jerkiness in emulation?
+                /*} else if (sleepTime < -GB_NANOS_PER_FRAME) {
                     if (frameSkipCount >= MAX_FRAMESKIP) {
-                        frameSkip = false;
-                        lcd.frameSkip = false;
+                        lcd.disableFrameSkip();
                         frameSkipCount = 0;
                         nextUpdate = System.nanoTime();
                     } else {
-                        frameSkip = true;
-                        lcd.frameSkip = true;
+                        lcd.enableFrameSkip();
                         frameSkipCount++;
                     }
+                }*/
+                } else if (frameSkipCount >= MAX_FRAMESKIP) {
+                	lcd.disableFrameSkip();
+                	frameSkipCount = 0;
+                	nextUpdate = System.nanoTime();
+                } else {
+                	lcd.enableFrameSkip();
+                	frameSkipCount++;
                 }
                 nextHaltCycle += GB_CYCLES_PER_FRAME;
             }
         }
-        frameSkip = false;
     }
 
     /**

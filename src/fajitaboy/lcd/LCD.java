@@ -1,10 +1,13 @@
 package fajitaboy.lcd;
 
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.LCDConstants.*;
+import static fajitaboy.constants.HardwareConstants.GB_CYCLES_PER_LINE;
+import static fajitaboy.constants.HardwareConstants.GB_HBLANK_PERIOD;
+import static fajitaboy.constants.HardwareConstants.GB_LCD_OAMSEARCH_PERIOD;
+import static fajitaboy.constants.HardwareConstants.GB_LCD_TRANSFER_PERIOD;
+import static fajitaboy.constants.HardwareConstants.GB_VBLANK_LINE;
 
 import fajitaboy.memory.AddressBus;
-import fajitaboy.memory.MemoryInterface;
 
 /**
  * @author Tobias Svensson
@@ -49,7 +52,17 @@ public class LCD {
 	/**
 	 * If true, frame will not be rendered.
 	 */
-	public boolean frameSkip = false;
+	private boolean frameSkip = false;
+	
+    /**
+     * Next cycle at which the LCD will proceed to next line.
+     */
+    private long nextLineInc;
+
+    /**
+     * Next cycle at which the LCD will change its mode.
+     */
+    private long nextModeChange;
 
 	/*
 	 * (non-Javadoc)
@@ -71,7 +84,8 @@ public class LCD {
 	 * Resets LCD to default state.
 	 */
 	public void reset() {
-
+        nextLineInc = GB_CYCLES_PER_LINE;
+        nextModeChange = GB_CYCLES_PER_LINE;
 	}
 
 	/**
@@ -154,6 +168,61 @@ public class LCD {
 
 		return pixels;
 	}
+	
+	/**
+	 * Updates the LCD a given amount of cycles.
+	 * @param cycles Oscillator cycles to step
+	 */
+    public void updateLCD(int cycles) {
+        int ly;
+        boolean lycHit = false;
+        
+        // Move LCD to next line
+        if (cycles > nextLineInc) {
+        	lycHit = nextLine();        	
+            nextLineInc += GB_CYCLES_PER_LINE;
+            ly = ram.read(ADDRESS_LY);
+            
+        	// Perform V-Blank
+            if (ly == GB_VBLANK_LINE) {
+                vblank();
+                //if (!frameSkip) {
+                	newScreen = true;
+                //}  
+            }
+        }
+        nextLineInc -= cycles;
+
+        if (cycles > nextModeChange) {
+            ly = ram.read(ADDRESS_LY);
+            if (ly < 144) {
+                changeMode();
+
+                // Read current mode and determine wait time from that
+                int mode = ram.read(ADDRESS_STAT) & 0x03;
+                if (mode == 0) {
+                    nextModeChange += GB_HBLANK_PERIOD;
+                } else if (mode == 2) {
+                    nextModeChange += GB_LCD_OAMSEARCH_PERIOD;
+                } else if (mode == 3) {
+                    nextModeChange += GB_LCD_TRANSFER_PERIOD;
+                }
+            } else {
+                // This line nothing happens, see what happens next line...
+                nextModeChange += GB_CYCLES_PER_LINE;
+            }
+        }
+        nextModeChange -= cycles;
+
+        // Handle LYC hit
+        if (lycHit) {
+            // Trigger LCDSTAT interrupt if LYC=LY Coincidence Interrupt is enabled
+            int stat = ram.read(ADDRESS_STAT);
+            if ((stat & 0x40) != 0) {
+                ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x02);
+            }
+        }
+    }
 
 	/**
 	 * Performs the V-Blank.
@@ -237,6 +306,14 @@ public class LCD {
 	public int[][] getScreen() {
 		newScreen = false;
 		return screen.getBits();
+	}
+	
+	public void enableFrameSkip() {
+		frameSkip = true;
+	}
+	
+	public void disableFrameSkip() {
+		frameSkip = false;
 	}
 
 }
