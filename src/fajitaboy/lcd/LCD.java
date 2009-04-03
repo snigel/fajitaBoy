@@ -119,6 +119,7 @@ public class LCD {
 			// Read and draw window if enabled.
 			if (lcdc.windowDisplayEnable) {
 				wnd.readWindow(ram, lcdc);
+				//wnd.readWindowLine(ly, ram, lcdc);
 				wnd.draw(screen, ram, ram.getVram(), ly);
 			}
 
