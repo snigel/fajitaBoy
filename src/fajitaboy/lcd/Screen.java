@@ -10,18 +10,12 @@ public class Screen {
 	}
 	
 	public void clear() {
-		for ( int x = 0; x < GB_LCD_W; x++ ) {
-			for ( int y = 0; y < GB_LCD_H; y++ ) {
-				bits[y][x] = 0;
-			}
-		}
+		clear(0);
 	}
 	
 	public void clear(int clr) {
-		for ( int x = 0; x < GB_LCD_W; x++ ) {
-			for ( int y = 0; y < GB_LCD_H; y++ ) {
-				bits[y][x] = clr;
-			}
+		for ( int x = 0; x < GB_LCD_H; x++ ) {
+			clearLine(x, clr);
 		}
 	}
 	
@@ -118,39 +112,6 @@ public class Screen {
 			}
 		}
 	}
-	
-	
-	
-	/**
-	 * @param data 
-	 * 		data to blit
-	 * @param palette
-	 * 		palette to use
-	 * @param sx
-	 * 		start x value in screen
-	 * @param sy
-	 * 		start y value in screen
-	 * @param dx
-	 * 		start x value in data
-	 * @param dy
-	 * 		start y value in data
-	 * @param dw
-	 * 		width of data to blit
-	 * @param dh
-	 * 		height of data to blit
-	 * @param ignore
-	 * 		data value to ignore
-	 */
-/*	private void blit(int[][] data, int palette, int sx, int sy, int dx, int dy, int dw, int dh) {
-		for (int cdy = dy, csy = sy; cdy < dy + dh; csy++, cdy++) {
-			for (int cdx = dx, csx = sx; cdx < dx + dw; csx++, cdx++) {
-				int newidx = data[cdy][cdx];
-				if (newidx != 0) {
-					bits[csy][csx] = 0x03 & palette >> newidx*2;
-				}
-			}
-		}
-	} */
 	
 	public int[][] getBits() {
 		return bits;
