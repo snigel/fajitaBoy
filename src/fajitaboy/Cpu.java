@@ -1707,6 +1707,10 @@ public final class Cpu {
             while (true)
                 ; // Debug
         }
+        
+        // Cap pc to correct area
+        pc &= 0xFFFF;
+        
         return cycleTime;
     }
 
