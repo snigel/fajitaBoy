@@ -2,6 +2,18 @@ package fajitaboy;
 
 import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+import javax.swing.JFrame;
+
+import fajitaboy.audio.Audio;
+import fajitaboy.audio.Audio2;
+import fajitaboy.audio.Audio3;
+import fajitaboy.audio.Audio4;
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.AddressBus;
 import fajitaboy.memory.MemoryInterface;
@@ -56,8 +68,36 @@ public class Oscillator implements Runnable{
      */
     private LCD lcd;
 
+    /**
+     * Pointer to a class with the proper interface to draw the GB pixels to screen.
+     */
     private DrawsGameboyScreen dgs; 
     
+    /**
+     * 
+     */
+    private boolean audioEnabled;
+    
+    // Audio variables
+    // TODO Move this functionality to a separate class
+    private Audio au1;
+    private Audio2 au2;
+    private Audio3 au3;
+    private Audio4 au4;
+    private boolean ch1Left;
+    private boolean ch1Right;
+    private boolean ch2Left;
+    private boolean ch2Right;
+    private boolean ch3Left;
+    private boolean ch3Right;
+    private boolean ch4Left;
+    private boolean ch4Right;
+    private AudioFormat af;
+    private SourceDataLine sdl;
+    private int sampleRate = 44100;
+    private int samples = 735;
+    private int finalSamples;
+    private byte[] destBuff;
     /**
      * Creates a new Oscillator with default values.
      * @param cpu
@@ -93,6 +133,44 @@ public class Oscillator implements Runnable{
         nextDividerInc = GB_DIV_CLOCK;
         nextHaltCycle = GB_CYCLES_PER_FRAME;
         running = false;
+        audioEnabled = true;
+        resetAudio();
+    }
+    
+    /**
+     * Initializes the Audio module.
+     */
+    public void resetAudio() {
+    	try {
+        	af = new AudioFormat(sampleRate, 8, 2, true, false);
+        	DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
+        	sdl = (SourceDataLine) AudioSystem.getLine(info);
+        	sdl.open(af);
+        	sdl.start();
+
+        	au1 = new Audio((AddressBus)ram, sampleRate);
+        	au2 = new Audio2((AddressBus)ram, sampleRate);
+        	au3 = new Audio3((AddressBus)ram, sampleRate);
+        	au4 = new Audio4((AddressBus)ram, sampleRate);
+        } catch ( LineUnavailableException e ) {
+        	System.out.println("Error when initializing audio: " + e);
+        	audioEnabled = false;
+        }
+    }
+    
+    /**
+     * Some audio function...
+     */
+    private void stereoSelect() {
+        int nr51 = ram.read(NR51_REGISTER);
+        ch1Left = ((nr51 & 0x1) > 0);
+        ch2Left = ((nr51 & 0x2) > 0);
+        ch3Left = ((nr51 & 0x4) > 0);
+        ch4Left = ((nr51 & 0x8) > 0);
+        ch1Right = ((nr51 & 0x10) > 0);
+        ch2Right = ((nr51 & 0x20)  > 0);
+        ch3Right = ((nr51 & 0x40) > 0);
+        ch4Right = ((nr51 & 0x80) > 0);
     }
 
     /**
@@ -162,6 +240,26 @@ public class Oscillator implements Runnable{
         }
 
     }
+    
+    /**
+     * Generates one frame of audio.
+     */
+    private void generateAudio() {
+    	if(sdl.available()*2 < samples*2) {
+            destBuff = new byte[sdl.available()*2];
+            finalSamples = sdl.available();
+        }
+        else {
+            destBuff = new byte[samples*2];
+            finalSamples = samples;
+        }
+        stereoSelect();
+        au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
+        au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
+        au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
+        au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
+        sdl.write(destBuff, 0, destBuff.length);
+    }
 
     public LCD getLCD() {
         return lcd;
@@ -180,6 +278,7 @@ public class Oscillator implements Runnable{
             step();
 
             if (cycles > nextHaltCycle) {
+            	generateAudio();
                 nextUpdate += GB_NANOS_PER_FRAME;
                 sleepTime = nextUpdate - System.nanoTime();
                 
