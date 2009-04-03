@@ -4,7 +4,8 @@ public final class HardwareConstants {
 	public static final int GB_CLOCK_FREQUENCY = 4194304; // MHz
 	public static final int GB_CYCLES_PER_LINE = 456;
 	public static final int GB_CYCLES_PER_FRAME = 70224;  // OBS! Only true if no write to LY occurs!
-	public static final int GB_NANOS_PER_FRAME = 16742706; 
+	public static final int GB_NANOS_PER_FRAME = 16742706;
+	public static final int GB_VBLANK_LINE = 144;
 	public static final int GB_VBLANK_PERIOD = 4560;
 	public static final int GB_HBLANK_PERIOD = 207;
 	public static final int GB_LCD_TRANSFER_PERIOD = 77;

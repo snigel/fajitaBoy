@@ -190,7 +190,7 @@ public class Oscillator implements Runnable{
 
             // Check line # for VBlank and reset to 0
             ly = ram.read(ADDRESS_LY);
-            if (ly == 144) {
+            if (ly == GB_VBLANK_LINE) {
                 lcd.vblank();
                 
                 //call draw
