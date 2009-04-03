@@ -215,6 +215,8 @@ public class LCD {
 		int ly = ram.read(ADDRESS_LY) + 1;
 		int lyc = ram.read(ADDRESS_LYC);
 		int stat = ram.read(ADDRESS_STAT);
+		if ( ly >= 154 )
+			ly = 0;
 		ram.forceWrite(ADDRESS_LY, ly);
 		if (ly == lyc) {
 			// Coincidence bit on

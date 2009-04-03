@@ -196,10 +196,7 @@ public class Oscillator implements Runnable{
                 //call draw
                 if (!frameSkip && dgs != null) {
                     dgs.drawGameboyScreen(lcd.getScreen());
-                }
-                
-            } else if (ly >= 154) {
-                ram.forceWrite(ADDRESS_LY, 0);
+                }  
             }
         }
 
