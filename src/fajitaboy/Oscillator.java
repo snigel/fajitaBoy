@@ -2,7 +2,6 @@ package fajitaboy;
 
 import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.MessageConstants.*;
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.AddressBus;
 import fajitaboy.memory.MemoryInterface;
@@ -185,14 +184,14 @@ public class Oscillator implements Runnable{
         boolean lycHit = false;
         
         if (cycles > nextLineInc) {
-        	lycHit = lcd.oscillatorMessage(MSG_LCD_NEXT_LINE); // lyc hit!?
+        	lycHit = lcd.nextLine();
         	
             nextLineInc += GB_CYCLES_PER_LINE;
 
             // Check line # for VBlank and reset to 0
             ly = ram.read(ADDRESS_LY);
             if (ly == 144) {
-                lcd.oscillatorMessage(MSG_LCD_VBLANK);
+                lcd.vblank();
                 
                 //call draw
                 if (!frameSkip && dgs != null) {
@@ -207,7 +206,7 @@ public class Oscillator implements Runnable{
         if (cycles > nextModeChange) {
             ly = ram.read(ADDRESS_LY);
             if (ly < 144) {
-                lcd.oscillatorMessage(MSG_LCD_CHANGE_MODE);
+                lcd.changeMode();
 
                 // Read current mode and determine wait time from that
                 int mode = ram.read(ADDRESS_STAT) & 0x03;
