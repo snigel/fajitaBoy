@@ -148,7 +148,7 @@ public class AddressBus implements MemoryInterface {
     public int read(int address) {
         if (address < 0 || address > module.length-1) {
             System.out.println("incorrect memory address "+address+" wrapping..");
-            address=address%65535;
+            address &= 0xFFFF;
         }
         return module[address].read(address);
     }
@@ -160,7 +160,7 @@ public class AddressBus implements MemoryInterface {
     public void write(int address, final int data) {
         if (address < 0 || address > module.length-1) {
             System.out.println("incorrect memory address "+address+" wrapping..");
-            address=address%65535;
+            address &= 0xFFFF;
         }
         module[address].write(address, data);
     }
