@@ -17,7 +17,6 @@ import javax.swing.JTextField;
  * game.
  * 
  * @author Peter Olsson, Marcus Johansson
- * 
  */
 @SuppressWarnings("serial")
 public class SingleplayerLoadPanel extends JPanel implements ActionListener {
@@ -55,7 +54,7 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
         startGameButton.addActionListener(this);
         fileStringField.addActionListener(this);
 
-        fileStringField.setText("YOUR ROM FILE PATH HERE :D");
+        fileStringField.setText("/tetris.gb");
 
         add(fileStringField);
         add(loadFileButton);

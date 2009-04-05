@@ -3,17 +3,13 @@ package fajitaboy;
 import java.applet.AudioClip;
 
 import java.awt.Color;
-
 import java.awt.Dimension;
 
 import java.awt.Toolkit;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.io.File;
-
-
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
@@ -83,10 +79,11 @@ public class FajitaBoy extends JApplet {
         /** GamePanel. */
         PLAYGAME,
 
-        /** Ingame Menu */
+        /** Ingame Menu. */
         INGAME_MENU,
 
-        PAUSE;
+        /** Pause game. */
+        PAUSE
     }
 
     // - Panels
@@ -102,11 +99,20 @@ public class FajitaBoy extends JApplet {
     /** Emulator panel, where the actual emulator screen is shown. */
     private GamePanel gamePanel;
 
-    /** Contains the gamePanel and an optional menu.  */
+    /** Contains the gamePanel and an optional menu. */
     private LayeredGamePanel layeredGamePanel;
 
-    /**  */
+    /** Menu. */
     private IngameMenuPanel ingameMenuPanel;
+
+    /** Menu for keybindings. */
+    private KeySettingsPanel keySettingsPanel;
+
+    /** "Pause". */
+    private JLabel pauseText;
+
+    /** Keybindings. */
+    private KeyInputController kic;
 
     // ------------------------------------------------------------------------
     // - Applet overrides
@@ -139,6 +145,13 @@ public class FajitaBoy extends JApplet {
         startScreen = new StartScreenPanel(this);
         singleplayerLoadscreen = new SingleplayerLoadPanel(this, fileChooser);
         ingameMenuPanel = new IngameMenuPanel(this);
+        keySettingsPanel = new KeySettingsPanel(this);
+
+        pauseText = new JLabel(" PAUSED ");
+        // pauseText.setBackground(Color.white);
+        pauseText.setOpaque(true);
+        pauseText.setFont(FB_INGAMEFONT);
+        pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
         // Appletviewer resize
         resize(frameSize);
@@ -150,6 +163,7 @@ public class FajitaBoy extends JApplet {
         gameState = GameState.STARTSCREEN;
         setContentPane(startScreen);
         getContentPane().validate();
+        // addKeyListener(this);
 
         addMouseListener(new MouseController());
     }
@@ -222,16 +236,12 @@ public class FajitaBoy extends JApplet {
 
         case INGAME_MENU:
             layeredGamePanel.setOverlapingPane(ingameMenuPanel);
+            keySettingsPanel.refreshLabels();
             showStatus("Ingame menu screen");
             break;
         case PAUSE:
-            JLabel pauseText = new JLabel(" PAUSED ");
-            // pauseText.setBackground(Color.white);
-            pauseText.setOpaque(true);
-            pauseText.setFont(FB_INGAMEFONT);
-            pauseText
-                    .setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
             layeredGamePanel.setOverlapingPane(pauseText);
+            showStatus("Paused!");
             break;
         default:
             return; // Non-implemented state or something
@@ -255,24 +265,41 @@ public class FajitaBoy extends JApplet {
 
         emulator = new Emulator(path);
 
-        KeyInputController kic = new KeyInputController(this,
+        kic = new KeyInputController(this, layeredGamePanel,
                 emulator.addressBus.getJoyPad());
 
-        gamePanel.addKeyListener(kic);
-        layeredGamePanel.addKeyListener(kic);
-        addKeyListener(kic);
+        // gamePanel.addKeyListener(kic);
+        // layeredGamePanel.addKeyListener(kic);
+        // addKeyListener(kic);
 
         changeGameState(GameState.PLAYGAME);
     }
 
-    public void resetEmulator() {
+    /**
+     * Resets the emulator.
+     */
+    public final void resetEmulator() {
         emulator.addressBus.reset();
         emulator.cpu.reset();
         emulator.oscillator.reset();
     }
 
-    public GameState getGameState() {
+    /**
+     * Returns what state the applet is in.
+     * 
+     * @return applet game state
+     */
+    public final GameState getGameState() {
         return gameState;
+    }
+
+    /**
+     * Returns the input controller.
+     * 
+     * @return kic
+     */
+    public final KeyInputController getKIC() {
+        return kic;
     }
 
     /*
@@ -316,7 +343,15 @@ public class FajitaBoy extends JApplet {
      * { e.printStackTrace(); } catch (ClassNotFoundException e) {
      * e.printStackTrace(); } }
      */
-    public static boolean checkFile(File file) {
+
+    /**
+     * Checks if the file is readable etc.
+     * 
+     * @param file
+     *            file to check
+     * @return true if everythings cool
+     */
+    public static boolean checkFile(final File file) {
         if (!file.exists()) {
             errorMsg("File doesn't exist, try again.");
             return false;
@@ -397,6 +432,7 @@ public class FajitaBoy extends JApplet {
     private class MouseController extends MouseAdapter {
         /**
          * Makes sure that the applet can regain the focus by clicking on it.
+         * @param e mouseevent
          */
         public void mousePressed(final MouseEvent e) {
             requestFocus();
