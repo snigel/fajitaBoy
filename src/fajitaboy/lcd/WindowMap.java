@@ -49,18 +49,14 @@ public class WindowMap {
 		
 		// The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
 		// A postion of WX=7, WY=0 locates the window at upper left, it is then completely covering normal background.
-		if (scx < 0 || scx > 166 || scy < 0 || scy > 143 || scy > ly) {
-			return;
-		}
+        if (!visibleAt(ly, scx, scy)) {
+            return;
+        }
 		scx -= 7;
 		
-		// vi borde inte behöva köra modulus här
-		int firstTileY = ((scy + ly) / 8);
+		// we should not need mod here
+		int firstTileY = ((ly - scy) / 8);
 		int firstTileX = (scx / 8);
-		
-		if (firstTileY < 0 || firstTileY >= 32 || firstTileX < 0 || firstTileX >= 32) {
-			System.out.println("not supposed to happen");
-		}
 		
 		int addr_base = 0;
 		if (lcdc.windowTileMapSelect) {
@@ -69,6 +65,24 @@ public class WindowMap {
 			addr_base = 0x9800;
 		}
 		
+        /*
+         * only reads relevant tiles
+         */
+        for (int cx = scx, tx = firstTileX; cx < GB_LCD_W; cx += 8, tx++) {
+            int ty = firstTileY;
+            // addr, where we read the tile pattern nr.
+            int addr = addr_base + ty * GB_MAP_W + tx; 
+            
+            int pnr = ram.read(addr);
+            if ( lcdc.tileDataSelect ) {
+                tileAddresses[ty][tx] = pnr;
+            } else {
+                // signed
+                tileAddresses[ty][tx] = 0x100 + (byte)pnr; 
+            } 
+        }
+        
+        /*
 		// read tile-numbers
 		for (int cx = 0; cx < GB_MAP_VISIBLE_W + 1; cx++) {
 			int ty = (firstTileY + (firstTileX + cx)/GB_MAP_H) % GB_MAP_H; 
@@ -85,6 +99,7 @@ public class WindowMap {
 				tileAddresses[ty][tx] = 0x100 + (byte)pnr; 
 			} 
 		}
+        */
 	}
 	
 	public void drawLine(Screen screen, MemoryInterface ram, Vram vram, int ly) {
@@ -96,24 +111,25 @@ public class WindowMap {
 		scy = ram.read(ADDRESS_WY);
 		// The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
 		// A postion of WX=7, WY=0 locates the window at upper left, it is then completely covering normal background.
-		if (scx < 0 || scx > 166 || scy < 0 || scy > 143 || scy > ly) {
-			return;
-		}
+		if (!visibleAt(ly, scx, scy)) {
+            return;
+        }
 		scx -= 7;
 
+        int firstTileY = ((ly - scy) / 8);  // y blir == 32 hÃ¤r, resultat -> knas 
+        int firstTileX = (scx / 8);
+        
 		//	Draw tiles
-		int datax, datay = 0, tileId;
-		// For each row...
-		for ( int y = scy; y <= GB_LCD_H; y += 8 ) {
-			datax = 0;
-			// For each column...
-			for ( int x = scx; x <= GB_LCD_W; x += 8 ) {
-				tileId = tileAddresses[datay][datax];
-				screen.blitTile(tiles[tileId], ram.read(PALETTE_BG_DATA), x, y, ly, false);
-				datax++;
-			}
-			datay++;
-		}
+        
+        int p = ram.read(PALETTE_BG_DATA);
+        int sy = firstTileY * 8 + scy; // ly - (ly - scy); 
+       
+        
+        for (int x = scx, tx = firstTileX; x < GB_LCD_W; x += 8, tx++) {
+            int tileId = tileAddresses[firstTileY][tx];
+            
+            screen.blitTile(tiles[tileId], p, x, sy, ly, false);
+        }
 	}
 
 	public void draw(Screen screen, MemoryInterface ram, Vram vram, int ly) {
@@ -125,9 +141,9 @@ public class WindowMap {
 		scy = ram.read(ADDRESS_WY);
 		// The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143. 
 		// A postion of WX=7, WY=0 locates the window at upper left, it is then completely covering normal background.
-		if (scx < 0 || scx > 166 || scy < 0 || scy > 143 || scy > ly) {
-			return;
-		}
+        if (!visibleAt(ly, scx, scy)) {
+            return;
+        }
 		scx -= 7;
 
 		//	Draw tiles
@@ -144,4 +160,8 @@ public class WindowMap {
 			datay++;
 		}
 	}
+
+    private static boolean visibleAt(int ly, int scx, int scy) {
+        return !(scx < 0 || scx > 166 || scy < 0 || scy > 143 || scy > ly);
+    }
 }
