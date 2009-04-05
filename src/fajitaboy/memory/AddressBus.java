@@ -145,9 +145,10 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public int read(final int address) {
+    public int read(int address) {
         if (address < 0 || address > module.length-1) {
-            throw new ArrayIndexOutOfBoundsException("AddressBus.java: "+address);
+            System.out.println("incorrect memory address "+address+" wrapping..");
+            address=address%65535;
         }
         return module[address].read(address);
     }
@@ -156,9 +157,10 @@ public class AddressBus implements MemoryInterface {
     /**
      * {@inheritDoc}
      */
-    public void write(final int address, final int data) {
+    public void write(int address, final int data) {
         if (address < 0 || address > module.length-1) {
-            throw new ArrayIndexOutOfBoundsException("AddressBus.java: "+address);
+            System.out.println("incorrect memory address "+address+" wrapping..");
+            address=address%65535;
         }
         module[address].write(address, data);
     }
