@@ -320,14 +320,14 @@ public final class Cpu {
             cycleTime += 8;
             break;
         case 0x0f: // RRCA
-        	if (getC() == 1) {
+        	if ((a & 0x01) == 1) {
                 a = a | 0x0100;
+                setC(1);
+            } else {
+            	setC(0);
             }
-        	setC(a & 0x01);
             a = a >>> 1;
-            setZ(0);
-            setN(0);
-            setH(0);
+            cc &= 0x1f;  // Performance!
             pc++;
             cycleTime += 4;
             break;
@@ -1009,48 +1009,46 @@ public final class Cpu {
             pc++;
             cycleTime += 4;
             break;
-
         case 0x88: // ADC A,B
-            add(b + getC());
+            adc(b);
             pc++;
             cycleTime += 4;
             break;
         case 0x89: // ADC A,C
-            add(c + getC());
+            adc(c);
             pc++;
             cycleTime += 4;
             break;
         case 0x8a: // ADC A,D
-            add(d + getC());
+            adc(d);
             pc++;
             cycleTime += 4;
             break;
         case 0x8b: // ADC A,E
-            add(e + getC());
+            adc(e);
             pc++;
             cycleTime += 4;
             break;
         case 0x8c: // ADC A,H
-            add(h + getC());
+            adc(h);
             pc++;
             cycleTime += 4;
             break;
         case 0x8d: // ADC A,L
-            add(l + getC());
+            adc(l);
             pc++;
             cycleTime += 4;
             break;
         case 0x8e: // ADC A,(HL)
-            add((ram.read(getHL()) & 0xff) + getC());
+            adc(ram.read(getHL()) & 0xff);
             pc++;
             cycleTime += 8;
             break;
         case 0x8f: // ADC A,A
-            add(a + getC());
+            adc(a);
             pc++;
             cycleTime += 4;
             break;
-
         case 0x90: // SUB B
             sub(b);
             pc++;
@@ -1093,42 +1091,42 @@ public final class Cpu {
             break;
 
         case 0x98: // SBC A,B
-            sub(b + getC());
+            sbc(b);
             pc++;
             cycleTime += 4;
             break;
         case 0x99: // SBC A,C
-            sub(c + getC());
+            sbc(c);
             pc++;
             cycleTime += 4;
             break;
         case 0x9A: // SBC A,D
-            sub(d + getC());
+            sbc(d);
             pc++;
             cycleTime += 4;
             break;
         case 0x9B: // SBC A,E
-            sub(e + getC());
+            sbc(e);
             pc++;
             cycleTime += 4;
             break;
         case 0x9C: // SBC A,H
-            sub(h + getC());
+            sbc(h);
             pc++;
             cycleTime += 4;
             break;
         case 0x9D: // SBC A,L
-            sub(l + getC());
+            sbc(l);
             pc++;
             cycleTime += 4;
             break;
         case 0x9e: // SBC A,(HL)
-            sub((ram.read(getHL()) & 0xFF) + getC());
+            sbc(ram.read(getHL()) & 0xFF);
             pc++;
             cycleTime += 8;
             break;
         case 0x9f: // SBC A,A
-            sub(a + getC());
+            sbc(a);
             pc++;
             cycleTime += 4;
             break;
@@ -1429,7 +1427,7 @@ public final class Cpu {
             cycleTime += 24;
             break;
         case 0xce: // ADC A,n
-            add(readn() + getC());
+            adc(readn());
             pc += 2;
             cycleTime += 8;
             break;
@@ -1530,7 +1528,7 @@ public final class Cpu {
             cycleTime += 4;
             break;
         case 0xde: // SBC A,n
-            sub(readn() + getC());
+            sbc(readn());
             pc += 2;
             cycleTime += 8;
             break;
@@ -1632,6 +1630,7 @@ public final class Cpu {
             break;
         case 0xF1: // POP AF
             setAF(pop());
+            cc = cc & 0xf0;
             pc++;
             cycleTime += 12;
             break;
@@ -1905,6 +1904,22 @@ public final class Cpu {
         }
         setZ(a == 0);
     }
+    
+    /**
+     * Operation ADC A,s (s is a 8bit value) (A <- A + s + c).
+     * @param s
+     *            The register value to add
+     */
+    // TODO Optimize this function
+    private void adc(final int s) {
+    	int carry = getC();
+    	add(s);
+    	if ( carry != 0 ) {  // Carry performed as separate operation ONLY if c=1
+    		int flags = cc & 0x30;  // These flags ONLY should remain set...
+    		add(1);	
+    		cc = flags | cc;
+    	}
+    }
 
     /**
      * Operation SUB s (s is a 8bit value) (A <- A - s).
@@ -1922,7 +1937,22 @@ public final class Cpu {
             setC(0);
         }
         setZ(a == 0);
-
+    }
+    
+    /**
+     * Operation SBC s (s is a 8bit value) (A <- A - s - c).
+     * @param s
+     *            The register value to subtract
+     */
+    // TODO Optimize function
+    private void sbc(final int s) {
+    	int carry = getC();
+    	sub(s);
+    	if ( carry != 0 ) { // Carry performed as separate operation ONLY if c=1
+    		int flags = cc & 0x30;  // These flags ONLY should remain set...
+    		sub(1);	
+    		cc = flags | cc;
+    	}
     }
 
     /**
