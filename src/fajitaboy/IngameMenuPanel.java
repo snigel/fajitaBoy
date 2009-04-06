@@ -11,9 +11,9 @@ import javax.swing.JTabbedPane;
 @SuppressWarnings("serial")
 public class IngameMenuPanel extends JTabbedPane {
 
-    private final static String MAINLABEL = "Game  ";
-    private final static String KEYSLABEL = "Keys  ";
-    private final static String SOUNDLABEL = "Sound  ";
+    private final static String MAINLABEL = " Game  ";
+    private final static String KEYSLABEL = " Keys  ";
+    private final static String SOUNDLABEL = " Sound  ";
 
     /** Buttons. */
     private IngameMenuMain main;
@@ -32,7 +32,7 @@ public class IngameMenuPanel extends JTabbedPane {
 
         setOpaque(true);
 
-        setPreferredSize(new Dimension(200, 200));
+        setPreferredSize(new Dimension(215, 200));
         setBackground(Color.LIGHT_GRAY);
         setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 

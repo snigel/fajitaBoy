@@ -1,17 +1,22 @@
 package fajitaboy;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Spring;
+import javax.swing.SpringLayout;
 
 import fajitaboy.FajitaBoy.GameState;
+import static fajitaboy.constants.PanelConstants.*;
 
 /**
  * Key change stuff.
@@ -21,10 +26,6 @@ public class KeySettingsPanel extends JPanel {
 
     /** Applet. */
     private FajitaBoy fajitaBoy;
-
-    private JPanel joypad;
-    private JPanel middle;
-    private JPanel buttons;
 
     private InputField left, right, up, down;
     private InputField a, b, start, select;
@@ -40,11 +41,10 @@ public class KeySettingsPanel extends JPanel {
 
         setOpaque(true);
         setPreferredSize(new Dimension(270, 130));
-        setLayout(new BorderLayout());
 
-        joypad = new JPanel();
-        middle = new JPanel();
-        buttons = new JPanel();
+        JLabel middle = new JLabel();
+        middle.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        middle.setOpaque(true);
 
         up = new InputField("Up");
         down = new InputField("Down");
@@ -55,26 +55,82 @@ public class KeySettingsPanel extends JPanel {
         start = new InputField("Start");
         select = new InputField("Select");
 
-        joypad.setPreferredSize(new Dimension(80, 80));
-        joypad.setLayout(new BorderLayout());
-        joypad.add(up, BorderLayout.NORTH);
-        joypad.add(left, BorderLayout.WEST);
-        joypad.add(right, BorderLayout.EAST);
-        joypad.add(down, BorderLayout.SOUTH);
+        SpringLayout layout = new SpringLayout();
+        setLayout(layout);
 
-        middle.setPreferredSize(new Dimension(80, 40));
-        middle.setLayout(new GridLayout(1, 2));
-        middle.add(start);
-        middle.add(select);
+        add(up);
+        add(left);
+        add(middle);
+        add(right);
+        add(down);
+        add(a);
+        add(b);
+        add(start);
+        add(select);
 
-        buttons.setPreferredSize(new Dimension(80, 40));
-        buttons.setLayout(new GridLayout(1, 2));
-        buttons.add(a);
-        buttons.add(b);
+        Color joypadColor = new Color(150, 160, 160);
+        up.setBackground(joypadColor);
+        down.setBackground(joypadColor);
+        left.setBackground(joypadColor);
+        right.setBackground(joypadColor);
+        middle.setBackground(joypadColor);
 
-        add(joypad, BorderLayout.WEST);
-        add(middle, BorderLayout.SOUTH);
-        add(buttons, BorderLayout.EAST);
+        Color buttonColor = new Color(200, 80, 160);
+        a.setBackground(buttonColor);
+        b.setBackground(buttonColor);
+
+        Color miscColor = new Color(190, 200, 200);
+        start.setBackground(miscColor);
+        select.setBackground(miscColor);
+
+        SpringLayout.Constraints boxCons = layout.getConstraints(this);
+
+        // --------------------------------------------------------------------
+        // -- Joypad layout stuff, based on the center box called middle.
+
+        SpringLayout.Constraints joypadCons = layout.getConstraints(middle);
+        joypadCons.setX(Spring.sum(Spring.constant(buttonWidth + 1), boxCons
+                .getConstraint(SpringLayout.WEST)));
+        joypadCons.setY(Spring.sum(Spring.constant(buttonHeight + padding),
+                boxCons.getConstraint(SpringLayout.NORTH)));
+        SpringLayout.Constraints upCons = layout.getConstraints(up);
+        upCons.setX(joypadCons.getConstraint(SpringLayout.WEST));
+        upCons.setY(Spring.sum(Spring.constant(-buttonHeight), joypadCons
+                .getConstraint(SpringLayout.NORTH)));
+        SpringLayout.Constraints leftCons = layout.getConstraints(left);
+        leftCons.setY(joypadCons.getConstraint(SpringLayout.NORTH));
+        leftCons.setX(Spring.sum(Spring.constant(-buttonWidth), joypadCons
+                .getConstraint(SpringLayout.WEST)));
+        SpringLayout.Constraints rightCons = layout.getConstraints(right);
+        rightCons.setY(joypadCons.getConstraint(SpringLayout.NORTH));
+        rightCons.setX(joypadCons.getConstraint(SpringLayout.EAST));
+        SpringLayout.Constraints downCons = layout.getConstraints(down);
+        downCons.setX(joypadCons.getConstraint(SpringLayout.WEST));
+        downCons.setY(joypadCons.getConstraint(SpringLayout.SOUTH));
+
+        // --------------------------------------------------------------------
+        // -- A and B button layout. Based on the joypad layout
+
+        SpringLayout.Constraints bCons = layout.getConstraints(b);
+        bCons.setX(Spring.sum(Spring.constant(padding), rightCons
+                .getConstraint(SpringLayout.EAST)));
+        bCons.setY(Spring.sum(Spring.constant(padding), joypadCons
+                .getConstraint(SpringLayout.NORTH)));
+        SpringLayout.Constraints aCons = layout.getConstraints(a);
+        aCons.setX(bCons.getConstraint(SpringLayout.EAST));
+        aCons.setY(Spring.sum(Spring.constant(-2 * padding), joypadCons
+                .getConstraint(SpringLayout.NORTH)));
+
+        // --------------------------------------------------------------------
+        // -- Start/Select button layout.
+
+        SpringLayout.Constraints startCons = layout.getConstraints(start);
+        startCons.setX(Spring.constant(2 * buttonWidth));
+        startCons.setY(Spring.sum(Spring.constant(2 * padding), downCons
+                .getConstraint(SpringLayout.SOUTH)));
+        SpringLayout.Constraints selectCons = layout.getConstraints(select);
+        selectCons.setX(startCons.getConstraint(SpringLayout.EAST));
+        selectCons.setY(startCons.getConstraint(SpringLayout.NORTH));
 
         validate();
     }
@@ -121,8 +177,9 @@ public class KeySettingsPanel extends JPanel {
          */
         public InputField(final String btn) {
             super(btn);
-            setFont(new Font("Verdana", Font.PLAIN, 10));
-            setPreferredSize(new Dimension(30, 20));
+            setFont(new Font("Terminal", Font.PLAIN, 9));
+            setMargin(new Insets(0, 0, 0, 0));
+            setPreferredSize(new Dimension(buttonWidth, buttonHeight));
             button = btn;
 
             setOpaque(true);
@@ -155,7 +212,7 @@ public class KeySettingsPanel extends JPanel {
             KeyInputController controller = fajitaBoy.getKIC();
             if (e.getKeyCode() != KeyEvent.VK_ESCAPE) {
                 controller.setKey(e.getKeyCode(), button);
-                System.out.println("Set:"+button+" to "+e.getKeyCode());
+                System.out.println("Set:" + button + " to " + e.getKeyCode());
                 refreshLabels();
             } else {
                 fajitaBoy.changeGameState(GameState.PLAYGAME);
