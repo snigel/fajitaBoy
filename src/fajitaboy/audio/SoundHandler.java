@@ -1,95 +1,92 @@
 package fajitaboy.audio;
 
+import static fajitaboy.constants.AddressConstants.*;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.AudioFormat.Encoding;
+import javax.swing.JFrame;
 
-import fajitaboy.memory.AddressBus;
-
+import fajitaboy.GamePanel;
 import fajitaboy.memory.AddressBus;
 
 /**
- * This class handles the sound
- *
- * @author Adam Hulin, Johan Gustafsson
- *
+ * A debug class for testing the audio.
+ * @author snigel
  */
 public class SoundHandler {
-    private AudioFormat audioFormat;
-    private SourceDataLine sourceDataLine;
-    private float sampleRate;
-    private int bufferLength;
-    private SoundChannel1 channel1;
-    private int playLength;
-    private AddressBus addressbus;
 
-    public SoundHandler(AddressBus addresbus) {
-        this.addressbus = addressbus;
-        // Prövar med den här sampleraten.
-        sampleRate = 44100;
-        bufferLength = 100; //100 ms
-        channel1 = new SoundChannel1(addressbus, sampleRate);
-        //Används i playSound().
-        playLength = (int) (sampleRate / 60);
+    private AddressBus ab;
+    private Audio au1;
+    private Audio2 au2;
+    private Audio3 au3;
+    private Audio4 au4;
+    private boolean ch1Left;
+    private boolean ch1Right;
+    private boolean ch2Left;
+    private boolean ch2Right;
+    private boolean ch3Left;
+    private boolean ch3Right;
+    private boolean ch4Left;
+    private boolean ch4Right;
+    private GamePanel gp;
+    private int samples;
+    private int finalSamples;
+    private byte[] destBuff;
+    private AudioFormat af;
+    private SourceDataLine sdl;
 
-        //Använder 8 bits signed pcm. Tror inte det spelar så stor roll
-        //om det är signed eller inte. Nu när den är signed så är det 0
-        //som är medelpunkten = tyst.
-        audioFormat =
-            new AudioFormat(Encoding.PCM_SIGNED,
-                            sampleRate,
-                            8, //Antal bits per sample
-                            2, //Antal kanaler, kör med stereo
-                            2, // Framesize in bytes = samplesize*antal kanaler.
-                            sampleRate,  //Förstår inte riktigt skillnaden, för den
-                                         //blir ju samma som sample rate, kanske finns
-                                         //special fall.
+    public SoundHandler(AddressBus ab, float sampleRate, int samples ) throws LineUnavailableException {
+        af = new AudioFormat(sampleRate, 8, 2, true, false);
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
+        sdl = (SourceDataLine) AudioSystem.getLine(info);
+        sdl.open(af);
+        sdl.start();
 
-                            true); //Big endian
+        JFrame jfr = new JFrame();
+        gp = new GamePanel(2);
+        jfr.setContentPane(gp);
+        jfr.setVisible(true);
 
-        //Fann att vi måste ta en lite om väg via dataline för att få att vi använder pcm.
-        //http://www.javafaq.nu/java-example-code-454.html
-        DataLine.Info info =
-            new DataLine.Info (SourceDataLine.class, audioFormat);
-        try {
-            sourceDataLine = (SourceDataLine) AudioSystem.getLine (info);
-        } catch (LineUnavailableException e) {
-            // Kanske ha någon sound enable variabel som sätts av här?
-            e.printStackTrace();
-        }
+        this.ab = ab;
+        this.samples = samples;
+        au1 = new Audio(ab, sampleRate);
+        au2 = new Audio2(ab, sampleRate);
+        au3 = new Audio3(ab, sampleRate);
+        au4 = new Audio4(ab, sampleRate);
 
-        //Nu ska en buffer storlek bestämmas. Varför inte en så stor som möjligt?
-        //Vi är ju rädda för att hamna i block state, när vi försöker skriva till
-        //en fullbuffer. Men kollar man i datalines api så står det att det finns
-        //en max storlek. I https://www.cs.auckland.ac.nz/references/java/java1.5/tutorial/sound/capturing.html
-        //står det att man bara ska fylla en liten del av buffer vid varje skrivning.
-        //De använder en femtedel. Så om vi ska fylla med 16.6 ms vi varje vblank. Så
-        //kan buffern vara 16.6 * 5. Så jag sätter den till 100 ms. Vi får nog förmodligen
-        //kanske utöka den. Vi har ju snackat om 200 ms.
-        try {
-            //Vet inte riktigt om vi måste ta hänsyn till stereo när vi beräknar buffer
-            //size. I så fall får vi lägga till en faktor 2.
-            sourceDataLine.open(audioFormat, ((int) (sampleRate / 1000 * bufferLength)));
-        } catch (LineUnavailableException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        sourceDataLine.start();
     }
 
-    //Den här metoden kallas vid vblank och skall mixa ihop de fyra kanalerna.
-    public void playSound() {
-        //Det är den här delen jag är lite osäker på. Behöver lite try and error.
-        //Men om vi kallar på vblank 60 / sek. Så behöver vi producera 16.6 ms ljud.
-        //Som sagt exakt hur det blir slut ändan, vet jag inte än.
-        byte buffer[] = new byte[playLength];
-        //Här skickar vi med alla samma buffer till samtliga kanaler för att
-        //addera ihop vågorna.
-        //http://deku.gbadev.org/program/sound1.html
-        channel1.generateSound(buffer);
-        sourceDataLine.write(buffer, 0, playLength);
+    public void generateTone() {
+        if(sdl.available()*2 < samples*2) {
+            destBuff = new byte[sdl.available()*2];
+            finalSamples = sdl.available();
+        }
+        else {
+            destBuff = new byte[samples*2];
+            finalSamples = samples;
+        }
+        stereoSelect();
+        au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
+        au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
+        au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
+        au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
+
+        sdl.write(destBuff, 0, destBuff.length);
+    }
+
+    private void stereoSelect() {
+        int nr51 = ab.read(NR51_REGISTER);
+        ch1Left = ((nr51 & 0x1) > 0);
+        ch2Left = ((nr51 & 0x2) > 0);
+        ch3Left = ((nr51 & 0x4) > 0);
+        ch4Left = ((nr51 & 0x8) > 0);
+        ch1Right = ((nr51 & 0x10) > 0);
+        ch2Right = ((nr51 & 0x20)  > 0);
+        ch3Right = ((nr51 & 0x40) > 0);
+        ch4Right = ((nr51 & 0x80) > 0);
     }
 }
+
