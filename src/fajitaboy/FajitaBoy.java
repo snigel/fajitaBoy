@@ -435,7 +435,7 @@ public class FajitaBoy extends JApplet {
          * @param e mouseevent
          */
         public void mousePressed(final MouseEvent e) {
-            requestFocus();
+            gamePanel.requestFocus();
         }
     }
 
