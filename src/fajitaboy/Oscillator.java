@@ -139,6 +139,17 @@ public class Oscillator implements Runnable{
         	audioEnabled = false;
         }
     }
+    
+    /**
+     * Generates one frame of Audio.
+     */
+    private void generateAudio() {
+    	try {
+    		soundHandler.generateTone();
+    	} catch ( LineUnavailableException e ) {
+    		// Do nothing...
+    	}
+    }
 
     /**
      * Step the Oscillator once. The Oscillator causes the CPU to step once, and
@@ -225,7 +236,7 @@ public class Oscillator implements Runnable{
             step();
 
             if (cycles > nextHaltCycle) {
-            	soundHandler.generateTone();
+            	generateAudio();
                 nextUpdate += GB_NANOS_PER_FRAME;
                 sleepTime = nextUpdate - System.nanoTime();
                 

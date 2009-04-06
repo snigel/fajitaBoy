@@ -59,7 +59,7 @@ public class SoundHandler {
 
     }
 
-    public void generateTone() {
+    public void generateTone() throws LineUnavailableException {
         if(sdl.available()*2 < samples*2) {
             destBuff = new byte[sdl.available()*2];
             finalSamples = sdl.available();
