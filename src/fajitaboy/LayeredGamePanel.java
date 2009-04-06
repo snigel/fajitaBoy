@@ -10,6 +10,9 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.KeyStroke;
 
+import static fajitaboy.constants.LCDConstants.GB_LCD_H;
+import static fajitaboy.constants.LCDConstants.GB_LCD_W;
+
 /**
  * Game panel + eventual menus.
  */
@@ -20,6 +23,9 @@ public class LayeredGamePanel extends JLayeredPane {
     private GamePanel gamePanel;
     /** Panel drawn ontop of the game panel. */
     private JComponent overlapingPane;
+    
+    private int width;
+    private int height;
 
     /**
      * Constructor.
@@ -31,8 +37,9 @@ public class LayeredGamePanel extends JLayeredPane {
 
         gamePanel = gp;
         Dimension gamePanelDimension = gamePanel.getPreferredSize();
-        gamePanel.setBounds(0, 0, gamePanelDimension.width,
-                gamePanelDimension.height);
+        width = gamePanelDimension.width;
+        height = gamePanelDimension.height;
+        gamePanel.setBounds(0, 0, width, height);
         add(gamePanel, JLayeredPane.DEFAULT_LAYER);
 
     }
@@ -47,11 +54,10 @@ public class LayeredGamePanel extends JLayeredPane {
         if (overlapingPane != null) {
             remove(overlapingPane);
         }
-        Dimension gd = gamePanel.getPreferredSize();
         Dimension cd = jc.getPreferredSize();
 
-        int x = (gd.width - cd.width) / 2;
-        int y = (gd.height - cd.height) / 2;
+        int x = (width - cd.width) / 2;
+        int y = (height - cd.height) / 2;
 
         jc.setBounds(x, y, cd.width, cd.height);
         overlapingPane = jc;
@@ -66,6 +72,33 @@ public class LayeredGamePanel extends JLayeredPane {
     public final void removeOverlapingPane() {
         if (overlapingPane != null) {
             remove(overlapingPane);
+        }
+        validate();
+    }
+    
+    /**
+     * Updates the size, and updates the zoom and position of the overlapping panel.
+     * @param width the width
+     * @param height the height
+     */
+    public void updateSize(int width, int height) {
+        this.width = width;
+        this.height = height;
+        int zoom = Math.min(width / GB_LCD_W  , height / GB_LCD_H );
+        int x = (width - GB_LCD_W*zoom)/2;
+        int y = (height - GB_LCD_H*zoom)/2;
+        System.out.println("x: "+x+ "y: "+ y);
+        gamePanel.setBounds(x, y, GB_LCD_W*zoom,
+                GB_LCD_H*zoom);
+        gamePanel.setZoom(zoom);
+        
+        if (overlapingPane != null) {
+            Dimension cd = overlapingPane.getPreferredSize();
+
+            x = (width - cd.width) / 2;
+            y = (height - cd.height) / 2;
+
+            overlapingPane.setBounds(x, y, cd.width, cd.height);
         }
         validate();
     }

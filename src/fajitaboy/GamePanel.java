@@ -55,10 +55,20 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
                 new MemoryImageSource(160, 144, colorModel, pixels, 0, 160));
         // draw the image
         Graphics g = getGraphics();
-        g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
+        if(g != null) {
+        	g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
+        }
     }
 
     public void paint(Graphics g) {
         g.drawImage(image, 0, 0, 160 * zoom, 144 * zoom, null);
+    }
+    
+    /**
+     * Sets the new zoom.
+     * @param zoom new zoom
+     */
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
     }
 }

@@ -41,7 +41,7 @@ public class KeyInputController {
     private Action releaseA, releaseB, releaseSelect, releaseStart;
 
     // -- Applet actions
-    private Action pause, menu;
+    private Action pause, menu, fullscreen;
 
     /**
      * Creates a new KeyInputController object that handles key input.
@@ -177,6 +177,12 @@ public class KeyInputController {
                 }
             }
         };
+        
+        fullscreen = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+            	fajitaBoy.toggleFullScreen();
+            }
+        };
 
     }
 
@@ -208,6 +214,7 @@ public class KeyInputController {
         // Appletators
         gamePanel.getActionMap().put("pushPause", pause);
         gamePanel.getActionMap().put("pushMenu", menu);
+        gamePanel.getActionMap().put("pushFullscreen", fullscreen);
     }
 
     /**
@@ -230,6 +237,7 @@ public class KeyInputController {
 
         setKey(KeyEvent.VK_ESCAPE, "Menu", false);
         setKey(KeyEvent.VK_P, "Pause", false);
+        setKey(KeyEvent.VK_F4, "Fullscreen", false);
     }
 
     /**
