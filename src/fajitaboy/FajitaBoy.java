@@ -432,10 +432,16 @@ public class FajitaBoy extends JApplet {
     private class MouseController extends MouseAdapter {
         /**
          * Makes sure that the applet can regain the focus by clicking on it.
-         * @param e mouseevent
+         * 
+         * @param e
+         *            mouseevent
          */
         public void mousePressed(final MouseEvent e) {
-            gamePanel.requestFocus();
+            if (gameState == GameState.PLAYGAME
+                    || gameState == GameState.INGAME_MENU
+                    || gameState == GameState.PAUSE) {
+                gamePanel.requestFocus();
+            }
         }
     }
 
