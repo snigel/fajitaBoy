@@ -7,12 +7,18 @@ import static fajitaboy.constants.HardwareConstants.GB_LCD_OAMSEARCH_PERIOD;
 import static fajitaboy.constants.HardwareConstants.GB_LCD_TRANSFER_PERIOD;
 import static fajitaboy.constants.HardwareConstants.GB_VBLANK_LINE;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
 import fajitaboy.memory.AddressBus;
 
 /**
  * @author Tobias Svensson
  */
-public class LCD {
+public class LCD implements StateMachine {
 
     /**
      * Pointer to MemoryInterface class.
@@ -316,5 +322,18 @@ public class LCD {
     public void disableFrameSkip() {
         frameSkip = false;
     }
-
+    
+    public void saveState( FileOutputStream os ) throws IOException {
+    	FileIOStreamHelper.writeBoolean(os, frameSkip);
+    	FileIOStreamHelper.writeBoolean(os, newScreen);
+    	FileIOStreamHelper.writeData(os, nextLineInc, 8);
+    	FileIOStreamHelper.writeData(os, nextModeChange, 8);
+    }
+    
+    public void readState( FileInputStream is ) throws IOException {
+    	frameSkip = FileIOStreamHelper.readBoolean(is);
+    	newScreen = FileIOStreamHelper.readBoolean(is);
+    	nextLineInc = FileIOStreamHelper.readData(is, 8);
+    	nextModeChange = FileIOStreamHelper.readData(is, 8);
+    }
 }

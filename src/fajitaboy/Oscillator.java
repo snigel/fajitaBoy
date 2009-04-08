@@ -3,6 +3,10 @@ package fajitaboy;
 import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import javax.sound.sampled.LineUnavailableException;
 
 import fajitaboy.audio.SoundHandler;
@@ -15,7 +19,7 @@ import fajitaboy.memory.MemoryInterface;
  * devices to do different things at different clock cycles.
  * @author Tobias S
  */
-public class Oscillator implements Runnable{
+public class Oscillator implements Runnable, StateMachine {
 
     /**
      * Max number of frames to skip in a row.
@@ -285,5 +289,24 @@ public class Oscillator implements Runnable{
     public void disableAudio() {
     	audioEnabled = false;
     }
+    
+    public void saveState( FileOutputStream os ) throws IOException {
+    	FileIOStreamHelper.writeData(os, cycles, 8);
+    	FileIOStreamHelper.writeData(os, nextDividerInc, 8);
+    	FileIOStreamHelper.writeData(os, nextHaltCycle, 8);
+    	FileIOStreamHelper.writeData(os, prevTimerInc, 8);
+    	
+    	cpu.saveState(os);
+    	lcd.saveState(os);
+    }
 
+    public void readState( FileInputStream is ) throws IOException {
+    	cycles = FileIOStreamHelper.readData(is, 8);
+    	nextDividerInc = FileIOStreamHelper.readData(is, 8);
+    	nextHaltCycle = FileIOStreamHelper.readData(is, 8);
+    	prevTimerInc = FileIOStreamHelper.readData(is, 8);
+    	
+    	cpu.readState(is);
+    	lcd.readState(is);
+    }
 }

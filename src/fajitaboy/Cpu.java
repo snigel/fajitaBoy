@@ -1,14 +1,18 @@
 package fajitaboy;
 
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.HardwareConstants.*;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import fajitaboy.memory.MemoryInterface;
 
 /**
  * CPU class for emulating the Game Boy CPU.
  * @author Tobias S, Peter O
  */
-public final class Cpu {
+public final class Cpu implements StateMachine {
 
     /**
      * Address bus to access the memory.
@@ -172,7 +176,6 @@ public final class Cpu {
     	interruptJumpAddress = 0x0000;
     	interruptBit = 0xFF;
     	executeInterrupt = false;
-    	int bit = 0x00;
 
     	// Look for interrupts
     	ieReg = ram.read(ADDRESS_IE);
@@ -2423,6 +2426,45 @@ public final class Cpu {
      */
     public boolean getExecuteInterrupt() {
         return executeInterrupt;
+    }
+    
+    public void saveState( FileOutputStream os ) throws IOException {
+    	FileIOStreamHelper.writeData(os, pc, 2);
+    	FileIOStreamHelper.writeData(os, sp, 2);
+    	
+    	// Write registers
+    	os.write(a);
+    	os.write(b);
+    	os.write(c);
+    	os.write(d);
+    	os.write(e);
+    	os.write(cc);
+    	os.write(h);
+    	os.write(l);
+    	
+    	// Write flags
+    	FileIOStreamHelper.writeBoolean(os, ime);
+    	FileIOStreamHelper.writeBoolean(os, stop);
+    }
+    
+    public void readState( FileInputStream is ) throws IOException {
+    	// Read PC and SP
+    	pc = (int)FileIOStreamHelper.readData(is, 2);
+    	sp = (int)FileIOStreamHelper.readData(is, 2);
+    	
+    	// Read registers
+    	a = is.read();
+    	b = is.read();
+    	c = is.read();
+    	d = is.read();
+    	e = is.read();
+    	cc = is.read();
+    	h = is.read();
+    	l = is.read();
+    	
+    	// Read flags
+    	ime = FileIOStreamHelper.readBoolean(is);
+    	stop = FileIOStreamHelper.readBoolean(is);
     }
 }
 
