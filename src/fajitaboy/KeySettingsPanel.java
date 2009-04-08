@@ -15,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
-import fajitaboy.FajitaBoy.GameState;
 import static fajitaboy.constants.PanelConstants.*;
 
 /**
@@ -214,8 +213,6 @@ public class KeySettingsPanel extends JPanel {
                 controller.setKey(e.getKeyCode(), button);
                 System.out.println("Set:" + button + " to " + e.getKeyCode());
                 refreshLabels();
-            } else {
-                fajitaBoy.changeGameState(GameState.PLAYGAME);
             }
         }
 

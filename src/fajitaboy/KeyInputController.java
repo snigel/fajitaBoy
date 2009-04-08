@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JLayeredPane;
 import javax.swing.KeyStroke;
@@ -41,7 +42,7 @@ public class KeyInputController {
     private Action releaseA, releaseB, releaseSelect, releaseStart;
 
     // -- Applet actions
-    private Action pause, menu, fullscreen;
+    private Action pause, menu, fullscreen, mute;
 
     /**
      * Creates a new KeyInputController object that handles key input.
@@ -177,10 +178,19 @@ public class KeyInputController {
                 }
             }
         };
-        
+
         fullscreen = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	fajitaBoy.toggleFullScreen();
+                fajitaBoy.toggleFullScreen();
+            }
+        };
+        mute = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                // if (fajitaBoy.getOscillator().isAudioEnable()) {
+                fajitaBoy.getOscillator().disableAudio();
+                // } else {
+                // fajitaBoy.getOscillator().enableAudio();
+                // }
             }
         };
 
@@ -191,30 +201,33 @@ public class KeyInputController {
      */
     private void initActionMap() {
 
+        ActionMap am = gamePanel.getActionMap();
+
         // Pushers
-        gamePanel.getActionMap().put("pushLeft", pushLeft);
-        gamePanel.getActionMap().put("pushRight", pushRight);
-        gamePanel.getActionMap().put("pushUp", pushUp);
-        gamePanel.getActionMap().put("pushDown", pushDown);
-        gamePanel.getActionMap().put("pushA", pushA);
-        gamePanel.getActionMap().put("pushB", pushB);
-        gamePanel.getActionMap().put("pushStart", pushStart);
-        gamePanel.getActionMap().put("pushSelect", pushSelect);
+        am.put("pushLeft", pushLeft);
+        am.put("pushRight", pushRight);
+        am.put("pushUp", pushUp);
+        am.put("pushDown", pushDown);
+        am.put("pushA", pushA);
+        am.put("pushB", pushB);
+        am.put("pushStart", pushStart);
+        am.put("pushSelect", pushSelect);
 
         // Releasers
-        gamePanel.getActionMap().put("releaseLeft", releaseLeft);
-        gamePanel.getActionMap().put("releaseRight", releaseRight);
-        gamePanel.getActionMap().put("releaseUp", releaseUp);
-        gamePanel.getActionMap().put("releaseDown", releaseDown);
-        gamePanel.getActionMap().put("releaseA", releaseA);
-        gamePanel.getActionMap().put("releaseB", releaseB);
-        gamePanel.getActionMap().put("releaseStart", releaseStart);
-        gamePanel.getActionMap().put("releaseSelect", releaseSelect);
+        am.put("releaseLeft", releaseLeft);
+        am.put("releaseRight", releaseRight);
+        am.put("releaseUp", releaseUp);
+        am.put("releaseDown", releaseDown);
+        am.put("releaseA", releaseA);
+        am.put("releaseB", releaseB);
+        am.put("releaseStart", releaseStart);
+        am.put("releaseSelect", releaseSelect);
 
         // Appletators
-        gamePanel.getActionMap().put("pushPause", pause);
-        gamePanel.getActionMap().put("pushMenu", menu);
-        gamePanel.getActionMap().put("pushFullscreen", fullscreen);
+        am.put("pushPause", pause);
+        am.put("pushMenu", menu);
+        am.put("pushFullscreen", fullscreen);
+        am.put("pushMute", mute);
     }
 
     /**
@@ -238,6 +251,7 @@ public class KeyInputController {
         setKey(KeyEvent.VK_ESCAPE, "Menu", false);
         setKey(KeyEvent.VK_P, "Pause", false);
         setKey(KeyEvent.VK_F4, "Fullscreen", false);
+        setKey(KeyEvent.VK_M, "Mute", false);
     }
 
     /**

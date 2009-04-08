@@ -49,4 +49,29 @@ public class IngameMenuPanel extends JTabbedPane {
         validate();
     }
 
+    /**
+     * Refreshes labels on keybinding buttons.
+     */
+    public final void refreshLabels() {
+        keys.refreshLabels();
+    }
+
+    /**
+     * Refreshes buttons and things in menu.
+     */
+    public final void refresh() {
+        keys.refreshLabels();
+        sound.refreshSlider();
+    }
+
+    /**
+     * Sets sound panel oscillator for audiocontrol.
+     * 
+     * @param oscillator
+     *            to fix sound
+     */
+    public final void setOscillator(Oscillator oscillator) {
+        sound.setOscillator(oscillator);
+    }
+
 }

@@ -63,13 +63,12 @@ public class FajitaBoy extends JApplet implements ComponentListener {
      * Path to the rom file. Not sure if this is needed.
      */
     private String romPath;
-    
-    /** 
-     * Fullscreen frame.
-     * Is null if not in fullscreen mode.
+
+    /**
+     * Fullscreen frame. Is null if not in fullscreen mode.
      */
     private FullScreenFrame fullScreen;
-    
+
     /** Label to show in apple area when in fullscreen mode. */
     private JLabel fullScreenPlaceHolder;
 
@@ -116,9 +115,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** Menu. */
     private IngameMenuPanel ingameMenuPanel;
 
-    /** Menu for keybindings. */
-    private KeySettingsPanel keySettingsPanel;
-
     /** "Pause". */
     private JLabel pauseText;
 
@@ -149,7 +145,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         }
 
         addComponentListener(this);
-        
+
         // Init paths to user home catalog
         romPath = System.getProperty("user.home");
         fileChooser = new JFileChooser(romPath);
@@ -158,8 +154,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         startScreen = new StartScreenPanel(this);
         singleplayerLoadscreen = new SingleplayerLoadPanel(this, fileChooser);
         ingameMenuPanel = new IngameMenuPanel(this);
-        keySettingsPanel = new KeySettingsPanel(this);
-        
+
         fullScreenPlaceHolder = new JLabel("Click to exit fullscreen mode!");
 
         pauseText = new JLabel(" PAUSED ");
@@ -167,7 +162,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         pauseText.setOpaque(true);
         pauseText.setFont(FB_INGAMEFONT);
         pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-
 
         // Appletviewer resize
         resize(frameSize);
@@ -233,20 +227,20 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         // Switch to new state
         switch (state) {
         case STARTSCREEN:
-        	deactivateFullScreen();
+            deactivateFullScreen();
             setContentPane(startScreen);
             showStatus("Start Screen");
             break;
 
         case SINGLEPLAYER_LOADSCREEN:
-        	deactivateFullScreen();
+            deactivateFullScreen();
             setContentPane(singleplayerLoadscreen);
             showStatus("Singleplayer Screen");
 
             break;
         case PLAYGAME:
             gamePanel.setIgnoreRepaint(true);
-            if(fullScreen != null) {
+            if (fullScreen != null) {
                 fullScreen.setContentPane(layeredGamePanel);
             } else {
                 setContentPane(layeredGamePanel);
@@ -258,7 +252,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         case INGAME_MENU:
             layeredGamePanel.setOverlapingPane(ingameMenuPanel);
-            keySettingsPanel.refreshLabels();
             showStatus("Ingame menu screen");
             break;
         case PAUSE:
@@ -269,8 +262,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             return; // Non-implemented state or something
         }
         gameState = state;
-        
-        if(fullScreen != null) {
+
+        if (fullScreen != null) {
             fullScreen.getContentPane().requestFocusInWindow();
             fullScreen.validate();
         } else {
@@ -296,45 +289,44 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         kic = new KeyInputController(this, layeredGamePanel,
                 emulator.addressBus.getJoyPad());
 
-        // gamePanel.addKeyListener(kic);
-        // layeredGamePanel.addKeyListener(kic);
-        // addKeyListener(kic);
+        ingameMenuPanel.refreshLabels();
+        ingameMenuPanel.setOscillator(emulator.oscillator);
 
         changeGameState(GameState.PLAYGAME);
     }
-    
+
     /**
      * Toggle fullscreen mode.
      */
     public void toggleFullScreen() {
-        if(fullScreen != null) {
+        if (fullScreen != null) {
             deactivateFullScreen();
         } else {
             activateFullScreen();
         }
 
     }
-    
+
     /**
      * Activate fullscreen mode.
      */
     public void activateFullScreen() {
-        if(fullScreen == null) {
+        if (fullScreen == null) {
             fullScreen = new FullScreenFrame(layeredGamePanel);
             gamePanel.grabFocus();
             setContentPane(fullScreenPlaceHolder);
             validate();
         }
     }
-    
+
     /**
      * Deactivates fullscreen mode.
      */
     public void deactivateFullScreen() {
-        if(fullScreen != null) {
+        if (fullScreen != null) {
             layeredGamePanel.updateSize(getWidth(), getHeight());
             setContentPane(layeredGamePanel);
-           // gamePanel.grabFocus();
+            // gamePanel.grabFocus();
             gamePanel.requestFocus();
             fullScreen.dispose();
             fullScreen = null;
@@ -366,6 +358,15 @@ public class FajitaBoy extends JApplet implements ComponentListener {
      */
     public final KeyInputController getKIC() {
         return kic;
+    }
+
+    /**
+     * Returns the emulators oscillator.
+     * 
+     * @return oscillator
+     */
+    public final Oscillator getOscillator() {
+        return emulator.oscillator;
     }
 
     /*
@@ -503,37 +504,37 @@ public class FajitaBoy extends JApplet implements ComponentListener {
          *            mouseevent
          */
         public void mousePressed(final MouseEvent e) {
-        	if (gameState == GameState.PLAYGAME
+            if (gameState == GameState.PLAYGAME
                     || gameState == GameState.INGAME_MENU
                     || gameState == GameState.PAUSE) {
-        		gamePanel.requestFocus();
-        	}
-        	
-        	if(fullScreen != null) {
-        		deactivateFullScreen();
-        	}
+                gamePanel.requestFocus();
+            }
+
+            if (fullScreen != null) {
+                deactivateFullScreen();
+            }
         }
     }
-    
+
     public void componentHidden(ComponentEvent e) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void componentMoved(ComponentEvent e) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void componentResized(ComponentEvent e) {
-        if(layeredGamePanel != null) {
+        if (layeredGamePanel != null) {
             layeredGamePanel.updateSize(getWidth(), getHeight());
         }
     }
 
     public void componentShown(ComponentEvent e) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }
