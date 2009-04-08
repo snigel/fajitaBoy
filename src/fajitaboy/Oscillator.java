@@ -148,6 +148,9 @@ public class Oscillator implements Runnable, StateMachine {
      * Generates one frame of Audio.
      */
     private void generateAudio() {
+    	if ( !audioEnabled )
+    		return;
+    	
     	try {
     		soundHandler.generateTone();
     	} catch ( LineUnavailableException e ) {
@@ -287,6 +290,9 @@ public class Oscillator implements Runnable, StateMachine {
     }
     
     public void disableAudio() {
+    	if ( audioEnabled ) {
+    		soundHandler.close();
+    	}
     	audioEnabled = false;
     }
     

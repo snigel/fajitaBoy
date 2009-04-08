@@ -88,5 +88,9 @@ public class SoundHandler {
         ch3Right = ((nr51 & 0x40) > 0);
         ch4Right = ((nr51 & 0x80) > 0);
     }
+    
+    public void close() {
+    	sdl.close();
+    }
 }
 
