@@ -26,8 +26,19 @@ public class Audio3 {
             return destBuff;
         calcFreq();
         int shift = calcShift();
+        int k = 0;
+        byte d;
         for(int i = 0; i < samples; i++) {
-            destBuff[i] += (byte) (wavePattern[((32 * pos) / waveLength) % 32] >> shift);
+        	d = (byte) (wavePattern[((32 * pos) / waveLength) % 32] >> shift);
+        	if ( left ) {
+                destBuff[k] += d;
+        	}
+        	k++;
+        	if ( right ) {
+        		destBuff[k] += d;
+        	}
+        	k++;
+                
             pos = (pos +1) % waveLength;
         }
         return destBuff;
