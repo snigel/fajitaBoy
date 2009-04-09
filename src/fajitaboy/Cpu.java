@@ -2428,6 +2428,9 @@ public final class Cpu implements StateMachine {
         return executeInterrupt;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void saveState( FileOutputStream os ) throws IOException {
     	FileIOStreamHelper.writeData(os, pc, 2);
     	FileIOStreamHelper.writeData(os, sp, 2);
@@ -2447,6 +2450,9 @@ public final class Cpu implements StateMachine {
     	FileIOStreamHelper.writeBoolean(os, stop);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void readState( FileInputStream is ) throws IOException {
     	// Read PC and SP
     	pc = (int)FileIOStreamHelper.readData(is, 2);

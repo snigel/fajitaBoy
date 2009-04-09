@@ -4,11 +4,40 @@ import fajitaboy.memory.MemoryInterface;
 import static fajitaboy.constants.AddressConstants.*;
 
 public class SpriteAttribute implements Comparable {
-    int x, y, patternNr;
+	
+	/**
+	 * Sprite X coordinate + 8
+	 */
+    int x;
     
+    /**
+     * Sprite Y coordinate + 16
+     */
+    int y;
+    
+    /**
+     * Tile ID for this sprite.
+     */
+    int patternNr;
+    
+    /**
+     * True if sprite should be drawn behind Background.
+     */
     boolean behindBG;
+    
+    /**
+     * When true, sprite is flipped horizontally.
+     */
     boolean flipX;
+    
+    /**
+     * When true, sprite is flipped vertically.
+     */
     boolean flipY;
+    
+    /**
+     * Address to sprite palette.
+     */
     int paletteAddr;
     
     public void read(MemoryInterface ram, int addr) {

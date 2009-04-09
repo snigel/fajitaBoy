@@ -1,7 +1,7 @@
 package fajitaboy;
 
 import static fajitaboy.constants.HardwareConstants.*;
-import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.EmulationConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,12 +20,6 @@ import fajitaboy.memory.MemoryInterface;
  * @author Tobias S
  */
 public class Oscillator implements Runnable, StateMachine {
-
-    /**
-     * Max number of frames to skip in a row.
-     * TODO move this constant to a proper constant class.
-     */
-    private final int MAX_FRAMESKIP = 10;
     
     private boolean running;
     
@@ -38,16 +32,6 @@ public class Oscillator implements Runnable, StateMachine {
      * Cycles since Oscillator initialization.
      */
     private long cycles;
-
-    /**
-     * Previous cycle at which the Timer was incremented.
-     */
-    private long prevTimerInc;
-
-    /**
-     * Next cycle at which the Divider will be incremented.
-     */
-    private long nextDividerInc;
 
     /**
      * Pointer to CPU instance.
@@ -63,6 +47,11 @@ public class Oscillator implements Runnable, StateMachine {
      * Pointer to LCD instance.
      */
     private LCD lcd;
+    
+    /**
+     * Pointer to Timer instance.
+     */
+    private Timer timer;
 
     /**
      * Pointer to a class with the proper interface to draw the GB pixels to screen.
@@ -100,6 +89,7 @@ public class Oscillator implements Runnable, StateMachine {
         this.cpu = cpu;
         this.ram = ram;
         lcd = new LCD(ram);
+        timer = new Timer();
         reset();
     }
 
@@ -124,10 +114,9 @@ public class Oscillator implements Runnable, StateMachine {
      */
     public void reset() {
         cycles = 0;
-        prevTimerInc = 0;
-        nextDividerInc = GB_DIV_CLOCK;
         nextHaltCycle = GB_CYCLES_PER_FRAME;
         running = false;
+        timer.reset();
         disableAudio();
         resetAudio();
     }
@@ -168,8 +157,7 @@ public class Oscillator implements Runnable, StateMachine {
         int cycleInc = cpu.step();
         cycles += cycleInc;
         
-        updateDiv();
-        updateTimer();
+        timer.update(cycleInc, ram);
         
         // Update LCD
         lcd.updateLCD(cycleInc);
@@ -178,52 +166,6 @@ public class Oscillator implements Runnable, StateMachine {
         }
         
         return cycleInc;
-    }
-
-    /**
-     * Increment Divider register.
-     */
-    private void updateDiv() {
-    	if ( cycles >= nextDividerInc ) {
-    		ram.forceWrite( ADDRESS_DIV, (ram.read(ADDRESS_DIV) + 1) & 0xFF );
-    		nextDividerInc += GB_DIV_CLOCK;
-    	}
-    }
-    
-    /**
-     * Increment Timer.
-     */
-    private void updateTimer() {
-        int tac = ram.read(ADDRESS_TAC);
-        int timerFreq = 0;
-        switch (tac & 0x03) {
-        case 0:
-            timerFreq = GB_TIMER_CLOCK_0;
-            break;
-        case 1:
-            timerFreq = GB_TIMER_CLOCK_1;
-            break;
-        case 2:
-            timerFreq = GB_TIMER_CLOCK_2;
-            break;
-        case 3:
-            timerFreq = GB_TIMER_CLOCK_3;
-            break;
-        }
-        
-        while (cycles >= prevTimerInc + timerFreq) {
-            if ((tac & 0x04) != 0) {
-                int tima = ram.read(ADDRESS_TIMA);
-                if (tima == 0xFF) {
-                    ram.write(ADDRESS_TIMA, ram.read(ADDRESS_TMA));
-                    ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x04);
-                } else {
-                    ram.write(ADDRESS_TIMA, tima + 1);
-                }
-            }
-            prevTimerInc += timerFreq;
-        }
-
     }
 
     public LCD getLCD() {
@@ -296,23 +238,27 @@ public class Oscillator implements Runnable, StateMachine {
     	audioEnabled = false;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void saveState( FileOutputStream os ) throws IOException {
     	FileIOStreamHelper.writeData(os, cycles, 8);
-    	FileIOStreamHelper.writeData(os, nextDividerInc, 8);
     	FileIOStreamHelper.writeData(os, nextHaltCycle, 8);
-    	FileIOStreamHelper.writeData(os, prevTimerInc, 8);
     	
+    	timer.saveState(os);
     	cpu.saveState(os);
     	lcd.saveState(os);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     public void readState( FileInputStream is ) throws IOException {
     	cycles = FileIOStreamHelper.readData(is, 8);
-    	nextDividerInc = FileIOStreamHelper.readData(is, 8);
     	nextHaltCycle = FileIOStreamHelper.readData(is, 8);
-    	prevTimerInc = FileIOStreamHelper.readData(is, 8);
     	
     	cpu.readState(is);
     	lcd.readState(is);
+    	timer.readState(is);
     }
 }

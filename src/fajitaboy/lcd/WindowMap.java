@@ -6,19 +6,31 @@ import fajitaboy.memory.MemoryInterface;
 import fajitaboy.memory.Vram;
 
 public class WindowMap {
-	/*
+	/**
 	 * Contains the id of each tile to be displayed.
 	 */
 	private int[][] tileAddresses;
 
+	/**
+	 * Default constructor.
+	 */
 	public WindowMap() {
 		reset();
 	}
 
+	/**
+	 * Clear WindowMap data.
+	 */
 	public void reset() {
 		tileAddresses = new int[32][32];
 	}
 
+	/**
+	 * Reads the Window from memory.
+	 * @param ram Pointer to memory interface
+	 * @param lcdc Pointer to LCDC information
+	 */
+	// TODO Decrepit function? Remove?
 	public void readWindow(MemoryInterface ram, LCDC lcdc) {
 		// find base address
 		int addr_base;
@@ -41,6 +53,12 @@ public class WindowMap {
 		}
 	}
 	
+	/**
+	 * Reads the Window from memory. Only reads the line that is currently being rendered.
+	 * @param ly Screen line that is currently being rendered
+	 * @param ram Pointer to memory interface
+	 * @param lcdc Pointer to LCDC information
+	 */
 	public void readWindowLine(int ly, MemoryInterface ram, LCDC lcdc) {
 		int scx, scy;
 
@@ -65,9 +83,7 @@ public class WindowMap {
 			addr_base = 0x9800;
 		}
 		
-        /*
-         * only reads relevant tiles
-         */
+        // only reads relevant tiles
         for (int cx = scx, tx = firstTileX; cx < GB_LCD_W; cx += 8, tx++) {
             int ty = firstTileY;
             // addr, where we read the tile pattern nr.
@@ -81,27 +97,15 @@ public class WindowMap {
                 tileAddresses[ty][tx] = 0x100 + (byte)pnr; 
             } 
         }
-        
-        /*
-		// read tile-numbers
-		for (int cx = 0; cx < GB_MAP_VISIBLE_W + 1; cx++) {
-			int ty = (firstTileY + (firstTileX + cx)/GB_MAP_H) % GB_MAP_H; 
-			int tx = (firstTileX + cx) % GB_MAP_W;
-			
-			// addr, where we read the tile pattern nr.
-			int addr = addr_base + ty * GB_MAP_W + tx; 
-			
-			int pnr = ram.read(addr);
-			if ( lcdc.tileDataSelect ) {
-				tileAddresses[ty][tx] = pnr;
-			} else {
-				// signed
-				tileAddresses[ty][tx] = 0x100 + (byte)pnr; 
-			} 
-		}
-        */
 	}
 	
+	/**
+	 * Draws one line of the window onto the screen.
+	 * @param screen Pointer to screen surface
+	 * @param ram Pointer to memory interface
+	 * @param vram Pointer to VRAM
+	 * @param ly Screen line to draw onto
+	 */
 	public void drawLine(Screen screen, MemoryInterface ram, Vram vram, int ly) {
 // 		Prepare variables
 		int scx, scy;
@@ -132,10 +136,17 @@ public class WindowMap {
         }
 	}
 
+	/**
+	 * Draws the window onto the screen.
+	 * @param screen Pointer to screen surface
+	 * @param ram Pointer to memory interface
+	 * @param vram Pointer to VRAM
+	 * @param ly Screen line to draw onto
+	 */
+	// TODO Decrepit function? Remove?
 	public void draw(Screen screen, MemoryInterface ram, Vram vram, int ly) {
 		// 		Prepare variables
 		int scx, scy;
-		Tile[] tiles = vram.getTiles();
 
 		scx = ram.read(ADDRESS_WX);
 		scy = ram.read(ADDRESS_WY);
@@ -147,6 +158,7 @@ public class WindowMap {
 		scx -= 7;
 
 		//	Draw tiles
+		Tile[] tiles = vram.getTiles();
 		int datax, datay = 0, tileId;
 		// For each row...
 		for ( int y = scy; y <= GB_LCD_H; y += 8 ) {
@@ -161,6 +173,13 @@ public class WindowMap {
 		}
 	}
 
+	/**
+	 * Returns if window is visible on a given screen line
+	 * @param ly Screen line to check
+	 * @param scx Window X scroll coordinate
+	 * @param scy Window Y scroll coordinate
+	 * @return True if visible at given line
+	 */
     private static boolean visibleAt(int ly, int scx, int scy) {
         return !(scx < 0 || scx > 166 || scy < 0 || scy > 143 || scy > ly);
     }

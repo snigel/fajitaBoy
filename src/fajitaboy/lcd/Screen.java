@@ -3,22 +3,38 @@ package fajitaboy.lcd;
 import static fajitaboy.constants.LCDConstants.*;
 
 public class Screen {
+	/**
+	 * Contains the pixels that have been drawn onto the screen. 
+	 */                    
 	public int bits[][];
 
 	public Screen() {
 		bits = new int[GB_LCD_H][GB_LCD_W];
 	}
 	
+	/**
+	 * Clear screen. Fills screen with white.
+	 */
+	// TODO Decrepit function? Remove?
 	public void clear() {
 		clear(0);
 	}
 	
+	/**
+	 * Clears screen by filling it with a color.
+	 * @param clr Color to fill screen with
+	 */
 	public void clear(int clr) {
 		for ( int x = 0; x < GB_LCD_H; x++ ) {
 			clearLine(x, clr);
 		}
 	}
 	
+	/**
+	 * Clears one line on the screen with the given color.
+	 * @param clr Color to fill screen with
+	 * @param ly Line to clear
+	 */
 	public void clearLine(int clr, int ly) {
 		for ( int x = 0; x < GB_LCD_W; x++ ) {
 			bits[ly][x] = clr;
@@ -33,7 +49,6 @@ public class Screen {
 	 * @param y Y-position to draw tile at
 	 * @param ly Line to blit to on screen
 	 * @param transparent If true, palette index 0 is not rendered. 
-	 * @throws Exception
 	 */
 	public void blitTile(Tile t, int palette, int x, int y, int ly, boolean transp ) {
 		// Abort if no blitting occurs
@@ -71,6 +86,16 @@ public class Screen {
 		}
 	}
 	
+	/**
+	 * Blits a sprite onto screen.
+	 * @param t Tile to blit
+	 * @param palette Sprite palette
+	 * @param x Sprite X coordinate
+	 * @param y Sprite Y Coordinate
+	 * @param ly Screen line to blit onto
+	 * @param xFlip Enable horisontal sprite flip
+	 * @param yFlip Enable vertical sprite flip
+	 */
 	public void blitSprite(Tile t, int palette, int x, int y, int ly, boolean xFlip, boolean yFlip ) {
 		// Abort if no blitting occurs
 		if ( y > ly || y + 8 <= ly || x <= -8 || x >= 160 )
@@ -113,6 +138,10 @@ public class Screen {
 		}
 	}
 	
+	/**
+	 * Returns the screen pixels
+	 * @return Array of screen pixels
+	 */
 	public int[][] getBits() {
 		return bits;
 	}

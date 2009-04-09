@@ -10,13 +10,26 @@ import fajitaboy.memory.Vram;
 
 public class SpriteAttributeTable {
     
+	/**
+	 * Collection of sprites to be rendered behind background.
+	 */
     Queue<SpriteAttribute> behindBG = new PriorityQueue<SpriteAttribute>();
+    
+    /**
+     * Collection of sprites to be rendered above background.
+     */
     Queue<SpriteAttribute> aboveBG = new PriorityQueue<SpriteAttribute>();
     
+    /**
+     * Default constructor.
+     */
 	public SpriteAttributeTable() {
-
 	}
 	
+	/**
+	 * Reads the sprite attribute table from memory.
+	 * @param ram Pointer to memory
+	 */
 	public void readSpriteAttributes(MemoryInterface ram) {
 		// Read sprite attribute table
         int spriteAttrAddr = 0xFE00;
@@ -36,6 +49,15 @@ public class SpriteAttributeTable {
 		}
 	}
 	
+	/**
+	 * Draws sprites onto screen.
+	 * @param screen Pointer to screen
+	 * @param drawBehindBG Whether to draw the sprites that are above or behind the background
+	 * @param ram Pointer to memory
+	 * @param lcdc Pointer to LCDC information
+	 * @param vram Pointer to VRAM
+	 * @param ly Screen line to blit at
+	 */
 	public void draw(Screen screen, boolean drawBehindBG, MemoryInterface ram, LCDC lcdc, Vram vram, int ly) {
 	    Queue<SpriteAttribute> toDraw;
         if (drawBehindBG) {

@@ -6,29 +6,36 @@ import fajitaboy.memory.MemoryInterface;
 import fajitaboy.memory.Vram;
 
 public class BackgroundMap {
-	public static enum MapType {BACKGROUND, WINDOW}
-
-	/*
+	/**
 	 * Contains the id of each tile to be displayed.
 	 */
 	private int[][] tileAddresses = new int[32][32];
-	MapType type;
 
+	/**
+	 * Default constructor.
+	 */
 	public BackgroundMap() {
 		reset();
 	}
 
+	/**
+	 * Resets the BackgroundMap with empty data.
+	 */
 	public void reset() {
 		tileAddresses = new int[32][32];
 	}
 	
+	/**
+	 * Reads the BackgroundMap from memory. Only reads the line that is currently being rendered.
+	 * @param ly Screen line that is currently being rendered
+	 * @param ram Pointer to memory interface
+	 * @param lcdc Pointer to LCDC information
+	 */
 	public void readBackgroundWholeLine(int ly, MemoryInterface ram, LCDC lcdc) {
-		int scx, scy, firstTileX, firstTileY;
+		int scy, firstTileY;
 		
-		scx = ram.read(ADDRESS_SCX);
 		scy = ram.read(ADDRESS_SCY);
 
-		firstTileX = scx/8;
 		firstTileY = ((scy + ly) / 8) % 32;
 		
 		int addr_base = 0;
@@ -58,6 +65,13 @@ public class BackgroundMap {
 		}
 	}
 	
+	/**
+	 * Reads the BackgroundMap from memory. Only reads the line that is currently being rendered.
+	 * Is optimized compared to readBackgroundWholeLine.
+	 * @param ly Screen line that is currently being rendered
+	 * @param ram Pointer to memory interface
+	 * @param lcdc Pointer to LCDC information
+	 */
 	public void readBackgroundLine(int ly, MemoryInterface ram, LCDC lcdc) {
 		int scx, scy, firstTileX, firstTileY;
 		
@@ -116,6 +130,14 @@ public class BackgroundMap {
 		}
 	}
 	
+	
+	/**
+	 * Draws one line of the BackgroundMap onto the screen.
+	 * @param screen Pointer to screen surface
+	 * @param ram Pointer to memory interface
+	 * @param vram Pointer to VRAM
+	 * @param ly Screen line to draw onto
+	 */
 	public void drawLine(Screen screen, MemoryInterface ram, Vram vram, int ly) {
 		int scx, scy, firstTileX, firstTileY;
 		Tile[] tiles = vram.getTiles();
@@ -145,6 +167,14 @@ public class BackgroundMap {
 		}
 	}
 	
+	
+	/**
+	 * Reads the BackgroundMap from memory.
+	 * @param ly Screen line that is currently being rendered
+	 * @param ram Pointer to memory interface
+	 * @param lcdc Pointer to LCDC information
+	 */
+	// TODO Decrepit function? Remove?
 	public void readBackground(MemoryInterface ram, LCDC lcdc) {
 		// find base address
 		int addr_base = 0;
@@ -174,6 +204,15 @@ public class BackgroundMap {
 		}
 	}
 	
+	
+	/**
+	 * Draws the BackgroundMap onto the screen.
+	 * @param screen Pointer to screen surface
+	 * @param ram Pointer to memory interface
+	 * @param vram Pointer to VRAM
+	 * @param ly Screen line to draw onto
+	 */
+	// TODO Decrepit function? Remove?
 	public void draw(Screen screen, MemoryInterface ram, Vram vram, int ly) {
 		// 		Prepare variables
 		

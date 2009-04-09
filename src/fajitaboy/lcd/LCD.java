@@ -306,23 +306,40 @@ public class LCD implements StateMachine {
         }
     }
 
+    /**
+     * Returns true if a new screen has been rendered, that has not yet been obtained.
+     * @return True if new screen has not been obtained, false otherwise.
+     */
     public boolean newScreenAvailable() {
         return newScreen;
     }
 
+    /**
+     * Returns the pixels that should be drawn onto the screen.
+     * @return Pixels in 8-bit palette form, 4 color.
+     */
     public int[][] getScreen() {
         newScreen = false;
         return screen.getBits();
     }
 
+    /**
+     * Enables frame skip.
+     */
     public void enableFrameSkip() {
         frameSkip = true;
     }
 
+    /**
+     * Disables frame skip.
+     */
     public void disableFrameSkip() {
         frameSkip = false;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void saveState( FileOutputStream os ) throws IOException {
     	FileIOStreamHelper.writeBoolean(os, frameSkip);
     	FileIOStreamHelper.writeBoolean(os, newScreen);
@@ -330,6 +347,9 @@ public class LCD implements StateMachine {
     	FileIOStreamHelper.writeData(os, nextModeChange, 8);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void readState( FileInputStream is ) throws IOException {
     	frameSkip = FileIOStreamHelper.readBoolean(is);
     	newScreen = FileIOStreamHelper.readBoolean(is);
