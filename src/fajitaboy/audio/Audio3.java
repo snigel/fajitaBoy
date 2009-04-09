@@ -22,9 +22,12 @@ public class Audio3 {
     }
 
     public byte[] generateTone(byte[] destBuff, boolean left, boolean right, int samples) {
+        if((ab.read(NR30_REGISTER) & 0x80) == 0 )
+            return destBuff;
         calcFreq();
+        int shift = calcShift();
         for(int i = 0; i < samples; i++) {
-            destBuff[i] += (byte) (wavePattern[((32 * pos) / waveLength) % 32]);
+            destBuff[i] += (byte) (wavePattern[((32 * pos) / waveLength) % 32] >> shift);
             pos = (pos +1) % waveLength;
         }
         return destBuff;
@@ -54,7 +57,7 @@ public class Audio3 {
         int nr32 = (ab.read(NR32_REGISTER)  & 0x60) >> 5;
         switch(nr32) {
         case 0:
-            return 4;
+            return 9;
         case 1:
             return 0;
         case 2:
@@ -62,7 +65,7 @@ public class Audio3 {
         case 3:
             return 2;
         default:
-            return 0;
+            return 9;
         }
     }
 
@@ -71,15 +74,14 @@ public class Audio3 {
         if (waveLength == 0) {
             waveLength = 1;
         }
-        int shift = calcShift();
         int startAddress = 0xFF30;
         int endAddress = 0xFF3F;
         wavePattern = new byte[32];
         int k = 0;
         for(int i = 0; i <= (endAddress - startAddress); i++) {
-           wavePattern[k] = (byte) ((((ab.read((startAddress +i)) & 0xF0) >> 4) >> shift) * 2);
+           wavePattern[k] = (byte) (((ab.read((startAddress +i)) & 0xF0) >> 4) * 2);
            k++;
-           wavePattern[k] = (byte) (((ab.read((startAddress +i)) & 0xF) >> shift) * 2);
+           wavePattern[k] = (byte) ((ab.read((startAddress +i)) & 0xF) * 2);
            k++;
         }
     }
