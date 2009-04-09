@@ -75,7 +75,13 @@ public class Audio2 {
     private void calcFreq() {
         int low1 = ab.read(SOUND2_LOW);
         int high1 = ab.read(SOUND2_HIGH) * 0x100;
-        freq = 131072 / (2047 - (high1 + low1) & 0x7ff);
+        int tmp = (2047 - (high1 + low1) & 0x7ff);
+        if(tmp != 0 ) {
+            freq = 131072 / tmp;
+        }
+        else {
+            freq = 131072;
+        }
         if (freq == oldFreq) {
             return;
         } else {

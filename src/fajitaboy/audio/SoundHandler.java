@@ -7,9 +7,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import javax.swing.JFrame;
-
-import fajitaboy.GamePanel;
 import fajitaboy.memory.AddressBus;
 
 /**
@@ -31,7 +28,6 @@ public class SoundHandler {
     private boolean ch3Right;
     private boolean ch4Left;
     private boolean ch4Right;
-    private GamePanel gp;
     private int samples;
     private int finalSamples;
     private byte[] destBuff;
@@ -44,11 +40,6 @@ public class SoundHandler {
         sdl = (SourceDataLine) AudioSystem.getLine(info);
         sdl.open(af);
         sdl.start();
-
-        JFrame jfr = new JFrame();
-        gp = new GamePanel(2);
-        jfr.setContentPane(gp);
-        jfr.setVisible(true);
 
         this.ab = ab;
         this.samples = samples;

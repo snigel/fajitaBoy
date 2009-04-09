@@ -47,7 +47,6 @@ public class Audio {
             //Sweep
             if(sweepLength != 0) {
                 if (((i % (sweepLength * samples)) == 0) && (sweepNr < sweepSteps)) {
-                    System.out.println("Sweeping");
                     if(sweepDirection == 0) {
                         freq =  freq + (int)(freq / (Math.pow(2, sweepNr)));
                     }
@@ -95,7 +94,13 @@ public class Audio {
     private void calcFreq() {
         int low1 = ab.read(SOUND1_LOW);
         int high1 = ab.read(SOUND1_HIGH) * 0x100;
-        freq = 131072 / (2047 - (high1 + low1) & 0x7ff);
+        int tmp = (2047 - (high1 + low1) & 0x7ff);
+        if(tmp != 0 ) {
+            freq = 131072 / tmp;
+        }
+        else {
+            freq = 131072;
+        }
         if (freq == oldFreq) {
             return;
         } else {
