@@ -252,6 +252,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         case INGAME_MENU:
             layeredGamePanel.setOverlapingPane(ingameMenuPanel);
+            ingameMenuPanel.refresh();
             showStatus("Ingame menu screen");
             break;
         case PAUSE:

@@ -1,7 +1,6 @@
 package fajitaboy;
 
 import java.awt.Dimension;
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.swing.JLabel;
@@ -88,5 +87,4 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         // vol = Math.min(100, vol);
         // volume.setValue(vol);
     }
-
 }

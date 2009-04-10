@@ -261,4 +261,14 @@ public class Oscillator implements Runnable, StateMachine {
     	lcd.readState(is);
     	timer.readState(is);
     }
+
+    /**
+     * Getter for audioEnable, ie if the sound is enabled or not.
+     * 
+     * @return the audioEnabled
+     */
+    public final boolean isAudioEnabled() {
+        return audioEnabled;
+    }
+
 }

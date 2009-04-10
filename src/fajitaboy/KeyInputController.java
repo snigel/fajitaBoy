@@ -186,11 +186,11 @@ public class KeyInputController {
         };
         mute = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                // if (fajitaBoy.getOscillator().isAudioEnable()) {
-                fajitaBoy.getOscillator().disableAudio();
-                // } else {
-                // fajitaBoy.getOscillator().enableAudio();
-                // }
+                if (fajitaBoy.getOscillator().isAudioEnabled()) {
+                    fajitaBoy.getOscillator().disableAudio();
+                } else {
+                    fajitaBoy.getOscillator().enableAudio();
+                }
             }
         };
 
