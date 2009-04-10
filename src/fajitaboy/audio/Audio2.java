@@ -15,6 +15,9 @@ public class Audio2 {
     private int dutyLength;
     private int step;
     private int stepLength;
+    private boolean lengthEnabled;
+    private int toneLength;
+
 
     public Audio2(AddressBus ab,float sampleRate) {
         this.ab = ab;
@@ -22,40 +25,49 @@ public class Audio2 {
         pos = 0;
         oldFreq = 0;
         amp = 32;
+        lengthEnabled = false;
     }
 
     public byte[] generateTone(byte[] destBuff, boolean left, boolean right, int samples) {
         calcFreq();
+        if(((ab.read(NR22_REGISTER) & 0xF0 )>> 4) == 0) {
+            return destBuff;
+        }
 
-        int finalAmp;
-        int k = 0;
-        for (int i = 0; i < samples; i++) {
+        if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
+            if(lengthEnabled) {
+                toneLength -= samples;
+            }
+            int finalAmp;
+            int k = 0;
+            for (int i = 0; i < samples; i++) {
 
-            //Envelope
-            if (stepLength != 0) {
-                if ((i % (stepLength * samples)) == 0) {
-                    if ((amp > 0) && (amp < 32)) {
-                        amp += step;
+                //Envelope
+                if (stepLength != 0) {
+                    if ((i % (stepLength * samples)) == 0) {
+                        if ((amp > 0) && (amp < 32)) {
+                            amp += step;
+                        }
                     }
                 }
-            }
 
-            if(pos < dutyLength) {
-                finalAmp = -amp;
-            }
+                if (pos < dutyLength) {
+                    finalAmp = -amp;
+                }
 
-            else {
-                finalAmp = amp;
+                else {
+                    finalAmp = amp;
+                }
+                if (left) {
+                    destBuff[k] += (byte) finalAmp;
+                }
+                k++;
+                if (right) {
+                    destBuff[k] += (byte) finalAmp;
+                }
+                k++;
+                pos = (pos + 1) % waveLength;
             }
-            if(left) {
-                destBuff[k] += (byte) finalAmp;
-            }
-            k++;
-            if(right) {
-                destBuff[k] += (byte) finalAmp;
-            }
-            k++;
-            pos = (pos + 1) % waveLength;
         }
         return destBuff;
     }
@@ -85,6 +97,7 @@ public class Audio2 {
         if (freq == oldFreq) {
             return;
         } else {
+            calcToneLength();
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
@@ -113,4 +126,15 @@ public class Audio2 {
             return 0;
         }
     }
+    
+    /**
+     * 
+     */
+    private void calcToneLength() {
+        lengthEnabled = ((ab.read(NR24_REGISTER) & 0x40) > 0);
+        if(lengthEnabled) {
+            toneLength = (int) (((64 -((double)(ab.read(NR21_REGISTER) & 0x3F))) / 256) * sampleRate);
+        }
+    }
+
 }

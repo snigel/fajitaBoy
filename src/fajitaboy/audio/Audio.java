@@ -21,6 +21,8 @@ public class Audio {
     private int sweepSteps;
     private int sweepDirection;
     private int sweepNr;
+    private boolean lengthEnabled;
+    private int toneLength;
 
     public Audio(AddressBus ab,float sampleRate) throws LineUnavailableException {
         this.ab = ab;
@@ -28,51 +30,63 @@ public class Audio {
         pos = 0;
         oldFreq = 0;
         amp = 32;
+        lengthEnabled = false;
     }
 
     public byte[] generateTone(byte[] destBuff, boolean left, boolean right, int samples) {
         calcFreq();
-        int finalAmp;
-        int k = 0;
-        for (int i = 0; i < samples; i++) {
+        if(((ab.read(NR12_REGISTER) & 0xF0 )>> 4) == 0) {
+            return destBuff;
+        }
+                
 
-            //Envelope
-            if (stepLength != 0) {
-                if ((i % (stepLength * samples)) == 0) {
-                    if ((amp > 0) && (amp < 32)) {
-                        amp += step;
+        if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
+            if(lengthEnabled) {
+                toneLength -= samples;
+            }
+            
+            int finalAmp;
+            int k = 0;
+            for (int i = 0; i < samples; i++) {
+
+                //Envelope
+                if (stepLength != 0) {
+                    if ((i % (stepLength * samples)) == 0) {
+                        if ((amp > 0) && (amp < 32)) {
+                            amp += step;
+                        }
                     }
                 }
-            }
-            //Sweep
-            if(sweepLength != 0) {
-                if (((i % (sweepLength * samples)) == 0) && (sweepNr < sweepSteps)) {
-                    if(sweepDirection == 0) {
-                        freq =  freq + (int)(freq / (Math.pow(2, sweepNr)));
+                //Sweep
+                if (sweepLength != 0) {
+                    if (((i % (sweepLength * samples)) == 0)
+                            && (sweepNr < sweepSteps)) {
+                        if (sweepDirection == 0) {
+                            freq = freq + (int) (freq / (Math.pow(2, sweepNr)));
+                        } else {
+                            freq = freq - (int) (freq / (Math.pow(2, sweepNr)));
+                        }
                     }
-                    else {
-                        freq = freq - (int)(freq / (Math.pow(2, sweepNr)));
-                    }
+                    calcWavePattern();
                 }
-                calcWavePattern();
-            }
 
-            if(pos < dutyLength) {
-                finalAmp = -amp;
-            }
+                if (pos < dutyLength) {
+                    finalAmp = -amp;
+                }
 
-            else {
-                finalAmp = amp;
+                else {
+                    finalAmp = amp;
+                }
+                if (left) {
+                    destBuff[k] += (byte) finalAmp;
+                }
+                k++;
+                if (right) {
+                    destBuff[k] += (byte) finalAmp;
+                }
+                k++;
+                pos = (pos + 1) % waveLength;
             }
-            if(left) {
-                destBuff[k] += (byte) finalAmp;
-            }
-            k++;
-            if(right) {
-                destBuff[k] += (byte) finalAmp;
-            }
-            k++;
-            pos = (pos + 1) % waveLength;
         }
         return destBuff;
     }
@@ -104,10 +118,21 @@ public class Audio {
         if (freq == oldFreq) {
             return;
         } else {
+            calcToneLength();
             calcSweepLength();
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
+        }
+    }
+
+    /**
+     * 
+     */
+    private void calcToneLength() {
+        lengthEnabled = ((ab.read(NR14_REGISTER) & 0x40) > 0);
+        if(lengthEnabled) {
+            toneLength = (int) (((64 -((double)(ab.read(NR11_REGISTER) & 0x3F))) / 256) * sampleRate);
         }
     }
 

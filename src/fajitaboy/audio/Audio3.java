@@ -6,40 +6,49 @@ import fajitaboy.memory.AddressBus;
 
 public class Audio3 {
 
-    private float samplerate;
+    private float sampleRate;
     private int freq;
     private int oldFreq;
     private int waveLength;
     private byte[] wavePattern;
     private AddressBus ab;
     private int pos;
+    private boolean lengthEnabled;
+    private int toneLength;
 
     public Audio3(AddressBus ab, float sampleRate) {
-        this.samplerate = sampleRate;
+        this.sampleRate = sampleRate;
         this.ab = ab;
         oldFreq = 0;
         pos = 0;
+        lengthEnabled = false;
     }
 
     public byte[] generateTone(byte[] destBuff, boolean left, boolean right, int samples) {
-        if((ab.read(NR30_REGISTER) & 0x80) == 0 )
+        if((ab.read(NR30_REGISTER) & 0x80) == 0 ) {
             return destBuff;
+        }
         calcFreq();
-        int shift = calcShift();
-        int k = 0;
-        byte d;
-        for(int i = 0; i < samples; i++) {
-        	d = (byte) (wavePattern[((32 * pos) / waveLength) % 32] >> shift);
-        	if ( left ) {
-                destBuff[k] += d;
-        	}
-        	k++;
-        	if ( right ) {
-        		destBuff[k] += d;
-        	}
-        	k++;
-                
-            pos = (pos +1) % waveLength;
+        if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
+            if(lengthEnabled) {
+                toneLength -= samples;
+            }
+            int shift = calcShift();
+            int k = 0;
+            byte d;
+            for (int i = 0; i < samples; i++) {
+                d = (byte) (wavePattern[((32 * pos) / waveLength) % 32] >> shift);
+                if (left) {
+                    destBuff[k] += d;
+                }
+                k++;
+                if (right) {
+                    destBuff[k] += d;
+                }
+                k++;
+
+                pos = (pos + 1) % waveLength;
+            }
         }
         return destBuff;
     }
@@ -58,6 +67,7 @@ public class Audio3 {
             return;
         }
         else {
+            calcToneLength();
             calcWavePattern();
             oldFreq = freq;
             return;
@@ -81,7 +91,7 @@ public class Audio3 {
     }
 
     private void calcWavePattern() {
-        waveLength = (int)((samplerate) / (float)freq);
+        waveLength = (int)((sampleRate) / (float)freq);
         if (waveLength == 0) {
             waveLength = 1;
         }
@@ -96,4 +106,15 @@ public class Audio3 {
            k++;
         }
     }
+    
+    /**
+     * 
+     */
+    private void calcToneLength() {
+        lengthEnabled = ((ab.read(NR34_REGISTER) & 0x40) > 0);
+        if(lengthEnabled) {
+            toneLength = (int) (((256 -((double)(ab.read(NR31_REGISTER) & 0xFF))) / 256) * sampleRate);
+        }
+    }
+
 }
