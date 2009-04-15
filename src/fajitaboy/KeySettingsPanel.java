@@ -165,8 +165,8 @@ public class KeySettingsPanel extends JPanel {
      */
     private class InputField extends JButton implements KeyListener {
 
-        /** name. */
-        String button;
+        /** Name. */
+        private String button;
 
         /**
          * Constructor.
@@ -194,19 +194,11 @@ public class KeySettingsPanel extends JPanel {
             addMouseListener(ma);
         }
 
-        /**
-         * @inheritDoc
-         * @param e
-         *            keyevent
-         */
+        /** {@inheritDoc} */
         public void keyPressed(final KeyEvent e) {
         }
 
-        /**
-         * @inheritDoc
-         * @param e
-         *            keyevent
-         */
+        /** {@inheritDoc} */
         public void keyReleased(final KeyEvent e) {
             KeyInputController controller = fajitaBoy.getKIC();
             if (e.getKeyCode() != KeyEvent.VK_ESCAPE) {
@@ -216,14 +208,8 @@ public class KeySettingsPanel extends JPanel {
             }
         }
 
-        /**
-         * @inheritDoc
-         * @param e
-         *            keyevent
-         */
+        /** {@inheritDoc} */
         public void keyTyped(final KeyEvent e) {
         }
-
     }
-
 }

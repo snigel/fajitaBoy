@@ -1,14 +1,11 @@
 package fajitaboy;
 
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -61,11 +58,7 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
         add(startGameButton);
     }
 
-    /**
-     * @inheritDoc
-     * @param e
-     *            ActionEvent
-     */
+    /** {@inheritDoc} */
     public final void actionPerformed(final ActionEvent e) {
 
         if (e.getSource() == loadFileButton) {
@@ -79,7 +72,6 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
                 file = fileChooser.getSelectedFile();
                 fileStringField.setText(file.getAbsolutePath());
                 System.out.println(file.getAbsolutePath());
-
             }
 
         } else if (e.getSource() == startGameButton
@@ -90,7 +82,5 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
                 fajitaBoy.startGame(fileStringField.getText());
             }
         }
-
     }
-
 }

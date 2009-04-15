@@ -17,21 +17,19 @@ import static fajitaboy.constants.AudioConstants.*;
 @SuppressWarnings("serial")
 public class SoundSettingsPanel extends JPanel implements ChangeListener {
 
+    /** Oscillator. */
     private Oscillator oscillator;
 
-    JSlider volume;
+    /** Volume. */
+    private JSlider volume;
 
     /**
      * Constructor.
      */
     public SoundSettingsPanel() {
 
-        JLabel text = new JLabel("Sound is cool.");
-
         volume = new JSlider(JSlider.VERTICAL, VOLUME_MIN, VOLUME_MAX,
                 VOLUME_INIT);
-
-        // add(text);
         add(volume);
 
         volume.setPreferredSize(new Dimension(100, 150));
@@ -40,7 +38,8 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         volume.setPaintTicks(true);
         volume.setPaintLabels(true);
 
-        Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
+        Hashtable<Integer, JLabel> labelTable;
+        labelTable = new Hashtable<Integer, JLabel>();
         labelTable.put(new Integer(0), new JLabel("Mute"));
         labelTable.put(new Integer(VOLUME_MAX), new JLabel("Max"));
         volume.setLabelTable(labelTable);
@@ -60,11 +59,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         oscillator = osc;
     }
 
-    /**
-     * @inheritDocs
-     * @param e
-     *            event
-     */
+    /** {@inheritDoc} */
     public final void stateChanged(final ChangeEvent e) {
         JSlider source = (JSlider) e.getSource();
         if (!source.getValueIsAdjusting()) {
@@ -78,13 +73,17 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         }
     }
 
-    /**
-     * Refresh slider position.
-     */
-    public void refreshSlider() {
-        // int vol = oscillator.getVolume();
-        // vol = Math.max(0, vol);
-        // vol = Math.min(100, vol);
-        // volume.setValue(vol);
+    /** Refresh slider position. */
+    public final void refreshSlider() {
+
+        if (!oscillator.isAudioEnabled()) {
+            volume.setValue(0);
+        } else {
+            volume.setValue(VOLUME_MAX);
+            // int vol = oscillator.getVolume();
+            // vol = Math.max(0, vol);
+            // vol = Math.min(100, vol);
+            // volume.setValue(vol);
+        }
     }
 }

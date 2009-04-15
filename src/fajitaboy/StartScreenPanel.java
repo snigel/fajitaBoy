@@ -44,13 +44,11 @@ public class StartScreenPanel extends JPanel implements ActionListener {
 
         add(singleplayerButton);
         add(multiplayerButton);
+
+        multiplayerButton.setEnabled(false);
     }
 
-    /**
-     * @inheritDoc
-     * @param e
-     *            ActionEvent
-     */
+    /** {@inheritDoc} */
     public final void actionPerformed(final ActionEvent e) {
 
         if (e.getSource() == singleplayerButton) {

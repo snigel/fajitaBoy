@@ -2,7 +2,6 @@ package fajitaboy;
 
 import static fajitaboy.constants.PanelConstants.FB_INGAMEFONT;
 
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -53,10 +52,6 @@ public class IngameMenuMain extends JPanel implements ActionListener {
         initKey(newRom);
         initKey(reset);
         initKey(mainmenu);
-
-        saveState.setEnabled(false);
-        loadState.setEnabled(false);
-
     }
 
     /**
@@ -70,14 +65,9 @@ public class IngameMenuMain extends JPanel implements ActionListener {
         b.setMargin(new Insets(1, 1, 1, 1));
         b.addActionListener(this);
         add(b);
-
     }
 
-    /**
-     * @inheritDoc
-     * @param e
-     *            ActionEvent
-     */
+    /** {@inheritDoc} */
     public final void actionPerformed(final ActionEvent e) {
 
         if (e.getSource() == newRom) {
@@ -89,11 +79,10 @@ public class IngameMenuMain extends JPanel implements ActionListener {
             fajitaBoy.changeGameState(GameState.STARTSCREEN);
         } else if (e.getSource() == resume) {
             fajitaBoy.changeGameState(GameState.PLAYGAME);
+        } else if (e.getSource() == saveState) {
+            fajitaBoy.saveState();
+        } else if (e.getSource() == loadState) {
+            fajitaBoy.loadState();
         }
-        /*
-         * else if (e.getSource() == saveState) { fajitaBoy.saveState(); } else
-         * if (e.getSource() == loadState) { fajitaBoy.loadState(); }
-         */
     }
-
 }

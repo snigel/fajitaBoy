@@ -23,7 +23,7 @@ public class IngameMenuPanel extends JTabbedPane {
     private SoundSettingsPanel sound;
 
     /**
-     * Default constructor
+     * Default constructor.
      * 
      * @param fb
      *            applet
@@ -49,16 +49,12 @@ public class IngameMenuPanel extends JTabbedPane {
         validate();
     }
 
-    /**
-     * Refreshes labels on keybinding buttons.
-     */
+    /** Refreshes labels on keybinding buttons. */
     public final void refreshLabels() {
         keys.refreshLabels();
     }
 
-    /**
-     * Refreshes buttons and things in menu.
-     */
+    /** Refreshes buttons and things in menu. */
     public final void refresh() {
         keys.refreshLabels();
         sound.refreshSlider();
