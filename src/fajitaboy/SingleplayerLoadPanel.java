@@ -1,13 +1,20 @@
 package fajitaboy;
 
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.Spring;
+import javax.swing.SpringLayout;
+
+import fajitaboy.FajitaBoy.GameState;
 
 /**
  * Singleplayer panel where the user cna pick a rom and start a singleplayer
@@ -24,6 +31,8 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
     private JButton loadFileButton;
     /** Button for starting the game. */
     private JButton startGameButton;
+    /** Button for going back to main menu. */
+    private JButton backButton;
     /** Reference to the global filechooser. */
     private JFileChooser fileChooser;
     /** Reference to the parent FajitaBoy. */
@@ -43,19 +52,74 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
         fajitaBoy = fb;
         loadFileButton = new JButton("Browse...");
         startGameButton = new JButton("Start Game");
-        fileStringField = new JTextField(20);
+        backButton = new JButton("Back");
+        fileStringField = new JTextField(12);
 
         setOpaque(true);
+        setPreferredSize(fajitaBoy.getPreferredSize());
 
         loadFileButton.addActionListener(this);
         startGameButton.addActionListener(this);
         fileStringField.addActionListener(this);
+        backButton.addActionListener(this);
+
+        backButton.setPreferredSize(startGameButton.getPreferredSize());
 
         fileStringField.setText("/tetris.gb");
 
+        JLabel title = new JLabel("Singleplayer Game");
+        JLabel loadText = new JLabel("Select a ROM path");
+        
+        title.setFont(new Font("Verdana",Font.BOLD,20));
+
+        add(title);
+        add(loadText);
         add(fileStringField);
         add(loadFileButton);
         add(startGameButton);
+        add(backButton);
+
+        SpringLayout layout = new SpringLayout();
+        setLayout(layout);
+
+        SpringLayout.Constraints constraints = layout.getConstraints(this);
+
+        SpringLayout.Constraints titleCons = layout.getConstraints(title);
+        titleCons.setX(Spring.sum(Spring.constant(10), constraints
+                .getConstraint(SpringLayout.WEST)));
+        titleCons.setY(Spring.sum(Spring.constant(10), constraints
+                .getConstraint(SpringLayout.NORTH)));
+
+        SpringLayout.Constraints loadCons = layout.getConstraints(loadText);
+        loadCons.setX(titleCons.getConstraint(SpringLayout.WEST));
+        loadCons.setY(Spring.sum(Spring.constant(15), titleCons
+                .getConstraint(SpringLayout.SOUTH)));
+
+        SpringLayout.Constraints pathCons = layout
+                .getConstraints(fileStringField);
+        pathCons.setX(titleCons.getConstraint(SpringLayout.WEST));
+        pathCons.setY(Spring.sum(Spring.constant(5), loadCons
+                .getConstraint(SpringLayout.SOUTH)));
+
+        SpringLayout.Constraints browseCons = layout
+                .getConstraints(loadFileButton);
+        browseCons.setX(Spring.sum(Spring.constant(5), pathCons
+                .getConstraint(SpringLayout.EAST)));
+        browseCons.setY(Spring.sum(Spring.constant(-3), pathCons
+                .getConstraint(SpringLayout.NORTH)));
+
+        SpringLayout.Constraints backCons = layout.getConstraints(backButton);
+        backCons.setX(Spring.sum(Spring.constant(30), constraints
+                .getConstraint(SpringLayout.WEST)));
+        backCons.setY(Spring.sum(Spring.constant(-50), constraints
+                .getConstraint(SpringLayout.SOUTH)));
+
+        SpringLayout.Constraints startCons = layout
+                .getConstraints(startGameButton);
+        startCons.setX(Spring.sum(Spring.constant(-150), constraints
+                .getConstraint(SpringLayout.EAST)));
+        startCons.setY(backCons.getConstraint(SpringLayout.NORTH));
+
     }
 
     /** {@inheritDoc} */
@@ -81,6 +145,8 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
             if (FajitaBoy.checkFile(path)) {
                 fajitaBoy.startGame(fileStringField.getText());
             }
+        } else if (e.getSource() == backButton) {
+            fajitaBoy.changeGameState(GameState.STARTSCREEN);
         }
     }
 }

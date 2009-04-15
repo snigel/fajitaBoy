@@ -113,6 +113,10 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         addComponentListener(this);
 
+        // Appletviewer resize
+        resize(frameSize);
+        setPreferredSize(frameSize);
+
         // Init paths to user home catalog
         romPath = System.getProperty("user.home");
         fileChooser = new JFileChooser(romPath);
@@ -130,9 +134,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         pauseText.setOpaque(true);
         pauseText.setFont(FB_INGAMEFONT);
         pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-
-        // Appletviewer resize
-        resize(frameSize);
 
         // Highly necessary
         bootSound = getAudioClip(getCodeBase(), "bootsound_mockup.wav");
