@@ -2,7 +2,6 @@ package fajitaboy;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -166,20 +165,22 @@ public class KeySettingsPanel extends JPanel {
     private class InputField extends JButton implements KeyListener {
 
         /** Name. */
-        private String button;
+        private String buttonText;
 
         /**
          * Constructor.
          * 
-         * @param btn
+         * @param text
          *            button name
          */
-        public InputField(final String btn) {
-            super(btn);
-            setFont(new Font("Terminal", Font.PLAIN, 9));
+        public InputField(final String text) {
+            super(text);
+            setFont(FB_SMALLFONT);
             setMargin(new Insets(0, 0, 0, 0));
             setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-            button = btn;
+            setToolTipText("Click to change binding for " + text + " button.");
+
+            buttonText = text;
 
             setOpaque(true);
             getInputMap().clear();
@@ -202,8 +203,7 @@ public class KeySettingsPanel extends JPanel {
         public void keyReleased(final KeyEvent e) {
             KeyInputController controller = fajitaBoy.getKIC();
             if (e.getKeyCode() != KeyEvent.VK_ESCAPE) {
-                controller.setKey(e.getKeyCode(), button);
-                System.out.println("Set:" + button + " to " + e.getKeyCode());
+                controller.setKey(e.getKeyCode(), buttonText);
                 refreshLabels();
             }
         }
