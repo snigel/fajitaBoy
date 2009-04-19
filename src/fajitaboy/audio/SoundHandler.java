@@ -10,31 +10,119 @@ import javax.sound.sampled.SourceDataLine;
 import fajitaboy.memory.AddressBus;
 
 /**
- * A debug class for testing the audio.
- * @author snigel
+ * This is the main class for sound generation. It opens a sourcedataline that
+ * can interact with the sound card.
+ *
+ * @author Adam Hulin, Johan Gustafsson
+ *
  */
 public class SoundHandler {
 
+    /**
+     * The address bus.
+     */
     private AddressBus ab;
-    private Audio au1;
-    private Audio2 au2;
-    private Audio3 au3;
-    private Audio4 au4;
+
+    /**
+     * Game Boys first sound channel that generates a squarewave.
+     */
+    private SoundChannel1 au1;
+
+    /**
+     * Game Boys second sound channel that generates a squarewave.
+     */
+    private SoundChannel2 au2;
+
+    /**
+     * Game Boys third sound channel that generates a waveoutput.
+     */
+    private SoundChannel3 au3;
+
+    /**
+     * Game Boys fourth sound channnel that generates whitenoise.
+     */
+    private SoundChannel4 au4;
+
+    /**
+     * Flag that indicate if channel 1 left output is on or off.
+     */
     private boolean ch1Left;
+
+    /**
+     * Flag that indicate if channel 1 right output is on or off.
+     */
     private boolean ch1Right;
+
+    /**
+     * Flag that indicate if channel 2 left output is on or off.
+     */
     private boolean ch2Left;
+
+    /**
+     * Flag that indicate if channel 2 right output is on or off.
+     */
     private boolean ch2Right;
+
+    /**
+     * Flag that indicate if channel 3 left output is on or off.
+     */
     private boolean ch3Left;
+
+    /**
+     * Flag that indicate if channel 3 right output is on or off.
+     */
     private boolean ch3Right;
+
+    /**
+     * Flag that indicate if channel 4 left output is on or off.
+     */
     private boolean ch4Left;
+
+    /**
+     * Flag that indicate if channel 4 right output is on or off.
+     */
     private boolean ch4Right;
+
+    /**
+     * The number of samples that should be generated per v-blank.
+     */
     private int samples;
+
+    /**
+     * The final number of samples that will be generated on then availability
+     * in the SourceDataLines buffer is taken in account.
+     */
     private int finalSamples;
+
+    /**
+     * The array that holds the generated sound.
+     */
     private byte[] destBuff;
+
+    /**
+     * The audio format that is used with SourceDataLine.
+     */
     private AudioFormat af;
+
+    /**
+     * The line to the sound card.
+     */
     private SourceDataLine sdl;
 
-    public SoundHandler(AddressBus ab, float sampleRate, int samples ) throws LineUnavailableException {
+    /**
+     * Sets up the line to the sound card and creates the fours sound channels.
+     *
+     * @param ab
+     *            The address bus.
+     * @param sampleRate
+     *            The sample rate that the sound should be sampled.
+     * @param samples
+     *            The number of samples per v-blank.
+     * @throws LineUnavailableException
+     */
+    public SoundHandler(final AddressBus ab, final float sampleRate,
+            final int samples) throws LineUnavailableException {
+
         af = new AudioFormat(sampleRate, 8, 2, true, false);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
         sdl = (SourceDataLine) AudioSystem.getLine(info);
@@ -43,20 +131,23 @@ public class SoundHandler {
 
         this.ab = ab;
         this.samples = samples;
-        au1 = new Audio(ab, sampleRate);
-        au2 = new Audio2(ab, sampleRate);
-        au3 = new Audio3(ab, sampleRate);
-        au4 = new Audio4(ab, sampleRate);
-
+        au1 = new SoundChannel1(ab, sampleRate);
+        au2 = new SoundChannel2(ab, sampleRate);
+        au3 = new SoundChannel3(ab, sampleRate);
+        au4 = new SoundChannel4(ab, sampleRate);
     }
 
-    public void generateTone() throws LineUnavailableException {
-        if(sdl.available()*2 < samples*2) {
-            destBuff = new byte[sdl.available()*2];
+    /**
+     * Generates and outputs a clip of sound.
+     */
+    public final void generateTone() {
+        // Check if the available space in the buffer is less then
+        // the number of samples.
+        if (sdl.available() < samples) {
+            destBuff = new byte[sdl.available() * 2];
             finalSamples = sdl.available();
-        }
-        else {
-            destBuff = new byte[samples*2];
+        } else {
+            destBuff = new byte[samples * 2];
             finalSamples = samples;
         }
         stereoSelect();
@@ -68,6 +159,9 @@ public class SoundHandler {
         sdl.write(destBuff, 0, destBuff.length);
     }
 
+    /**
+     * Sets up the flag that controls the stereo outputs.
+     */
     private void stereoSelect() {
         int nr51 = ab.read(NR51_REGISTER);
         ch1Left = ((nr51 & 0x1) > 0);
@@ -75,13 +169,15 @@ public class SoundHandler {
         ch3Left = ((nr51 & 0x4) > 0);
         ch4Left = ((nr51 & 0x8) > 0);
         ch1Right = ((nr51 & 0x10) > 0);
-        ch2Right = ((nr51 & 0x20)  > 0);
+        ch2Right = ((nr51 & 0x20) > 0);
         ch3Right = ((nr51 & 0x40) > 0);
         ch4Right = ((nr51 & 0x80) > 0);
     }
-    
-    public void close() {
-    	sdl.close();
+
+    /**
+     * Closes the line to the sound card.
+     */
+    public final void close() {
+        sdl.close();
     }
 }
-

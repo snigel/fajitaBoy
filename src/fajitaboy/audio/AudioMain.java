@@ -22,10 +22,10 @@ import fajitaboy.memory.AddressBus;
 public class AudioMain implements DrawsGameboyScreen {
 
     private AddressBus ab;
-    private Audio au1;
-    private Audio2 au2;
-    private Audio3 au3;
-    private Audio4 au4;
+    private SoundChannel1 au1;
+    private SoundChannel2 au2;
+    private SoundChannel3 au3;
+    private SoundChannel4 au4;
     private boolean ch1Left;
     private boolean ch1Right;
     private boolean ch2Left;
@@ -56,10 +56,10 @@ public class AudioMain implements DrawsGameboyScreen {
 
 
         ab = new AddressBus("/bombjack.gb");
-        au1 = new Audio(ab, sampleRate);
-        au2 = new Audio2(ab, sampleRate);
-        au3 = new Audio3(ab, sampleRate);
-        au4 = new Audio4(ab, sampleRate);
+        au1 = new SoundChannel1(ab, sampleRate);
+        au2 = new SoundChannel2(ab, sampleRate);
+        au3 = new SoundChannel3(ab, sampleRate);
+        au4 = new SoundChannel4(ab, sampleRate);
 
         Cpu cpu = new Cpu(ab);
         Oscillator oc = new Oscillator(cpu, ab, this, true);

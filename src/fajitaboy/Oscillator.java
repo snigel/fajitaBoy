@@ -20,14 +20,14 @@ import fajitaboy.memory.MemoryInterface;
  * @author Tobias S
  */
 public class Oscillator implements Runnable, StateMachine {
-    
+
     private boolean running;
-    
+
     /**
      * Next cycle to stop and wait if going too fast
      */
     private long nextHaltCycle;
-    
+
     /**
      * Cycles since Oscillator initialization.
      */
@@ -47,7 +47,7 @@ public class Oscillator implements Runnable, StateMachine {
      * Pointer to LCD instance.
      */
     private LCD lcd;
-    
+
     /**
      * Pointer to Timer instance.
      */
@@ -57,27 +57,27 @@ public class Oscillator implements Runnable, StateMachine {
      * Pointer to a class with the proper interface to draw the GB pixels to screen.
      */
     private DrawsGameboyScreen dgs;
-    
+
     /**
      * Audio handler.
      */
     SoundHandler soundHandler;
-    
+
     /**
      * Audio is disabled by default.
      */
     private boolean audioEnabled;
-    
+
     /**
      * Sample rate for audio, default = 44100.
      */
     private int sampleRate = 44100;
-    
+
     /**
      * Sound samples per frame... or something?
      */
     private int samples = 735;
-    
+
     /**
      * Creates a new Oscillator with default values.
      * @param cpu
@@ -104,11 +104,11 @@ public class Oscillator implements Runnable, StateMachine {
      */
     public Oscillator(Cpu cpu, AddressBus ram, DrawsGameboyScreen dgs, boolean enableAudio ) {
         this(cpu,ram);
-        this.dgs = dgs; 
+        this.dgs = dgs;
         if ( enableAudio )
         	enableAudio();
     }
-    
+
     /**
      * Resets the Oscillator to default values.
      */
@@ -120,7 +120,7 @@ public class Oscillator implements Runnable, StateMachine {
         disableAudio();
         resetAudio();
     }
-    
+
     /**
      * Initializes the Audio module.
      */
@@ -132,19 +132,15 @@ public class Oscillator implements Runnable, StateMachine {
         	audioEnabled = false;
         }
     }
-    
+
     /**
      * Generates one frame of Audio.
      */
     private void generateAudio() {
     	if ( !audioEnabled )
     		return;
-    	
-    	try {
-    		soundHandler.generateTone();
-    	} catch ( LineUnavailableException e ) {
-    		// Do nothing...
-    	}
+
+		soundHandler.generateTone();
     }
 
     /**
@@ -156,15 +152,15 @@ public class Oscillator implements Runnable, StateMachine {
         // Step CPU
         int cycleInc = cpu.step();
         cycles += cycleInc;
-        
+
         timer.update(cycleInc, ram);
-        
+
         // Update LCD
         lcd.updateLCD(cycleInc);
         if ( dgs != null && lcd.newScreenAvailable() ) {
         	dgs.drawGameboyScreen(lcd.getScreen());
         }
-        
+
         return cycleInc;
     }
 
@@ -188,7 +184,7 @@ public class Oscillator implements Runnable, StateMachine {
             	generateAudio();
                 nextUpdate += GB_NANOS_PER_FRAME;
                 sleepTime = nextUpdate - System.nanoTime();
-                
+
                 // Sleep if running too fast
                 if (sleepTime >= 0) {
                     lcd.disableFrameSkip();
@@ -223,40 +219,40 @@ public class Oscillator implements Runnable, StateMachine {
     public final boolean isRunning() {
         return running;
     }
-    
+
     public void enableAudio() {
     	if ( audioEnabled == false ) {
     		audioEnabled = true;
     		resetAudio();
     	}
     }
-    
+
     public void disableAudio() {
     	if ( audioEnabled ) {
     		soundHandler.close();
     	}
     	audioEnabled = false;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public void saveState( FileOutputStream os ) throws IOException {
     	FileIOStreamHelper.writeData(os, cycles, 8);
     	FileIOStreamHelper.writeData(os, nextHaltCycle, 8);
-    	
+
     	timer.saveState(os);
     	cpu.saveState(os);
     	lcd.saveState(os);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public void readState( FileInputStream is ) throws IOException {
     	cycles = FileIOStreamHelper.readData(is, 8);
     	nextHaltCycle = FileIOStreamHelper.readData(is, 8);
-    	
+
     	cpu.readState(is);
     	lcd.readState(is);
     	timer.readState(is);
@@ -264,7 +260,7 @@ public class Oscillator implements Runnable, StateMachine {
 
     /**
      * Getter for audioEnable, ie if the sound is enabled or not.
-     * 
+     *
      * @return the audioEnabled
      */
     public final boolean isAudioEnabled() {

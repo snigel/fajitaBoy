@@ -5,13 +5,13 @@ import static fajitaboy.constants.AddressConstants.*;
 import fajitaboy.memory.AddressBus;
 
 /**
- * Represents Game Boys first sound channel. Generates a square wave with
- * envelope and sweep functions.
+ * Represents Game Boys second sound channel. Generates a square wave with
+ * envelope functions.
  *
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class SoundChannel1 {
+public class SoundChannel2 {
 
     /**
      * The sample rate the sound should be sampled.
@@ -69,31 +69,6 @@ public class SoundChannel1 {
     private int envelopeStepLength;
 
     /**
-     * The number of sweeps the sweep function should take.
-     */
-    private int sweepLength;
-
-    /**
-     * The number of steps the a sweep should take.
-     */
-    private int sweepSteps;
-
-    /**
-     * Indicates the direction the frequency should change.
-     */
-    private int sweepDirection;
-
-    /**
-     * Indicates the number of sweep steps taken.
-     */
-    private int sweepNr;
-
-    /**
-     * The position in a sweep.
-     */
-    private int sweepPos;
-
-    /**
      * Flag that indicates of toneLength is on or off.
      */
     private boolean lengthEnabled;
@@ -104,14 +79,14 @@ public class SoundChannel1 {
     private int toneLength;
 
     /**
-     * Constructor for SoundChannel 1.
+     * Constructor for SoundChannel 2.
      *
      * @param ab
      *            The address bus.
      * @param sampleRate
      *            The sample rate.
      */
-    public SoundChannel1(final AddressBus ab, final float sampleRate) {
+    public SoundChannel2(final AddressBus ab, final float sampleRate) {
         this.ab = ab;
         this.sampleRate = sampleRate;
         pos = 0;
@@ -135,22 +110,17 @@ public class SoundChannel1 {
      */
     public byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
-
         calcFreq();
-        // If the sound channel is mute, return.
-        if (((ab.read(NR12_REGISTER) & 0xF0) >> 4) == 0) {
+        if (((ab.read(NR22_REGISTER) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
 
-        if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
+        if (/*(toneLength > 0 && lengthEnabled) || !lengthEnabled*/true) {
             if (lengthEnabled) {
                 toneLength -= samples;
             }
-            // The final amplitude, that should be put in the array.
             int finalAmp;
-            // Used for stereo input.
             int k = 0;
-            // Fill the array with samples.
             for (int i = 0; i < samples; i++) {
 
                 // Envelope
@@ -163,26 +133,13 @@ public class SoundChannel1 {
                     envelopePos++;
                 }
 
-                // Sweep
-                if (sweepLength != 0) {
-                    if (((sweepPos % (sweepLength * samples)) == 0)
-                            && (sweepNr < sweepSteps)) {
-                        System.out.println("Sweep");
-                        if (sweepDirection == 0) {
-                            freq = freq + (int) (freq / (Math.pow(2, sweepNr)));
-                        } else {
-                            freq = freq - (int) (freq / (Math.pow(2, sweepNr)));
-                        }
-                    }
-                    sweepPos++;
-                }
-                // Check the wavepattern
                 if (pos < dutyLength) {
                     finalAmp = -amp;
-                } else {
-                    finalAmp = amp;
                 }
 
+                else {
+                    finalAmp = amp;
+                }
                 if (left) {
                     destBuff[k] += (byte) finalAmp;
                 }
@@ -194,7 +151,6 @@ public class SoundChannel1 {
                 pos = (pos + 1) % waveLength;
             }
         }
-
         return destBuff;
     }
 
@@ -202,11 +158,10 @@ public class SoundChannel1 {
      * Calculates the envelope parameters.
      */
     private void calcEnvelope() {
-        // Read the envelope register.
-        int nr12 = ab.read(NR12_REGISTER);
-        amp = ((nr12 & 0xF0) >> 4) * 2;
-        envelopeStepLength = nr12 & 0x7;
-        int direction = nr12 & 0x8;
+        int nr22 = ab.read(NR22_REGISTER);
+        amp = ((nr22 & 0xF0) >> 4) * 2;
+        envelopeStepLength = nr22 & 0x7;
+        int direction = nr22 & 0x8;
         if (direction == 0) {
             envelopeStep = -2;
         } else {
@@ -220,9 +175,8 @@ public class SoundChannel1 {
      * parameters.
      */
     private void calcFreq() {
-        int low1 = ab.read(SOUND1_LOW);
-        int high1 = ab.read(SOUND1_HIGH) * 0x100;
-        // Calculate the frequency
+        int low1 = ab.read(SOUND2_LOW);
+        int high1 = ab.read(SOUND2_HIGH) * 0x100;
         int tmp = (2047 - (high1 + low1) & 0x7ff);
         if (tmp != 0) {
             freq = 131072 / tmp;
@@ -233,66 +187,10 @@ public class SoundChannel1 {
             return;
         } else {
             calcToneLength();
-            calcSweep();
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
         }
-    }
-
-    /**
-     * Checks if calculate if tone length is enabled and if it is calculates the
-     * tone length.
-     */
-    private void calcToneLength() {
-        lengthEnabled = ((ab.read(NR14_REGISTER) & 0x40) > 0);
-        if (lengthEnabled) {
-            toneLength = (int) (((64 - ((double)
-                    (ab.read(NR11_REGISTER) & 0x3F))) / 256) * sampleRate);
-        }
-    }
-
-    /**
-     * Calculates the sweep parameters.
-     */
-    private void calcSweep() {
-        sweepNr = 0;
-        sweepPos = 0;
-        int nr10 = ab.read(NR10_REGISTER);
-        sweepSteps = nr10 & 0x7;
-        sweepDirection = nr10 & 0x8;
-        int sweepTime = ((nr10 & 0x70) >> 4);
-
-        switch (sweepTime) {
-        case 0:
-            sweepLength = 0;
-            break;
-        case 1:
-            sweepLength = (int) ((sampleRate / 1000) * 7.8);
-            break;
-        case 2:
-            sweepLength = (int) ((sampleRate / 1000) * 15.6);
-            break;
-        case 3:
-            sweepLength = (int) ((sampleRate / 1000) * 23.4);
-            break;
-        case 4:
-            sweepLength = (int) ((sampleRate / 1000) * 31.3);
-            break;
-        case 5:
-            sweepLength = (int) ((sampleRate / 1000) * 39.1);
-            break;
-        case 6:
-            sweepLength = (int) ((sampleRate / 1000) * 46.9);
-            break;
-        case 7:
-            sweepLength = (int) ((sampleRate / 1000) * 54.7);
-            break;
-        default:
-            sweepLength = 0;
-            break;
-        }
-
     }
 
     /**
@@ -303,8 +201,8 @@ public class SoundChannel1 {
         if (waveLength == 0) {
             waveLength = 1;
         }
-        int nr11 = ((ab.read(NR11_REGISTER) & 0xC0) >> 6);
-        switch (nr11) {
+        int nr21 = ((ab.read(NR21_REGISTER) & 0xC0) >> 6);
+        switch (nr21) {
         case 0:
             return (int) ((float) waveLength * 0.125);
         case 1:
@@ -317,4 +215,17 @@ public class SoundChannel1 {
             return 0;
         }
     }
+
+    /**
+     * Checks if calculate if tone length is enabled and if it is calculates the
+     * tone length.
+     */
+    private void calcToneLength() {
+        lengthEnabled = ((ab.read(NR24_REGISTER) & 0x40) > 0);
+        if (lengthEnabled) {
+            toneLength = (int) (((64 - ((double)
+                    (ab.read(NR21_REGISTER) & 0x3F))) / 256) * sampleRate);
+        }
+    }
+
 }

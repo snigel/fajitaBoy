@@ -24,7 +24,7 @@ public final class AddressConstants {
     public static final int ADDRESS_WY = 0xFF4A;
     public static final int ADDRESS_WX = 0xFF4B;
     public static final int ADDRESS_DMA = 0xFF46;
-    
+
     public static final int ADDRESS_JOYPAD = 0xFF00;
 
     public static final int CARTRIDGE_TYPE = 0x147;
@@ -36,12 +36,12 @@ public final class AddressConstants {
     public static final int ROMLOW_END = 0x4000;
     public static final int ROMHIGH_START = 0x4000;
     public static final int ROMHIGH_END = 0x8000;
-    
+
     public static final int VRAM_START = 0x8000;
     public static final int TILE_DATA_START = 0x8000;
     public static final int TILE_DATA_END = 0x9800;
     public static final int VRAM_END = 0xA000;
-    
+
     public static final int ERAM_START = 0xA000;
     public static final int ERAM_END = 0xC000;
     public static final int RAML_START = 0xC000;
@@ -93,11 +93,11 @@ public final class AddressConstants {
     public static final int BGB_REGISTER = 0xFF47;
     public static final int OBP0_REGISTER = 0xFF48;
     public static final int OBP1_REGISTER = 0xFF49;
-    
+
 	public static final int PALETTE_BG_DATA = 0xFF47;
 	public static final int PALETTE_SPRITE0_DATA = 0xFF48;
 	public static final int PALETTE_SPRITE1_DATA = 0xFF49;
-    
+
     //The real status register for the keypad
     public static final int KEYPAD_STATUS_REGISTER = 0xFF00;
     //The direction cross in the secret memory area
@@ -117,6 +117,8 @@ public final class AddressConstants {
     public static final int SOUND_CHANNEL_CONTROL = 0xFF24;
     public static final int SOUND_OUTPUT_SELECT = 0xFF25;
     public static final int SOUND_ON_OFF= 0xFF26;
+    public static final int SOUND3_WAVEPATTERN_START= 0xFF30;
+    public static final int SOUND3_WAVEPATTERN_END= 0xFF3F;
 
     public static final int SPRITE_ATTRIBUTE_TABLE = 0xFE00;
 
