@@ -253,9 +253,9 @@ public class Oscillator implements Runnable, StateMachine {
     	cycles = FileIOStreamHelper.readData(is, 8);
     	nextHaltCycle = FileIOStreamHelper.readData(is, 8);
 
+    	timer.readState(is);
     	cpu.readState(is);
     	lcd.readState(is);
-    	timer.readState(is);
     }
 
     /**
