@@ -150,6 +150,12 @@ public class SoundChannel4 {
                 }
             }
         }
+
+        if (toneLength < 0 && lengthEnabled && 
+                (ab.read(NR41_REGISTER) & 0x100) == 0) {
+            calcToneLength();
+        }
+
         return destBuff;
     }
 
@@ -200,9 +206,12 @@ public class SoundChannel4 {
      */
     private void calcToneLength() {
         lengthEnabled = ((ab.read(NR44_REGISTER) & 0x40) > 0);
+        int nr41 = ab.read(NR41_REGISTER);
         if (lengthEnabled) {
             toneLength = (int) (((64 - ((double)
-                    (ab.read(NR41_REGISTER) & 0x3F))) / 256) * sampleRate);
+                    (nr41 & 0x3F))) / 256) * sampleRate);
+            //Reset length counter
+            ab.forceWrite(NR41_REGISTER, nr41 + 0x100);
         }
     }
 }

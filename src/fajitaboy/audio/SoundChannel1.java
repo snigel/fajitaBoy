@@ -192,7 +192,14 @@ public class SoundChannel1 {
                 }
                 k++;
                 pos = (pos + 1) % waveLength;
-            }
+            }   
+        }
+        // This is needed for get the length to work correctly,
+        // It isn't pretty :) It checks if the forcedwritten bit has
+        // been reset. That indicates that we have a new length to work with.
+        if (toneLength < 0 && lengthEnabled && 
+                (ab.read(NR11_REGISTER) & 0x100) == 0) {
+            calcToneLength();
         }
 
         return destBuff;
@@ -246,9 +253,13 @@ public class SoundChannel1 {
      */
     private void calcToneLength() {
         lengthEnabled = ((ab.read(NR14_REGISTER) & 0x40) > 0);
+        int nr11 = ab.read(NR11_REGISTER);
         if (lengthEnabled) {
             toneLength = (int) (((64 - ((double)
-                    (ab.read(NR11_REGISTER) & 0x3F))) / 256) * sampleRate);
+                    (nr11 & 0x3F))) / 256) * sampleRate);
+            //Add a ninth bit to indicate that the length has been read.
+            //If the bit is reset, we know that a write has taken place.
+            ab.forceWrite(NR11_REGISTER, nr11 + 0x100);
         }
     }
 

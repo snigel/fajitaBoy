@@ -151,10 +151,10 @@ public class SoundHandler {
             finalSamples = samples;
         }
         stereoSelect();
-        au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
-        au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
-        au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
-        au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
+         au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
+         au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
+         au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
+         au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
 
         sdl.write(destBuff, 0, destBuff.length);
     }

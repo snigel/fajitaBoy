@@ -115,7 +115,7 @@ public class SoundChannel2 {
             return destBuff;
         }
 
-        if (/*(toneLength > 0 && lengthEnabled) || !lengthEnabled*/true) {
+        if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
             if (lengthEnabled) {
                 toneLength -= samples;
             }
@@ -149,8 +149,14 @@ public class SoundChannel2 {
                 }
                 k++;
                 pos = (pos + 1) % waveLength;
-            }
+            }            
         }
+
+        if (toneLength < 0 && lengthEnabled && 
+                (ab.read(NR21_REGISTER) & 0x100) == 0) {
+            calcToneLength();
+        }
+
         return destBuff;
     }
 
@@ -222,9 +228,12 @@ public class SoundChannel2 {
      */
     private void calcToneLength() {
         lengthEnabled = ((ab.read(NR24_REGISTER) & 0x40) > 0);
+        int nr21 = ab.read(NR21_REGISTER);
         if (lengthEnabled) {
             toneLength = (int) (((64 - ((double)
-                    (ab.read(NR21_REGISTER) & 0x3F))) / 256) * sampleRate);
+                    (nr21 & 0x3F))) / 256) * sampleRate);
+            //Reset length counter
+            ab.forceWrite(NR21_REGISTER, nr21 + 0x100);
         }
     }
 

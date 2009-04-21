@@ -51,6 +51,11 @@ public class IO extends MemoryComponent {
         switch (address) {
             case DIV_REGISTER: ram[addr] = 0; break;
             case LY_REGISTER: break;
+            //Used for hack to get sound length to work.
+            case NR11_REGISTER:ram[addr] = data & 0xFF; break;
+            case NR21_REGISTER:ram[addr] = data & 0xFF; break;
+            case NR31_REGISTER:ram[addr] = data & 0xFF; break;
+            case NR41_REGISTER:ram[addr] = data & 0xFF; break;
             case ADDRESS_JOYPAD: ram[addr] = data; jp.refresh(); break;
             default: ram[addr] = data; break;
 

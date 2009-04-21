@@ -89,7 +89,6 @@ public class SoundChannel3 {
      */
     public final byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
-
         if ((ab.read(NR30_REGISTER) & 0x80) == 0) {
             return destBuff;
         }
@@ -117,6 +116,12 @@ public class SoundChannel3 {
 
                 pos = (pos + 1) % waveLength;
             }
+
+        }
+
+        if (toneLength < 0 && lengthEnabled && 
+                (ab.read(NR31_REGISTER) & 0x100) == 0) {
+            calcToneLength();
         }
 
         return destBuff;
@@ -190,8 +195,12 @@ public class SoundChannel3 {
      */
     private void calcToneLength() {
         lengthEnabled = ((ab.read(NR34_REGISTER) & 0x40) > 0);
+        int nr31 = ab.read(NR31_REGISTER);
         if (lengthEnabled) {
-            toneLength = (int) (((256 - ((double) (ab.read(NR31_REGISTER) & 0xFF))) / 256) * sampleRate);
+            toneLength = (int) (((256 - ((double) 
+                    (nr31 & 0xFF))) / 256) * sampleRate);
+            //Reset the length counter.
+            ab.forceWrite(NR31_REGISTER, nr31 + 0x100);
         }
     }
 }
