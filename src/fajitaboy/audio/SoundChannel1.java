@@ -195,12 +195,21 @@ public class SoundChannel1 {
             }   
         }
         // This is needed for get the length to work correctly,
-        // It isn't pretty :) It checks if the forcedwritten bit has
+        // It isn't pretty :) It checks if the forced written bit has
         // been reset. That indicates that we have a new length to work with.
         if (toneLength < 0 && lengthEnabled && 
                 (ab.read(NR11_REGISTER) & 0x100) == 0) {
             calcToneLength();
         }
+        
+        if ((ab.read(NR12_REGISTER) & 0x100) == 0){
+            calcEnvelope();
+        }
+
+        if ((ab.read(NR10_REGISTER) & 0x100) == 0){
+            calcSweep();
+        }
+
 
         return destBuff;
     }
@@ -220,6 +229,7 @@ public class SoundChannel1 {
             envelopeStep = 2;
         }
         envelopePos = 0;
+        ab.forceWrite(NR12_REGISTER, nr12 + 0x100);
     }
 
     /**
@@ -270,6 +280,7 @@ public class SoundChannel1 {
         sweepNr = 0;
         sweepPos = 0;
         int nr10 = ab.read(NR10_REGISTER);
+        ab.forceWrite(NR10_REGISTER, nr10 + 0x100);
         sweepSteps = nr10 & 0x7;
         sweepDirection = nr10 & 0x8;
         int sweepTime = ((nr10 & 0x70) >> 4);

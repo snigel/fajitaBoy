@@ -157,6 +157,9 @@ public class SoundChannel2 {
             calcToneLength();
         }
 
+        if ((ab.read(NR22_REGISTER) & 0x100) == 0){
+            calcEnvelope();
+        }
         return destBuff;
     }
 
@@ -174,6 +177,7 @@ public class SoundChannel2 {
             envelopeStep = 2;
         }
         envelopePos = 0;
+        ab.forceWrite(NR22_REGISTER, nr22 + 0x100);
     }
 
     /**

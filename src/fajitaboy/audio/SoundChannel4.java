@@ -155,6 +155,11 @@ public class SoundChannel4 {
                 (ab.read(NR41_REGISTER) & 0x100) == 0) {
             calcToneLength();
         }
+        
+        if ((ab.read(NR42_REGISTER) & 0x100) == 0){
+            calcEnvelope();
+        }
+
 
         return destBuff;
     }
@@ -188,16 +193,18 @@ public class SoundChannel4 {
      * Calculates the envelope parameters.
      */
     private void calcEnvelope() {
-        int nr12 = ab.read(NR12_REGISTER);
-        amp = ((nr12 & 0xF0) >> 4) * 2;
-        envelopeStepLength = nr12 & 0x7;
-        int direction = nr12 & 0x8;
+        int nr42 = ab.read(NR42_REGISTER);
+        amp = ((nr42 & 0xF0) >> 4) * 2;
+        envelopeStepLength = nr42 & 0x7;
+        int direction = nr42 & 0x8;
         if (direction == 0) {
             envelopeStep = -2;
         } else {
             envelopeStep = 2;
         }
         envelopePos = 0;
+        ab.forceWrite(NR42_REGISTER, nr42 + 0x100);
+
     }
 
     /**
