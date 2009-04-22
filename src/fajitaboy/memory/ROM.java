@@ -3,17 +3,17 @@ package fajitaboy.memory;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
+
 import static fajitaboy.constants.AddressConstants.*;
 
-public class ROM implements MemoryInterface, MemoryBankInterface {
-
-    /**
-     * The size of the ram array.
-     */
-    protected int length;
+public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
 
     /**
      * This array holds the memory space of RAM.
@@ -116,7 +116,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
 
             
             DataInputStream dis;
-            FileInputStream fis = fis = new FileInputStream(romPath);
+            FileInputStream fis = new FileInputStream(romPath);
             ZipInputStream zis;
          // if zipfile
             // InputStream in=url.openStream ();
@@ -146,6 +146,37 @@ public class ROM implements MemoryInterface, MemoryBankInterface {
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	bank = (int) FileIOStreamHelper.readData( fis, 4 );
+    	
+    	// No need to write the ROM itself to the save state!!
+    	/*
+    	int length = (int) FileIOStreamHelper.readData( fis, 4 );
+    	offset = (int) FileIOStreamHelper.readData( fis, 4 );
+    	ram = new int[length];
+    	for ( int i = 0; i < length; i++ ) {
+    		ram[i] = (int) FileIOStreamHelper.readData( fis, 1 );
+    	} */
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	FileIOStreamHelper.writeData( fos, (long) bank, 4 );
+    	
+    	// No need to write the ROM itself to the save state!!
+    	/*
+    	FileIOStreamHelper.writeData( fos, (long) ram.length, 4 );
+    	FileIOStreamHelper.writeData( fos, (long) offset, 4 );
+    	for ( int i = 0; i < ram.length; i++ ) {
+    		FileIOStreamHelper.writeData( fos, ram[i], 1 );
+    	} */
     }
 
 }

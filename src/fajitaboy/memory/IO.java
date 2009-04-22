@@ -2,6 +2,13 @@ package fajitaboy.memory;
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.BitmaskConstants.*;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
+
 /**
  * Represent the I/0 part of the memory.
  * @author Adam Hulin, Johan Gustafsson
@@ -105,7 +112,7 @@ public class IO extends MemoryComponent {
      * @author DJ_BISSE & MC_ARVIXX
      *
      */
-    public class JoyPad {
+    public class JoyPad implements StateMachine {
         /**
          * Variables for all keys. True if pressed.
          */
@@ -302,5 +309,44 @@ public class IO extends MemoryComponent {
             refresh();
             keyInterrupt();
         }
+        
+        public void readState( FileInputStream fis ) throws IOException {
+        	up = FileIOStreamHelper.readBoolean( fis );
+        	down = FileIOStreamHelper.readBoolean( fis );
+        	left = FileIOStreamHelper.readBoolean( fis );
+        	right = FileIOStreamHelper.readBoolean( fis );
+        	a = FileIOStreamHelper.readBoolean( fis );
+        	b = FileIOStreamHelper.readBoolean( fis );
+        	start = FileIOStreamHelper.readBoolean( fis );
+        	select = FileIOStreamHelper.readBoolean( fis );
+        	refresh(); // Update joypad register to correct value
+        }
+        
+        public void saveState( FileOutputStream fos ) throws IOException {
+        	FileIOStreamHelper.writeBoolean( fos, up );
+        	FileIOStreamHelper.writeBoolean( fos, down );
+        	FileIOStreamHelper.writeBoolean( fos, left );
+        	FileIOStreamHelper.writeBoolean( fos, right );
+        	FileIOStreamHelper.writeBoolean( fos, a );
+        	FileIOStreamHelper.writeBoolean( fos, b );
+        	FileIOStreamHelper.writeBoolean( fos, start );
+        	FileIOStreamHelper.writeBoolean( fos, select );
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	super.readState(fis);
+    	jp.readState(fis);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	super.saveState(fos);
+    	jp.saveState(fos);
     }
 }

@@ -1,5 +1,12 @@
 package fajitaboy.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
+
 /**
  * Att göra:
  * 1. Ställa in rätt bank för minne.
@@ -18,7 +25,7 @@ package fajitaboy.memory;
   16/8 mode. S = 1 selects 4/32 mode.
  */
 
-public class MBC1 implements MemoryInterface {
+public class MBC1 implements MemoryInterface, StateMachine {
     Eram eram;
     ROM rom;
     int banks;
@@ -72,4 +79,21 @@ public class MBC1 implements MemoryInterface {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	rom.readState(fis);
+    	eram.readState(fis);
+    	banks = (int) FileIOStreamHelper.readData(fis, 4 );
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	rom.saveState(fos);
+    	eram.saveState(fos);
+    	FileIOStreamHelper.writeData(fos, (long) banks, 4 );
+    }
 }

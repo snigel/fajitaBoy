@@ -1,5 +1,12 @@
 package fajitaboy.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
+
 /**
  * Reroutes echo references to another address. Needs echo address, original
  * address and object references to pass on to.
@@ -7,7 +14,7 @@ package fajitaboy.memory;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class Echo implements MemoryInterface {
+public class Echo implements MemoryInterface, StateMachine {
     /**
      * The difference between the low ram and echo addresses.
      */
@@ -67,5 +74,13 @@ public class Echo implements MemoryInterface {
     public final void reset() {
         //mem.reset();
         //this should not need to be used. Use reset on the real object.
+    }
+    
+    public void readState( FileInputStream fis ) throws IOException {
+    	diff = (int)FileIOStreamHelper.readData( fis, 4 );
+    }
+    
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	FileIOStreamHelper.writeData( fos, (long)diff, 4 );
     }
 }

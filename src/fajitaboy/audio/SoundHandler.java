@@ -2,11 +2,18 @@ package fajitaboy.audio;
 
 import static fajitaboy.constants.AddressConstants.*;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
 import fajitaboy.memory.AddressBus;
 
 /**
@@ -16,7 +23,7 @@ import fajitaboy.memory.AddressBus;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class SoundHandler {
+public class SoundHandler implements StateMachine {
 
     /**
      * The address bus.
@@ -180,4 +187,44 @@ public class SoundHandler {
     public final void close() {
         sdl.close();
     }
+    
+    /**
+	 * {@inheritDoc}
+	 */
+	public void readState(FileInputStream is) throws IOException {
+		samples = (int) FileIOStreamHelper.readData(is, 4);
+		ch1Left = FileIOStreamHelper.readBoolean(is);
+		ch1Right = FileIOStreamHelper.readBoolean(is);
+		ch2Left = FileIOStreamHelper.readBoolean(is);
+		ch2Right = FileIOStreamHelper.readBoolean(is);
+		ch3Left = FileIOStreamHelper.readBoolean(is);
+		ch3Right = FileIOStreamHelper.readBoolean(is);
+		ch4Left = FileIOStreamHelper.readBoolean(is);
+		ch4Right = FileIOStreamHelper.readBoolean(is);
+		
+		au1.readState(is);
+		au2.readState(is);
+		au3.readState(is);
+		au4.readState(is);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveState(FileOutputStream os) throws IOException {
+		FileIOStreamHelper.writeData(os, (long) samples, 4);
+		FileIOStreamHelper.writeBoolean(os, ch1Left);
+		FileIOStreamHelper.writeBoolean(os, ch1Right);
+		FileIOStreamHelper.writeBoolean(os, ch2Left);
+		FileIOStreamHelper.writeBoolean(os, ch2Right);
+		FileIOStreamHelper.writeBoolean(os, ch3Left);
+		FileIOStreamHelper.writeBoolean(os, ch3Right);
+		FileIOStreamHelper.writeBoolean(os, ch4Left);
+		FileIOStreamHelper.writeBoolean(os, ch4Right);
+		
+		au1.saveState(os);
+		au2.saveState(os);
+		au3.saveState(os);
+		au4.saveState(os);
+	}
 }

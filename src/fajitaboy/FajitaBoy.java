@@ -508,11 +508,13 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         /** {@inheritDoc} */
         public void saveState(FileOutputStream fos) throws IOException {
             oscillator.saveState(fos);
+            addressBus.saveState(fos);
         }
 
         /** {@inheritDoc} */
         public void readState(FileInputStream is) throws IOException {
             oscillator.readState(is);
+            addressBus.readState(is);
         }
 
     }

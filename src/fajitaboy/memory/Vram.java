@@ -1,5 +1,10 @@
 package fajitaboy.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
 import fajitaboy.lcd.Tile;
 import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
@@ -92,4 +97,32 @@ public class Vram extends MemoryComponent {
 	public Tile[] getTiles() {
 		return tiles;
 	}
+	
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	super.readState(fis);
+    	
+    	// Special write to memory, to restore tiles
+    	int data;
+    	for ( int address = offset; address < TILE_DATA_END; address++ ) {
+    		data = (int) FileIOStreamHelper.readData( fis, 1 ); 
+    		write(address, data);
+    	}
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	super.saveState(fos);
+    	
+    	// Special read from memory to access tile data
+    	int data;
+    	for ( int address = offset; address < TILE_DATA_END; address++ ) {
+    		data = read(address);
+    		FileIOStreamHelper.writeData( fos, (long) data, 1 );
+    	}
+    }
 }

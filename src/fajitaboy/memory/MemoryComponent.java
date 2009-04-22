@@ -1,5 +1,12 @@
 package fajitaboy.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
+
 
 /**
  * Parentclass for all memory components.
@@ -7,7 +14,7 @@ package fajitaboy.memory;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class MemoryComponent implements MemoryInterface {
+public class MemoryComponent implements MemoryInterface, StateMachine {
 
     /**
      * The size of the ram array.
@@ -97,6 +104,29 @@ public class MemoryComponent implements MemoryInterface {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
         }
         ram[addr] = data;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	length = (int) FileIOStreamHelper.readData( fis, 4 );
+    	offset = (int) FileIOStreamHelper.readData( fis, 4 );
+    	ram = new int[length];
+    	for ( int i = 0; i < length; i++ ) {
+    		ram[i] = (int) FileIOStreamHelper.readData( fis, 1 );
+    	}
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	FileIOStreamHelper.writeData( fos, (long) length, 4 );
+    	FileIOStreamHelper.writeData( fos, (long) offset, 4 );
+    	for ( int i = 0; i < length; i++ ) {
+    		FileIOStreamHelper.writeData( fos, ram[i], 1 );
+    	}
     }
 
 }

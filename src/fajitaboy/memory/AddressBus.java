@@ -2,6 +2,13 @@ package fajitaboy.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
 import fajitaboy.memory.DebugMemory;
 
 /**
@@ -14,7 +21,7 @@ import fajitaboy.memory.DebugMemory;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class AddressBus implements MemoryInterface {
+public class AddressBus implements MemoryInterface, StateMachine {
     /**
      * The array which contains all the memory.
      */
@@ -214,4 +221,35 @@ public class AddressBus implements MemoryInterface {
     	return io.getJoyPad();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	interruptRegister.readState(fis);
+        raml.readState(fis);
+        echo.readState(fis);
+        ramh.readState(fis);
+        rom.readState(fis);
+        vram.readState(fis);
+        oam.readState(fis);
+        hram.readState(fis);
+        eram.readState(fis);
+        io.readState(fis);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	interruptRegister.saveState(fos);
+        raml.saveState(fos);
+        echo.saveState(fos);
+        ramh.saveState(fos);
+        rom.saveState(fos);
+        vram.saveState(fos);
+        oam.saveState(fos);
+        hram.saveState(fos);
+        eram.saveState(fos);
+        io.saveState(fos);
+    }
 }

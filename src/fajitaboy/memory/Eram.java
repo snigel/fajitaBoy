@@ -1,5 +1,11 @@
 package fajitaboy.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+
 /**
  * External RAM that is located on the cartridge.
  * @author Adam Hulin, Johan Gustafsson
@@ -108,4 +114,19 @@ public class Eram extends MemoryComponent {
         ram[addr] = data;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	super.readState(fis);
+    	bank = (int) FileIOStreamHelper.readData( fis, 4 );
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	super.saveState(fos);
+    	FileIOStreamHelper.writeData( fos, (long) bank, 4 );
+    }
 }

@@ -240,10 +240,14 @@ public class Oscillator implements Runnable, StateMachine {
     public void saveState( FileOutputStream os ) throws IOException {
     	FileIOStreamHelper.writeData(os, cycles, 8);
     	FileIOStreamHelper.writeData(os, nextHaltCycle, 8);
+    	FileIOStreamHelper.writeBoolean(os, audioEnabled);
+    	FileIOStreamHelper.writeData(os, sampleRate, 4);
+    	FileIOStreamHelper.writeData(os, samples, 4);
 
     	timer.saveState(os);
     	cpu.saveState(os);
     	lcd.saveState(os);
+    	soundHandler.saveState(os);
     }
 
     /**
@@ -252,10 +256,14 @@ public class Oscillator implements Runnable, StateMachine {
     public void readState( FileInputStream is ) throws IOException {
     	cycles = FileIOStreamHelper.readData(is, 8);
     	nextHaltCycle = FileIOStreamHelper.readData(is, 8);
+    	audioEnabled = FileIOStreamHelper.readBoolean(is);
+    	sampleRate = (int) FileIOStreamHelper.readData(is, 4);
+    	samples = (int) FileIOStreamHelper.readData(is, 4);
 
     	timer.readState(is);
     	cpu.readState(is);
     	lcd.readState(is);
+    	soundHandler.readState(is);
     }
 
     /**

@@ -1,10 +1,17 @@
 package fajitaboy.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
+
 /**
  * Represent the interrupt enable register.
  * @author Adam Hulin, Johan Gustafsson
  */
-public class InterruptRegister implements MemoryInterface {
+public class InterruptRegister implements MemoryInterface, StateMachine {
     /**
      * This single variable represents the memory space of the
      * InterruptRegister.
@@ -51,5 +58,13 @@ public class InterruptRegister implements MemoryInterface {
      */
     public final void reset() {
         register = 0;
+    }
+    
+    public void readState( FileInputStream fis ) throws IOException {
+    	register = (int) FileIOStreamHelper.readData( fis, 1 );
+    }
+    
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	FileIOStreamHelper.writeData( fos, (long) register, 1 );
     }
 }

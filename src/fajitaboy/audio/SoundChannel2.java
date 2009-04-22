@@ -2,6 +2,12 @@ package fajitaboy.audio;
 
 import static fajitaboy.constants.AddressConstants.*;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.StateMachine;
 import fajitaboy.memory.AddressBus;
 
 /**
@@ -11,7 +17,7 @@ import fajitaboy.memory.AddressBus;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
-public class SoundChannel2 {
+public class SoundChannel2 implements StateMachine {
 
     /**
      * The sample rate the sound should be sampled.
@@ -240,5 +246,41 @@ public class SoundChannel2 {
             ab.forceWrite(NR21_REGISTER, nr21 + 0x100);
         }
     }
+    
+    /**
+	 * {@inheritDoc}
+	 */
+	public void readState(FileInputStream is) throws IOException {
+		amp = (int) FileIOStreamHelper.readData(is, 4);
+		dutyLength = (int) FileIOStreamHelper.readData(is, 4);
+		envelopePos = (int) FileIOStreamHelper.readData(is, 4);
+		envelopeStep = (int) FileIOStreamHelper.readData(is, 4);
+		envelopeStepLength = (int) FileIOStreamHelper.readData(is, 4);
+		freq = (int) FileIOStreamHelper.readData(is, 4);
+		lengthEnabled = FileIOStreamHelper.readBoolean(is);
+		oldFreq = (int) FileIOStreamHelper.readData(is, 4);
+		pos = (int) FileIOStreamHelper.readData(is, 4);
+		sampleRate = (int) FileIOStreamHelper.readData(is, 4);
+		toneLength = (int) FileIOStreamHelper.readData(is, 4);
+		waveLength = (int) FileIOStreamHelper.readData(is, 4);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveState(FileOutputStream os) throws IOException {
+		FileIOStreamHelper.writeData(os, (long) amp, 4);
+		FileIOStreamHelper.writeData(os, (long) dutyLength, 4);
+		FileIOStreamHelper.writeData(os, (long) envelopePos, 4);
+		FileIOStreamHelper.writeData(os, (long) envelopeStep, 4);
+		FileIOStreamHelper.writeData(os, (long) envelopeStepLength, 4);
+		FileIOStreamHelper.writeData(os, (long) freq, 4);
+		FileIOStreamHelper.writeBoolean(os, lengthEnabled);
+		FileIOStreamHelper.writeData(os, (long) oldFreq, 4);
+		FileIOStreamHelper.writeData(os, (long) pos, 4);
+		FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
+		FileIOStreamHelper.writeData(os, (long) toneLength, 4);
+		FileIOStreamHelper.writeData(os, (long) waveLength, 4);
+	}
 
 }
