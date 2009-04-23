@@ -3,13 +3,16 @@ package fajitaboy;
 import java.applet.AudioClip;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Point;
 
 import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.MemoryImageSource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,6 +67,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
     /** Path to the rom file. Not sure if this is needed. */
     private String romPath;
+
+    /** Hidden cursor. */
+    private Cursor hiddenCursor;
 
     /** Enum describing which pane the applet is showing. */
     public enum GameState {
@@ -145,6 +151,12 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         // addKeyListener(this);
 
         addMouseListener(new MouseController());
+
+        // create the 'hidden' cursor
+        hiddenCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+                    Toolkit.getDefaultToolkit().createImage(
+                    new MemoryImageSource(0, 0, new int[0], 0, 0)),
+                    new Point(0, 0), "hiddenCursor");
     }
 
     /** {@inheritDoc} */
@@ -177,6 +189,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         case PLAYGAME:
             emulator.stop();
             gamePanel.setIgnoreRepaint(false);
+            layeredGamePanel.setCursor(Cursor.getDefaultCursor());
             break;
         case INGAME_MENU:
             layeredGamePanel.removeOverlapingPane();
@@ -203,6 +216,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             break;
 
         case PLAYGAME:
+            layeredGamePanel.setCursor(hiddenCursor);
             gamePanel.setIgnoreRepaint(true);
             if (fullScreen != null) {
                 fullScreen.setContentPane(layeredGamePanel);
