@@ -99,7 +99,10 @@ public class SoundChannel3 implements StateMachine {
             return destBuff;
         }
 
-        calcFreq();
+        if ((ab.read(NR33_REGISTER) & 0x100) == 0){
+            calcFreq();
+        }
+
         if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
             if (lengthEnabled) {
                 toneLength -= samples;
@@ -152,6 +155,7 @@ public class SoundChannel3 implements StateMachine {
             calcToneLength();
             calcWavePattern();
             oldFreq = freq;
+            ab.forceWrite(NR33_REGISTER, low1 + 0x100);
             return;
         }
     }

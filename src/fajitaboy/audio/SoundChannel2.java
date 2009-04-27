@@ -116,7 +116,11 @@ public class SoundChannel2 implements StateMachine {
      */
     public byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
-        calcFreq();
+
+        if ((ab.read(NR23_REGISTER) & 0x100) == 0){
+            calcFreq();
+        }
+
         if (((ab.read(NR22_REGISTER) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
@@ -206,6 +210,7 @@ public class SoundChannel2 implements StateMachine {
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
+            ab.forceWrite(NR23_REGISTER, low1 + 0x100);
         }
     }
 

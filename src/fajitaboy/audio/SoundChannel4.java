@@ -113,7 +113,10 @@ public class SoundChannel4 implements StateMachine {
     public final byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        calcFreq();
+        if ((ab.read(NR43_REGISTER) & 0x100) == 0){
+            calcFreq();
+        }
+    
         if (((ab.read(NR42_REGISTER) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
@@ -138,11 +141,11 @@ public class SoundChannel4 implements StateMachine {
                 }
 
                 if (left) {
-                    destBuff[k] += (byte) finalAmp;
+                    destBuff[k] += (byte) finalAmp / 2;
                 }
                 k++;
                 if (right) {
-                    destBuff[k] += (byte) finalAmp;
+                    destBuff[k] += (byte) finalAmp / 2;
                 }
                 k++;
 
@@ -192,6 +195,7 @@ public class SoundChannel4 implements StateMachine {
             calcEnvelope();
             calcToneLength();
             oldFreq = freq;
+            ab.forceWrite(NR43_REGISTER, nr43 + 0x100);
         }
     }
 

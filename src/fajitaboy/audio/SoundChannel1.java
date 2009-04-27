@@ -142,7 +142,9 @@ public class SoundChannel1 implements StateMachine {
     public byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        calcFreq();
+        if ((ab.read(NR13_REGISTER) & 0x100) == 0){
+            calcFreq();
+        }
         // If the sound channel is mute, return.
         if (((ab.read(NR12_REGISTER) & 0xF0) >> 4) == 0) {
             return destBuff;
@@ -172,12 +174,18 @@ public class SoundChannel1 implements StateMachine {
                 // Sweep
                 if (sweepLength != 0) {
                     if (((sweepPos % (sweepLength * samples)) == 0)
-                            && (sweepNr < sweepSteps)) {
-                        System.out.println("Sweep");
+                          /*  && (sweepNr < sweepSteps)*/) {
+                        int nr13 = ab.read(NR13_REGISTER);
                         if (sweepDirection == 0) {
                             freq = freq + (int) (freq / (Math.pow(2, sweepNr)));
+                            calcWavePattern();
+                            ab.forceWrite(NR13_REGISTER, nr13 + 0x100);
+                            oldFreq = freq;
                         } else {
                             freq = freq - (int) (freq / (Math.pow(2, sweepNr)));
+                            calcWavePattern();
+                            ab.forceWrite(NR13_REGISTER, nr13 + 0x100);
+                            oldFreq = freq;
                         }
                     }
                     sweepPos++;
@@ -215,7 +223,6 @@ public class SoundChannel1 implements StateMachine {
         if ((ab.read(NR10_REGISTER) & 0x100) == 0){
             calcSweep();
         }
-
 
         return destBuff;
     }
@@ -260,6 +267,7 @@ public class SoundChannel1 implements StateMachine {
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
+            ab.forceWrite(SOUND1_LOW, low1 + 0x100);
         }
     }
 
@@ -287,7 +295,7 @@ public class SoundChannel1 implements StateMachine {
         sweepPos = 0;
         int nr10 = ab.read(NR10_REGISTER);
         ab.forceWrite(NR10_REGISTER, nr10 + 0x100);
-        sweepSteps = nr10 & 0x7;
+        sweepNr = nr10 & 0x7;
         sweepDirection = nr10 & 0x8;
         int sweepTime = ((nr10 & 0x70) >> 4);
 
