@@ -18,7 +18,12 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac verbose="yes" compiler="javac1.5" srcdir="${applet-src}" destdir="${build}"/>
+    <!-- only compile the actual applet -->
+    <javac verbose="true" 
+	   includes="FajitaBoy.java" 
+	   compiler="javac1.5" 
+	   srcdir="${applet-src}" 
+	   destdir="${build}" />
   </target>
 
 
