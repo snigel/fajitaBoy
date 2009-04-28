@@ -18,26 +18,29 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 public class FullScreenFrame extends JFrame {
-    
+
     public FullScreenFrame(LayeredGamePanel layeredGamePanel) {
-    	
-    	GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+        GraphicsEnvironment ge = GraphicsEnvironment
+                .getLocalGraphicsEnvironment();
         GraphicsDevice screen = ge.getDefaultScreenDevice();
         DisplayMode display = screen.getDisplayMode();
-        
+
         setContentPane(layeredGamePanel);
         layeredGamePanel.updateSize(display.getWidth(), display.getHeight());
-        
+
         setResizable(false);
         setUndecorated(true);
-        //setAlwaysOnTop(true);
-        
+        // setAlwaysOnTop(true);
+
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        
+
         setTitle("FajitaBoy");
         setSize(Toolkit.getDefaultToolkit().getScreenSize());
+        setVisible(true);
         screen.setFullScreenWindow(this);
-        
+
+        validate();
         requestFocusInWindow();
     }
 }
