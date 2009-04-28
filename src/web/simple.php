@@ -1,7 +1,6 @@
-    <applet code="fajitaboy.FajitaBoy.class" 
+<applet code="fajitaboy.FajitaBoy.class" 
 	
-      archive="applet/FajitaBoy.jar"
-	  MAYSCRIPT
-	  height = 288 width = 320>
-
-    </applet>
+   archive="applet/FajitaBoy.jar"
+   MAYSCRIPT
+   height = 288 width = 320>
+</applet>
