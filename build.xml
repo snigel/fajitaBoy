@@ -19,8 +19,7 @@
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <!-- only compile the actual applet -->
-    <javac verbose="true" 
-	   includes="FajitaBoy.java" 
+    <javac includes="FajitaBoy.java" 
 	   compiler="javac1.5" 
 	   srcdir="${applet-src}" 
 	   destdir="${build}" />
