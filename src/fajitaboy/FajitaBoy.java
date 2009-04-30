@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
@@ -71,6 +72,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** Hidden cursor. */
     private Cursor hiddenCursor;
 
+    /** Handles cookies. */
+    private CookieJar cookieJar;
+
     /** Enum describing which pane the applet is showing. */
     public enum GameState {
         STARTSCREEN, SINGLEPLAYER_LOADSCREEN, MULTIPLAYER_DUNNOLOL, PLAYGAME, INGAME_MENU, PAUSE
@@ -116,7 +120,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
                     .setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
         } catch (Exception e) {
         }
-
         addComponentListener(this);
 
         // Appletviewer resize
@@ -142,7 +145,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
         // Highly necessary
-        bootSound = getAudioClip(getCodeBase(), "bootsound_mockup.wav");
+        bootSound = getAudioClip(getClass().getResource(
+                "resources/bootsound.wav"));
 
         // Set state to startup screen
         gameState = GameState.STARTSCREEN;
@@ -154,9 +158,11 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         // create the 'hidden' cursor
         hiddenCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-                    Toolkit.getDefaultToolkit().createImage(
-                    new MemoryImageSource(0, 0, new int[0], 0, 0)),
-                    new Point(0, 0), "hiddenCursor");
+                Toolkit.getDefaultToolkit().createImage(
+                        new MemoryImageSource(0, 0, new int[0], 0, 0)),
+                new Point(0, 0), "hiddenCursor");
+
+        cookieJar = new CookieJar(this);
     }
 
     /** {@inheritDoc} */
@@ -265,8 +271,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         layeredGamePanel.updateSize(getWidth(), getHeight());
         emulator = new Emulator(path);
 
-        kic = new KeyInputController(this, layeredGamePanel,
-                emulator.addressBus.getJoyPad());
+        kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
+                emulator.addressBus.getJoyPad(), cookieJar);
 
         ingameMenuPanel.refreshLabels();
         ingameMenuPanel.setOscillator(emulator.oscillator);
@@ -449,6 +455,36 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         Toolkit.getDefaultToolkit().beep();
         JOptionPane.showMessageDialog(null, msg, "Error",
                 JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Used by JS when reading from cookie.
+     * 
+     * @param name
+     *            owner
+     * @param cookieData
+     *            data
+     */
+    public final void setCookieData(final String owner, final String cookieData) {
+        cookieJar.setCookieData(owner, cookieData);
+    }
+
+    /**
+     * Used by JS when saving to cookie.
+     * 
+     * @return data to save
+     */
+    public final String getCookieData() {
+        return cookieJar.getCookieData();
+    }
+
+    /**
+     * Used by JS when saving to cookie.
+     * 
+     * @return cookie name
+     */
+    public final String getCookieName() {
+        return cookieJar.getCookieName();
     }
 
     /** {@inheritDoc} */

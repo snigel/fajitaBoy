@@ -13,10 +13,12 @@ import javax.swing.KeyStroke;
 import fajitaboy.FajitaBoy.GameState;
 import fajitaboy.memory.IO.JoyPad;
 
+import static fajitaboy.constants.PanelConstants.*;
+
 /**
  * Handles the key input.
  */
-public class KeyInputController {
+public class KeyInputController implements CookieEater {
 
     /** Joypad object. */
     private JoyPad joypad;
@@ -25,6 +27,11 @@ public class KeyInputController {
     private FajitaBoy fajitaBoy;
     /** gamepanel. */
     private LayeredGamePanel gamePanel;
+
+    private IngameMenuPanel keySettingsPanel;
+
+    /** cookies. */
+    private CookieJar cookieJar;
 
     /**
      * Enum for controller buttons.
@@ -51,19 +58,26 @@ public class KeyInputController {
      *            mainframe
      * @param lgp
      *            layeredgameframe
+     * @param ksp
+     *            keysettingspanel
      * @param jp
      *            the JoyPad object
-     * 
+     * @param cj
+     *            cookieJar
      */
     public KeyInputController(final FajitaBoy fb, final LayeredGamePanel lgp,
-            final JoyPad jp) {
+            final IngameMenuPanel ksp, final JoyPad jp, final CookieJar cj) {
         fajitaBoy = fb;
         joypad = jp;
         gamePanel = lgp;
+        keySettingsPanel = ksp;
+        cookieJar = cj;
 
         initActions();
         initActionMap();
         initInputMap();
+
+        importKeys();
     }
 
     /**
@@ -248,10 +262,11 @@ public class KeyInputController {
 
         // -- Appletors --------------------------------------------------------
 
-        setKey(KeyEvent.VK_ESCAPE, "Menu", false);
-        setKey(KeyEvent.VK_P, "Pause", false);
-        setKey(KeyEvent.VK_F4, "Fullscreen", false);
-        setKey(KeyEvent.VK_M, "Mute", false);
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), "pushMenu");
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0, false), "pushPause");
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0, false),
+                "pushFullscreen");
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0, false), "pushMute");
     }
 
     /**
@@ -265,8 +280,8 @@ public class KeyInputController {
      *            The string for a certain action
      */
     public final void setKey(final int key, final String actionMapKey) {
-        setKey(key, actionMapKey, false);
-        setKey(key, actionMapKey, true);
+        setKey(KeyStroke.getKeyStroke(key, 0, true), "release" + actionMapKey);
+        setKey(KeyStroke.getKeyStroke(key, 0, false), "push" + actionMapKey);
     }
 
     /**
@@ -282,26 +297,28 @@ public class KeyInputController {
      * @param onRelease
      *            trigger on key released
      */
-    public final void setKey(final int key, final String actionMapKey,
-            final boolean onRelease) {
+    public final void setKey(final KeyStroke key, final String actionMapKey) {
         InputMap ip = gamePanel
                 .getInputMap(JLayeredPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        KeyStroke keyStroke = KeyStroke.getKeyStroke(key, 0, onRelease);
-
-        String mapKey = (onRelease ? "release" : "push") + actionMapKey;
-
-        // Unbinds the new keys previous binding.
+        // Unbinds the new key's previous binding.
         if (ip.size() != 0) {
             for (KeyStroke keyS : ip.keys()) {
-                if (ip.get(keyS).toString().equals(mapKey.toString())) {
+                if (ip.get(keyS).toString().equals(actionMapKey)) {
                     ip.remove(keyS);
                 }
             }
         }
-        ip.remove(keyStroke);
-        ip.put(keyStroke, mapKey);
+        ip.remove(key);
 
+        ip.put(key, actionMapKey);
+
+    }
+
+    public final void setKey(final String key, final String actionMapKey) {
+        setKey(KeyStroke.getKeyStroke("pressed " + key), "push" + actionMapKey);
+        setKey(KeyStroke.getKeyStroke("released " + key), "release"
+                + actionMapKey);
     }
 
     /**
@@ -318,10 +335,73 @@ public class KeyInputController {
         String val = "push" + mapValue;
         for (KeyStroke k : ip.keys()) {
             if (ip.get(k).toString().equals(val.toString())) {
-                return k.toString().substring(8);
+
+                return k.toString().substring(8).trim();
             }
         }
         return "Unbound";
 
+    }
+
+    /**
+     * Attempts to read keybindings from browser cookie.
+     */
+    public final void importKeys() {
+        cookieJar.get(KEYBIND_COOKIE, this);
+    }
+
+    /**
+     * Attempts to save keybindings to browser cookie.
+     */
+    public final void exportKeys() {
+        String bindings;
+
+        bindings = getKey("Up");
+        bindings += ";" + getKey("Down");
+        bindings += ";" + getKey("Left");
+        bindings += ";" + getKey("Right");
+        bindings += ";" + getKey("A");
+        bindings += ";" + getKey("B");
+        bindings += ";" + getKey("Start");
+        bindings += ";" + getKey("Select");
+
+        cookieJar.put(KEYBIND_COOKIE, bindings);
+
+    }
+
+    /**
+     * Resets keys to default values.
+     */
+    public final void reset() {
+        initInputMap();
+    }
+
+    /** {@inheritDoc} */
+    public final void recieveCookie(final String cookie) {
+        if (cookie == "") {
+            return;
+        }
+        String[] keys = cookie.split(";");
+
+        if (keys.length != 8) {
+            return;
+        }
+
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), "pushMenu");
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0, false), "pushPause");
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0, false),
+                "pushFullscreen");
+        setKey(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0, false), "pushMute");
+
+        setKey(keys[0], "Up");
+        setKey(keys[1], "Down");
+        setKey(keys[2], "Left");
+        setKey(keys[3], "Right");
+        setKey(keys[4], "A");
+        setKey(keys[5], "B");
+        setKey(keys[6], "Start");
+        setKey(keys[7], "Select");
+
+        keySettingsPanel.refreshLabels();
     }
 }

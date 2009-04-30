@@ -3,6 +3,8 @@ package fajitaboy;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -20,13 +22,17 @@ import static fajitaboy.constants.PanelConstants.*;
  * Key change stuff.
  */
 @SuppressWarnings("serial")
-public class KeySettingsPanel extends JPanel {
+public class KeySettingsPanel extends JPanel implements ActionListener {
 
     /** Applet. */
     private FajitaBoy fajitaBoy;
 
     private InputField left, right, up, down;
     private InputField a, b, start, select;
+
+    private JButton save, load, reset;
+
+    private Dimension buttonSize;
 
     /**
      * Constructor.
@@ -40,9 +46,14 @@ public class KeySettingsPanel extends JPanel {
         setOpaque(true);
         setPreferredSize(new Dimension(270, 130));
 
+        buttonSize = new Dimension(BUTTONWIDTH, BUTTONHEIGHT);
+
         JLabel middle = new JLabel();
-        middle.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        middle.setPreferredSize(buttonSize);
         middle.setOpaque(true);
+
+        SpringLayout layout = new SpringLayout();
+        setLayout(layout);
 
         up = new InputField("Up");
         down = new InputField("Down");
@@ -53,8 +64,9 @@ public class KeySettingsPanel extends JPanel {
         start = new InputField("Start");
         select = new InputField("Select");
 
-        SpringLayout layout = new SpringLayout();
-        setLayout(layout);
+        save = initButton("Store", "Save current keybindings. (Cookie)");
+        load = initButton("Load", "Load saved keybindings.");
+        reset = initButton("Reset", "Resets keys to default bindings.");
 
         add(up);
         add(left);
@@ -87,17 +99,17 @@ public class KeySettingsPanel extends JPanel {
         // -- Joypad layout stuff, based on the center box called middle.
 
         SpringLayout.Constraints joypadCons = layout.getConstraints(middle);
-        joypadCons.setX(Spring.sum(Spring.constant(buttonWidth + 1), boxCons
+        joypadCons.setX(Spring.sum(Spring.constant(BUTTONWIDTH + 1), boxCons
                 .getConstraint(SpringLayout.WEST)));
-        joypadCons.setY(Spring.sum(Spring.constant(buttonHeight + padding),
-                boxCons.getConstraint(SpringLayout.NORTH)));
+        joypadCons.setY(Spring.sum(Spring.constant(BUTTONHEIGHT
+                + LAYOUT_PADDING), boxCons.getConstraint(SpringLayout.NORTH)));
         SpringLayout.Constraints upCons = layout.getConstraints(up);
         upCons.setX(joypadCons.getConstraint(SpringLayout.WEST));
-        upCons.setY(Spring.sum(Spring.constant(-buttonHeight), joypadCons
+        upCons.setY(Spring.sum(Spring.constant(-BUTTONHEIGHT), joypadCons
                 .getConstraint(SpringLayout.NORTH)));
         SpringLayout.Constraints leftCons = layout.getConstraints(left);
         leftCons.setY(joypadCons.getConstraint(SpringLayout.NORTH));
-        leftCons.setX(Spring.sum(Spring.constant(-buttonWidth), joypadCons
+        leftCons.setX(Spring.sum(Spring.constant(-BUTTONWIDTH), joypadCons
                 .getConstraint(SpringLayout.WEST)));
         SpringLayout.Constraints rightCons = layout.getConstraints(right);
         rightCons.setY(joypadCons.getConstraint(SpringLayout.NORTH));
@@ -110,25 +122,39 @@ public class KeySettingsPanel extends JPanel {
         // -- A and B button layout. Based on the joypad layout
 
         SpringLayout.Constraints bCons = layout.getConstraints(b);
-        bCons.setX(Spring.sum(Spring.constant(padding), rightCons
+        bCons.setX(Spring.sum(Spring.constant(LAYOUT_PADDING), rightCons
                 .getConstraint(SpringLayout.EAST)));
-        bCons.setY(Spring.sum(Spring.constant(padding), joypadCons
+        bCons.setY(Spring.sum(Spring.constant(LAYOUT_PADDING), joypadCons
                 .getConstraint(SpringLayout.NORTH)));
         SpringLayout.Constraints aCons = layout.getConstraints(a);
         aCons.setX(bCons.getConstraint(SpringLayout.EAST));
-        aCons.setY(Spring.sum(Spring.constant(-2 * padding), joypadCons
+        aCons.setY(Spring.sum(Spring.constant(-2 * LAYOUT_PADDING), joypadCons
                 .getConstraint(SpringLayout.NORTH)));
 
         // --------------------------------------------------------------------
         // -- Start/Select button layout.
 
         SpringLayout.Constraints startCons = layout.getConstraints(start);
-        startCons.setX(Spring.constant(2 * buttonWidth));
-        startCons.setY(Spring.sum(Spring.constant(2 * padding), downCons
+        startCons.setX(Spring.constant(2 * BUTTONWIDTH + 20));
+        startCons.setY(Spring.sum(Spring.constant(-10), downCons
                 .getConstraint(SpringLayout.SOUTH)));
         SpringLayout.Constraints selectCons = layout.getConstraints(select);
         selectCons.setX(startCons.getConstraint(SpringLayout.EAST));
         selectCons.setY(startCons.getConstraint(SpringLayout.NORTH));
+
+        // --------------------------------------------------------------------
+        // -- Save, load, reset buttons.
+
+        SpringLayout.Constraints saveCons = layout.getConstraints(save);
+        saveCons.setX(Spring.sum(Spring.constant(-185), boxCons
+                .getConstraint(SpringLayout.EAST)));
+        saveCons.setY(boxCons.getConstraint(SpringLayout.SOUTH));
+        SpringLayout.Constraints loadCons = layout.getConstraints(load);
+        loadCons.setX(saveCons.getConstraint(SpringLayout.EAST));
+        loadCons.setY(saveCons.getConstraint(SpringLayout.NORTH));
+        SpringLayout.Constraints resetCons = layout.getConstraints(reset);
+        resetCons.setX(loadCons.getConstraint(SpringLayout.EAST));
+        resetCons.setY(loadCons.getConstraint(SpringLayout.NORTH));
 
         validate();
     }
@@ -160,6 +186,26 @@ public class KeySettingsPanel extends JPanel {
     }
 
     /**
+     * Creates and inits a button.
+     * 
+     * @param name
+     *            Text on the button.
+     * @param tooltip
+     *            Mouseover text.
+     * @return the button
+     */
+    private JButton initButton(final String name, final String tooltip) {
+        JButton button = new JButton(name);
+        button.setPreferredSize(buttonSize);
+        button.setToolTipText(tooltip);
+        button.addActionListener(this);
+        button.setFont(FB_SMALLFONT);
+        button.setMargin(new Insets(0, 0, 0, 0));
+        add(button);
+        return button;
+    }
+
+    /**
      * Captures keyinputs and updates keymap thingy.
      */
     private class InputField extends JButton implements KeyListener {
@@ -177,7 +223,7 @@ public class KeySettingsPanel extends JPanel {
             super(text);
             setFont(FB_SMALLFONT);
             setMargin(new Insets(0, 0, 0, 0));
-            setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+            setPreferredSize(buttonSize);
             setToolTipText("Click to change binding for " + text + " button.");
 
             buttonText = text;
@@ -211,5 +257,20 @@ public class KeySettingsPanel extends JPanel {
         /** {@inheritDoc} */
         public void keyTyped(final KeyEvent e) {
         }
+    }
+
+    /** {@inheritDoc} */
+    public final void actionPerformed(final ActionEvent e) {
+        KeyInputController controller = fajitaBoy.getKIC();
+        if (e.getSource() == save) {
+            controller.exportKeys();
+        } else if (e.getSource() == load) {
+            controller.importKeys();
+        } else if (e.getSource() == reset) {
+            controller.reset();
+        }
+
+        refreshLabels();
+
     }
 }
