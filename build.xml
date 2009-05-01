@@ -32,8 +32,8 @@
     <mkdir dir="${dist-web}"/>
 
     <!-- Copy src/fajitaboy/images to build/fajitaboy/images -->
-    <copy todir="${build}/fajitaboy/images">
-      <fileset dir="${applet-src}/images" />
+    <copy todir="${build}/fajitaboy/resources">
+      <fileset dir="${applet-src}/resources" />
     </copy>
 
     <!-- Copy src/www to dist-web -->
