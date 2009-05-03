@@ -15,7 +15,7 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
     private int zoom;
     private Image image;
 
-    private ColorModel colorModel;
+    protected ColorModel colorModel;
     private byte[] palette;
 
     public GamePanel(int zoom) {

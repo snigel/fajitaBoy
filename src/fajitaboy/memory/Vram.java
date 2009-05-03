@@ -15,7 +15,7 @@ import static fajitaboy.constants.AddressConstants.*;
  */
 public class Vram extends MemoryComponent {
 
-	private Tile[] tiles;
+	protected Tile[] tiles;
 
     /**
      * @param start

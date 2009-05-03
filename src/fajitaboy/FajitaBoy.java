@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.MemoryImageSource;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,6 +31,7 @@ import javax.swing.UIManager;
 
 import fajitaboy.lcd.LCD;
 import fajitaboy.memory.AddressBus;
+import fajitaboy.memory.AddressBusCgb;
 import static fajitaboy.constants.PanelConstants.*;
 
 /**
@@ -267,9 +269,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         showStatus("Loading...");
         gamePanel = new GamePanel(2);
+        emulator = new Emulator(path);
         layeredGamePanel = new LayeredGamePanel(gamePanel);
         layeredGamePanel.updateSize(getWidth(), getHeight());
-        emulator = new Emulator(path);
 
         kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
                 emulator.addressBus.getJoyPad(), cookieJar);
@@ -533,10 +535,34 @@ public class FajitaBoy extends JApplet implements ComponentListener {
          *            Rom path
          */
         Emulator(final String path) {
+            // Temporarily solution.
+            try {
+                DataInputStream dis;
+                dis = new DataInputStream(new FileInputStream(new File(path)));
 
-            addressBus = new AddressBus(path);
-            cpu = new Cpu(addressBus);
-            oscillator = new Oscillator(cpu, addressBus, gamePanel, true);
+                dis.skipBytes(0x143);
+                int cgbFlag = dis.readUnsignedByte();
+                dis.close();
+                if ((cgbFlag & 0x80) != 0) {
+                    // Color!!
+                    gamePanel = new ColorGamePanel(2);
+                    SpeedSwitch speedSwitch = new SpeedSwitch();
+                    AddressBusCgb addressBusCgb = new AddressBusCgb(path);
+                    addressBus = addressBusCgb;
+                    cpu = new CpuCgb(addressBus, speedSwitch);
+                    oscillator = new OscillatorCgb(cpu, addressBusCgb, speedSwitch, gamePanel, true);
+                    
+                } else {
+                    // not color :(
+                    addressBus = new AddressBus(path);
+                    cpu = new Cpu(addressBus);
+                    oscillator = new Oscillator(cpu, addressBus, gamePanel, true);
+                }
+            
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }            
         }
 
         /**

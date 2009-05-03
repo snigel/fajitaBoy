@@ -33,7 +33,7 @@ public class LCD implements StateMachine {
     /**
      * Contains the Window.
      */
-    private WindowMap wnd = new WindowMap();
+    protected WindowMap wnd = new WindowMap();
 
     /**
      * Contains the Sprite Attribute Table.
@@ -48,17 +48,17 @@ public class LCD implements StateMachine {
     /**
      * Contains the LCDC flags.
      */
-    private LCDC lcdc;
+    protected LCDC lcdc;
 
     /**
      * Flag is true if a new screen has been rendered.
      */
-    private boolean newScreen = false;
+    protected boolean newScreen = false;
 
     /**
      * If true, frame will not be rendered.
      */
-    private boolean frameSkip = false;
+    protected boolean frameSkip = false;
 
     /**
      * Next cycle at which the LCD will proceed to next line.
@@ -97,7 +97,7 @@ public class LCD implements StateMachine {
     /**
      * Draws the GameBoy screen once.
      */
-    private void drawScreen() {
+    protected void drawScreen() {
         // Abort if Frame Skip is activated
         if (frameSkip)
             return;

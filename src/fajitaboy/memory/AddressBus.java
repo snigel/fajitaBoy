@@ -25,57 +25,57 @@ public class AddressBus implements MemoryInterface, StateMachine {
     /**
      * The array which contains all the memory.
      */
-    private MemoryInterface[] module = new MemoryInterface[GB_ADDRESS_SPACE];
+    protected MemoryInterface[] module = new MemoryInterface[GB_ADDRESS_SPACE];
 
     // All modules be declared here
 
     /**
      * The interrupt register part of the memory.
      */
-    private InterruptRegister interruptRegister;
+    protected InterruptRegister interruptRegister;
     /**
      * Only used for debug purposes, to return zero instead null.
      */
-    private DebugMemory debug;
+    protected DebugMemory debug;
     /**
      * Work RAM bank 0.
      */
-    private RamLow raml;
+    protected RamLow raml;
     /**
      * The echo part of the memory. Which is a exact replica of low ram.
      */
-    private Echo echo;
+    protected Echo echo;
     /**
      * The high RAM part of the memory.
      */
-    private RamHigh ramh;
+    protected RamHigh ramh;
     /**
      * Work RAM bank 1.
      */
-    private ROM rom;
+    protected ROM rom;
     /**
      * The Video RAM part of the memory.
      */
-    private Vram vram;
+    protected Vram vram;
     /**
      * The Sprite Attribute Table.
      */
-    private Oam oam;
+    protected Oam oam;
     /**
      * The High RAM.
      *
      */
-    private Hram hram;
+    protected Hram hram;
     /**
      * The external RAM that resides in the cartridge.
      */
-    private Eram eram;
+    protected Eram eram;
     /**
      * All the input/output addresses.
      */
-    private IO io;
+    protected IO io;
     
-    private MemoryInterface mbc;
+    protected MemoryInterface mbc;
 
     /**
      * Creates the addressbus and all the parts of the memory.
@@ -84,6 +84,10 @@ public class AddressBus implements MemoryInterface, StateMachine {
      *            The ROM-file
      */
     public AddressBus(final String romPath) {
+        initializeModule(romPath);
+    }
+    
+    protected void initializeModule(final String romPath) {
         // All modules must be initialized here
         debug = new DebugMemory();
         initialize(debug, DEBUG_START, DEBUG_END);
@@ -118,11 +122,12 @@ public class AddressBus implements MemoryInterface, StateMachine {
         module[INTERRUPT_ADDRESS] = interruptRegister;
 
         module[ADDRESS_DMA] = oam;
+        
         eram = new Eram(ERAM_START, ERAM_END);
         initialize(eram, ERAM_START, ERAM_END);
     }
 
-    private MemoryInterface setMBC(){
+    protected MemoryInterface setMBC(){
         switch(rom.getMBC()){
         case ROM: System.out.println("MBC: None"); return rom;
         case MBC1:System.out.println("MBC: MBC1");  return new MBC1(eram,rom);
@@ -142,7 +147,7 @@ public class AddressBus implements MemoryInterface, StateMachine {
      * @param end
      *            The exclusive end address.
      */
-    private void initialize(final MemoryInterface object,
+    protected void initialize(final MemoryInterface object,
             final int start, final int end) {
         for (int i = start; i < end; i++) {
             module[i] = object;

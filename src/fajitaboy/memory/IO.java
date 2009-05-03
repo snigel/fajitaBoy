@@ -49,7 +49,7 @@ public class IO extends MemoryComponent {
     /**
      * {@inheritDoc}
      */
-    public final void write(final int address, final int data) {
+    public void write(final int address, final int data) {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException(

@@ -24,6 +24,17 @@ public final class AddressConstants {
     public static final int ADDRESS_WY = 0xFF4A;
     public static final int ADDRESS_WX = 0xFF4B;
     public static final int ADDRESS_DMA = 0xFF46;
+    
+    public static final int VRAM_BANK = 0xFF4F;
+    public static final int CGB_FLAG = 0x0143;
+    
+    public static final int VRAM_DMA_SOURCE_H = 0xFF51;
+    public static final int VRAM_DMA_SOURCE_L = 0xFF52;
+    public static final int VRAM_DMA_DESTINATION_H = 0xFF53;
+    public static final int VRAM_DMA_DESTINATION_L = 0xFF54;
+    public static final int VRAM_DMA_START = 0xFF55;
+    
+    public static final int SVBK_REGISTER = 0xFF70;
 
     public static final int ADDRESS_JOYPAD = 0xFF00;
 
@@ -90,13 +101,20 @@ public final class AddressConstants {
     public static final int NR52_REGISTER = 0xFF26;
 
     public static final int LCDC_REGISTER = 0xFF40;
+    public static final int SPEED_SWITCH_REGISTER = 0xFF4D;
     public static final int BGB_REGISTER = 0xFF47;
     public static final int OBP0_REGISTER = 0xFF48;
     public static final int OBP1_REGISTER = 0xFF49;
 
-	public static final int PALETTE_BG_DATA = 0xFF47;
-	public static final int PALETTE_SPRITE0_DATA = 0xFF48;
-	public static final int PALETTE_SPRITE1_DATA = 0xFF49;
+    public static final int PALETTE_BG_DATA = 0xFF47;
+    public static final int PALETTE_SPRITE0_DATA = 0xFF48;
+    public static final int PALETTE_SPRITE1_DATA = 0xFF49;
+    
+    public static final int C_PALETTE_BACKGROUND_INDEX = 0xFF68;
+    public static final int C_PALETTE_BACKGROUND_DATA = 0xFF69;
+        
+    public static final int C_PALETTE_SPRITE_INDEX = 0xFF6A;
+    public static final int C_PALETTE_SPRITE_DATA = 0xFF6B;
 
     //The real status register for the keypad
     public static final int KEYPAD_STATUS_REGISTER = 0xFF00;

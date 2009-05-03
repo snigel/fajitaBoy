@@ -12,12 +12,12 @@ import fajitaboy.memory.MemoryInterface;
  * CPU class for emulating the Game Boy CPU.
  * @author Tobias S, Peter O
  */
-public final class Cpu implements StateMachine {
+public class Cpu implements StateMachine {
 
     /**
      * Address bus to access the memory.
      */
-    private MemoryInterface ram;
+    protected MemoryInterface ram;
 
     /**
      * Program counter/pointer 8bit register.
@@ -41,7 +41,7 @@ public final class Cpu implements StateMachine {
     private boolean ime;
 
     // 8bit registers:
-    /**Det gör den faktiskt nu, grejen är att det kommer ändå att komma negativa värden till
+    /**Det gï¿½r den faktiskt nu, grejen ï¿½r att det kommer ï¿½ndï¿½ att komma negativa vï¿½rden till
      * The H register.
      */
     private int h;
@@ -54,7 +54,7 @@ public final class Cpu implements StateMachine {
     /**
      * The A register.
      */
-    private int a;
+    protected int a;
 
     /**
      * The B register.
@@ -148,10 +148,10 @@ public final class Cpu implements StateMachine {
         
         // Perform processor operation
         if ( !stop ) {
-        	int inst = ram.read(pc);
-            cycleTime = runInstruction(inst);	
+            int inst = ram.read(pc);
+            cycleTime = runInstruction(inst);   
         } else {
-        	cycleTime = 16; // Must proceed cycles during stop!
+            cycleTime = 16; // Must proceed cycles during stop!
         }
 
         // Handle interrupts
@@ -173,42 +173,42 @@ public final class Cpu implements StateMachine {
     }
     
     public void findInterrupts() {
-    	interruptJumpAddress = 0x0000;
-    	interruptBit = 0xFF;
-    	executeInterrupt = false;
+        interruptJumpAddress = 0x0000;
+        interruptBit = 0xFF;
+        executeInterrupt = false;
 
-    	// Look for interrupts
-    	ieReg = ram.read(ADDRESS_IE);
-    	ifReg = ram.read(ADDRESS_IF);
+        // Look for interrupts
+        ieReg = ram.read(ADDRESS_IE);
+        ifReg = ram.read(ADDRESS_IF);
 
-    	if ((ieReg & 0x01) != 0 && (ifReg & 0x01) != 0) {
-    		// V-Blank interrupt
-    		interruptJumpAddress = ADDRESS_INT_VBLANK;
-    		interruptBit = 0xFE;
-    	} else if ((ieReg & 0x02) != 0 && (ifReg & 0x02) != 0) {
-    		// LCD Status interrupt
-    		interruptJumpAddress = ADDRESS_INT_LCDSTAT;
-    		interruptBit = 0xFD;
-    	} else if ((ieReg & 0x04) != 0 && (ifReg & 0x04) != 0) {
-    		// Timer interrupt
-    		interruptJumpAddress = ADDRESS_INT_TIMER;
-    		interruptBit = 0xFB;
-    	} else if ((ieReg & 0x08) != 0 && (ifReg & 0x08) != 0) {
-    		// Serial interrupt
-    		interruptJumpAddress = ADDRESS_INT_SERIAL;
-    		interruptBit = 0xF7;
-    	} else if ((ieReg & 0x10) != 0 && (ifReg & 0x10) != 0) {
-    		// Joypad interrupt
-    		interruptJumpAddress = ADDRESS_INT_JOYPAD;
-    		interruptBit = 0xEF;
-    	}
+        if ((ieReg & 0x01) != 0 && (ifReg & 0x01) != 0) {
+            // V-Blank interrupt
+            interruptJumpAddress = ADDRESS_INT_VBLANK;
+            interruptBit = 0xFE;
+        } else if ((ieReg & 0x02) != 0 && (ifReg & 0x02) != 0) {
+            // LCD Status interrupt
+            interruptJumpAddress = ADDRESS_INT_LCDSTAT;
+            interruptBit = 0xFD;
+        } else if ((ieReg & 0x04) != 0 && (ifReg & 0x04) != 0) {
+            // Timer interrupt
+            interruptJumpAddress = ADDRESS_INT_TIMER;
+            interruptBit = 0xFB;
+        } else if ((ieReg & 0x08) != 0 && (ifReg & 0x08) != 0) {
+            // Serial interrupt
+            interruptJumpAddress = ADDRESS_INT_SERIAL;
+            interruptBit = 0xF7;
+        } else if ((ieReg & 0x10) != 0 && (ifReg & 0x10) != 0) {
+            // Joypad interrupt
+            interruptJumpAddress = ADDRESS_INT_JOYPAD;
+            interruptBit = 0xEF;
+        }
 
-    	if ( interruptJumpAddress != 0x000 ) {
-    		stop = false;
-    		if ( ime ) {
-    			executeInterrupt = true;
-    		}
-    	}
+        if ( interruptJumpAddress != 0x000 ) {
+            stop = false;
+            if ( ime ) {
+                executeInterrupt = true;
+            }
+        }
     }
 
     /**
@@ -216,8 +216,8 @@ public final class Cpu implements StateMachine {
      */
     private void handleInterrupts() {
         if (executeInterrupt) {
-        	ifReg = ram.read(ADDRESS_IF);
-        	ram.write(ADDRESS_IF, ifReg & interruptBit); // clear interrupt bit
+            ifReg = ram.read(ADDRESS_IF);
+            ram.write(ADDRESS_IF, ifReg & interruptBit); // clear interrupt bit
             ime = false;
             stop = false;
             push(pc);
@@ -323,11 +323,11 @@ public final class Cpu implements StateMachine {
             cycleTime += 8;
             break;
         case 0x0f: // RRCA
-        	if ((a & 0x01) == 1) {
+            if ((a & 0x01) == 1) {
                 a = a | 0x0100;
                 setC(1);
             } else {
-            	setC(0);
+                setC(0);
             }
             a = a >>> 1;
             cc &= 0x1f;  // Performance!
@@ -335,10 +335,11 @@ public final class Cpu implements StateMachine {
             cycleTime += 4;
             break;
         case 0x10: // STOP
-        	stop = true;
-        	cycleTime += 4;
-        	pc++;
-        	;break;
+            stopActions();
+            stop = true;
+            cycleTime += 4;
+            pc++;           
+            break;
         case 0x11: // LD DE,nn
             setDE(readnn());
             pc += 3;
@@ -922,10 +923,10 @@ public final class Cpu implements StateMachine {
             cycleTime += 8;
             break;
         case 0x76: // HALT  (Implemented identically to STOP)
-        	stop = true;
-        	cycleTime += 4;
-        	pc++;
-        	break;
+            stop = true;
+            cycleTime += 4;
+            pc++;
+            break;
         case 0x77: // LD (HL),A
             ram.write(getHL(), a);
             pc++;
@@ -1706,7 +1707,7 @@ public final class Cpu implements StateMachine {
             cycleTime += 4;
             break;
         case 0xFE: // CP, n
-        	cp(readn());
+            cp(readn());
             pc += 2;
             cycleTime += 8;
             break;
@@ -1915,13 +1916,13 @@ public final class Cpu implements StateMachine {
      */
     // TODO Optimize this function
     private void adc(final int s) {
-    	int carry = getC();
-    	add(s);
-    	if ( carry != 0 ) {  // Carry performed as separate operation ONLY if c=1
-    		int flags = cc & 0x30;  // These flags ONLY should remain set...
-    		add(1);	
-    		cc = flags | cc;
-    	}
+        int carry = getC();
+        add(s);
+        if ( carry != 0 ) {  // Carry performed as separate operation ONLY if c=1
+            int flags = cc & 0x30;  // These flags ONLY should remain set...
+            add(1); 
+            cc = flags | cc;
+        }
     }
 
     /**
@@ -1949,13 +1950,13 @@ public final class Cpu implements StateMachine {
      */
     // TODO Optimize function
     private void sbc(final int s) {
-    	int carry = getC();
-    	sub(s);
-    	if ( carry != 0 ) { // Carry performed as separate operation ONLY if c=1
-    		int flags = cc & 0x30;  // These flags ONLY should remain set...
-    		sub(1);	
-    		cc = flags | cc;
-    	}
+        int carry = getC();
+        sub(s);
+        if ( carry != 0 ) { // Carry performed as separate operation ONLY if c=1
+            int flags = cc & 0x30;  // These flags ONLY should remain set...
+            sub(1); 
+            cc = flags | cc;
+        }
     }
 
     /**
@@ -2429,48 +2430,58 @@ public final class Cpu implements StateMachine {
     }
     
     /**
+     * Called each time the STOP instruction is executed.
+     * This version of stopActions() does nothing but it
+     * can be used by subclasses to fire actions on stop.
+     * eg. change speed.
+     */
+    protected void stopActions() {
+        // nothing..
+    }
+    
+    /**
      * {@inheritDoc}
      */
     public void saveState( FileOutputStream os ) throws IOException {
-    	FileIOStreamHelper.writeData(os, pc, 2);
-    	FileIOStreamHelper.writeData(os, sp, 2);
-    	
-    	// Write registers
-    	os.write(a);
-    	os.write(b);
-    	os.write(c);
-    	os.write(d);
-    	os.write(e);
-    	os.write(cc);
-    	os.write(h);
-    	os.write(l);
-    	
-    	// Write flags
-    	FileIOStreamHelper.writeBoolean(os, ime);
-    	FileIOStreamHelper.writeBoolean(os, stop);
+        FileIOStreamHelper.writeData(os, pc, 2);
+        FileIOStreamHelper.writeData(os, sp, 2);
+        
+        // Write registers
+        os.write(a);
+        os.write(b);
+        os.write(c);
+        os.write(d);
+        os.write(e);
+        os.write(cc);
+        os.write(h);
+        os.write(l);
+        
+        // Write flags
+        FileIOStreamHelper.writeBoolean(os, ime);
+        FileIOStreamHelper.writeBoolean(os, stop);
     }
     
     /**
      * {@inheritDoc}
      */
     public void readState( FileInputStream is ) throws IOException {
-    	// Read PC and SP
-    	pc = (int)FileIOStreamHelper.readData(is, 2);
-    	sp = (int)FileIOStreamHelper.readData(is, 2);
-    	
-    	// Read registers
-    	a = is.read();
-    	b = is.read();
-    	c = is.read();
-    	d = is.read();
-    	e = is.read();
-    	cc = is.read();
-    	h = is.read();
-    	l = is.read();
-    	
-    	// Read flags
-    	ime = FileIOStreamHelper.readBoolean(is);
-    	stop = FileIOStreamHelper.readBoolean(is);
+        // Read PC and SP
+        pc = (int)FileIOStreamHelper.readData(is, 2);
+        sp = (int)FileIOStreamHelper.readData(is, 2);
+        
+        // Read registers
+        a = is.read();
+        b = is.read();
+        c = is.read();
+        d = is.read();
+        e = is.read();
+        cc = is.read();
+        h = is.read();
+        l = is.read();
+        
+        // Read flags
+        ime = FileIOStreamHelper.readBoolean(is);
+        stop = FileIOStreamHelper.readBoolean(is);
     }
 }
 
