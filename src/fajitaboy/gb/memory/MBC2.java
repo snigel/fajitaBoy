@@ -17,12 +17,12 @@ package fajitaboy.gb.memory;
   16/8 mode. S = 1 selects 4/32 mode.
  */
 
-public class MBC2 extends MBC1 {
+/*public class MBC2 extends MBC1 {
 
 
     public MBC2 (Eram ram, ROM cartridge){
-        super(ram, cartridge);
+        //super(ram, cartridge);
     }
 
    
-}
+}*/

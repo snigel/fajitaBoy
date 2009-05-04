@@ -1,5 +1,8 @@
 package fajitaboy.gb.memory;
 
+import static fajitaboy.constants.AddressConstants.ERAM_END;
+import static fajitaboy.constants.AddressConstants.ERAM_START;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,16 +28,35 @@ import fajitaboy.gb.StateMachine;
   16/8 mode. S = 1 selects 4/32 mode.
  */
 
-public class MBC1 implements MemoryInterface, StateMachine {
+public class MBC1 implements MemoryBankController {
     Eram eram;
     ROM rom;
-    int banks;
+    int romBank;
+    int romBanks;
+    int ramBank;
+    int ramBanks;
+    int ramSize;
+    boolean romBankingMode;
+    boolean ramEnable;
 
-    public MBC1 (Eram ram, ROM cartridge){
-        eram=ram;
-        rom=cartridge;
-        banks=rom.getBanks();
-        System.out.println("This rom has "+banks+" banks");
+    public MBC1 (ROM cartridge){
+        rom = cartridge;
+        romBanks = rom.getRomBanks();
+        ramSize = rom.getRamSize();
+        int eramEnd;
+        if ( ramSize == 0x8000 ) {
+        	ramBanks = 4;
+        	eramEnd = ERAM_END;
+        } else if ( ramSize == 0x0800 ) {
+        	ramBanks = 1;
+        	eramEnd = ERAM_START + 0x0800;
+        } else {
+        	ramBanks = 1;
+        	eramEnd = ERAM_END;
+        }
+        
+        eram = new Eram(ERAM_START, eramEnd, ramBanks);
+        System.out.println("This rom has "+romBanks+" banks");
     }
 
     public int forceRead(int address) {
@@ -46,36 +68,50 @@ public class MBC1 implements MemoryInterface, StateMachine {
     }
 
     public int read(int address) {
-        //System.out.println("read from ad "+address);
         return rom.read(address);
     }
 
     public void reset() {
-        setRomBank(0);
+        setRomBank(1);
         setRamBank(0);
+        romBankingMode = true;
+        ramEnable = false;
     }
     private void setRomBank(int bank){
-        if(bank == 0){ //0 is not allowed on MBC1.
+        if (bank == 0) {
             rom.setBank(1);
         }
         else{
-           rom.setBank(bank&banks-1);
+            rom.setBank(bank % romBanks);
         }
-        //System.out.println("rom bank set to "+(bank%banks)+" tried "+bank);
     }
     private void setRamBank(int bank){
-        System.out.println("ram bank set to "+bank);
         eram.setBank(bank);
     }
 
 
     public void write(int address, int data) {
-        if(address>=0x2000 && 0x4000>address){
-            setRomBank(data);
-        } else if(address>=0x4000 && 0x6000>address){
-            System.out.println("ram bank change :D");
-        } else if(address>=0x6000 && 0x8000>address){
-            System.out.println("mode change :D");
+    	
+    	if (address >= 0x0000 && address < 0x2000) {
+    		if ( (data & 0x0F) == 0x0A ) {
+    			ramEnable = true;
+    		} else {
+    			ramEnable = false;
+    		}
+    	} else if (address >= 0x2000 && address < 0x4000) {
+    		if ( (data & 0x1F) == 0 ) {
+    			setRomBank((romBank & 0xE0) + 1);
+    		} else {
+    			setRomBank((romBank & 0xE0) + (data & 0x1F));
+    		}
+        } else if (address >= 0x4000 && address < 0x6000) {
+            if ( romBankingMode ) {
+            	setRomBank(((data & 0x03) << 5) + (romBank & 0x1F));
+            } else {
+            	setRamBank(data & 0x03);
+            }
+        } else if (address >= 0x6000 && address < 0x8000) {
+            romBankingMode = ((data & 0x01) == 0);
         }
     }
 
@@ -85,7 +121,10 @@ public class MBC1 implements MemoryInterface, StateMachine {
     public void readState( FileInputStream fis ) throws IOException {
     	rom.readState(fis);
     	eram.readState(fis);
-    	banks = (int) FileIOStreamHelper.readData(fis, 4 );
+    	romBank = (int) FileIOStreamHelper.readData(fis, 4 );
+    	romBanks = (int) FileIOStreamHelper.readData(fis, 4 );
+    	ramBank = (int) FileIOStreamHelper.readData(fis, 4 );
+    	ramBanks = (int) FileIOStreamHelper.readData(fis, 4 );
     }
     
     /**
@@ -94,6 +133,16 @@ public class MBC1 implements MemoryInterface, StateMachine {
     public void saveState( FileOutputStream fos ) throws IOException {
     	rom.saveState(fos);
     	eram.saveState(fos);
-    	FileIOStreamHelper.writeData(fos, (long) banks, 4 );
+    	FileIOStreamHelper.writeData(fos, (long) romBank, 4 );
+    	FileIOStreamHelper.writeData(fos, (long) romBanks, 4 );
+    	FileIOStreamHelper.writeData(fos, (long) ramBank, 4 );
+    	FileIOStreamHelper.writeData(fos, (long) ramBanks, 4 );
     }
+
+    /**
+     * {@inheritDoc}
+     */
+	public Eram getEram() {
+		return eram;
+	}
 }

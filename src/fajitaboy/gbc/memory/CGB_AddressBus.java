@@ -69,7 +69,7 @@ public class CGB_AddressBus extends AddressBus {
         interruptRegister = new InterruptRegister();
         module[INTERRUPT_ADDRESS] = interruptRegister;
 
-        eram = new Eram(ERAM_START, ERAM_END);
+        eram = mbc.getEram();
         initialize(eram, ERAM_START, ERAM_END);
         
         module[ADDRESS_DMA] = oam;        

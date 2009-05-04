@@ -69,13 +69,13 @@ public class AddressBus implements MemoryInterface, StateMachine {
     /**
      * The external RAM that resides in the cartridge.
      */
-    protected Eram eram;
+    protected MemoryComponent eram;
     /**
      * All the input/output addresses.
      */
     protected IO io;
     
-    protected MemoryInterface mbc;
+    protected MemoryBankController mbc;
 
     /**
      * Creates the addressbus and all the parts of the memory.
@@ -123,18 +123,18 @@ public class AddressBus implements MemoryInterface, StateMachine {
 
         module[ADDRESS_DMA] = oam;
         
-        eram = new Eram(ERAM_START, ERAM_END);
+        eram = mbc.getEram();
         initialize(eram, ERAM_START, ERAM_END);
     }
 
-    protected MemoryInterface setMBC(){
+    protected MemoryBankController setMBC(){
         switch(rom.getMBC()){
         case ROM: System.out.println("MBC: None"); return rom;
-        case MBC1:System.out.println("MBC: MBC1");  return new MBC1(eram,rom);
-        case MBC1_RAM: System.out.println("MBC: MBC1+RAM");  return new MBC1(eram, rom);
-        case MBC1_RAM_BATTERY:System.out.println("MBC: MBC1+RAM+BAT");  return new MBC1(eram, rom);
-        case MBC2: System.out.println("MBC: MBC2"); return new MBC2(eram, rom);
-        case MBC2_BATTERY: System.out.println("MBC: MBC2"); return new MBC2(eram, rom);
+        case MBC1:System.out.println("MBC: MBC1");  return new MBC1(rom);
+        case MBC1_RAM: System.out.println("MBC: MBC1+RAM");  return new MBC1(rom);
+        case MBC1_RAM_BATTERY:System.out.println("MBC: MBC1+RAM+BAT");  return new MBC1(rom);
+        //case MBC2: System.out.println("MBC: MBC2"); return new MBC2(rom);
+        //case MBC2_BATTERY: System.out.println("MBC: MBC2"); return new MBC2(rom);
         default: System.out.println("MBC not supported!");return rom;
         }
     }

@@ -23,6 +23,7 @@ public class Eram extends MemoryComponent {
     protected int[] ram;
 
     private int bank;
+    private int banks;
 
     /**
      * The offset value is used for subtracting the high incoming addresses to a
@@ -48,22 +49,23 @@ public class Eram extends MemoryComponent {
      *            two values are used for creating the right size of the ERAM
      *            array and for setting the offset value
      */
-    public Eram(final int start, final int end) {
+    public Eram(final int start, final int end, final int banks) {
         this.length = end - start;
+        this.banks = banks;
         offset = start; // set offset value for addressing
         reset();
+        System.out.println("ERAM size: " + ram.length + ", banks: " + banks);
     }
-
+    
     public void setBank(int bank) {
-        this.bank = bank;
+        this.bank = bank % banks;
     }
 
     /**
      * {@inheritDoc}
      */
     public int read(final int address) {
-        System.out.println("ERAM read: "+address);
-        int addr = address - offset;
+        int addr = address - offset + 0x2000 * bank;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException(String.format(
                     "MemoryComponent: could not read 0x%04x", address));
@@ -75,8 +77,7 @@ public class Eram extends MemoryComponent {
      * {@inheritDoc}
      */
     public void write(final int address, final int data) {
-        System.out.println("ERAM write: "+address+" "+data);
-        int addr = address - offset;
+        int addr = address - offset + 0x2000 * bank;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException(String.format(
                     "MemoryComponent: could not write 0x%04x", address));
@@ -89,14 +90,14 @@ public class Eram extends MemoryComponent {
      */
     public void reset() {
         bank = 0;
-        ram = new int[length];
+        ram = new int[length * banks];
     }
 
     /**
      * {@inheritDoc}
      */
     public int forceRead(final int address) {
-        int addr = address - offset;
+        int addr = address - offset + 0x2000 * bank;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
         }
@@ -107,7 +108,7 @@ public class Eram extends MemoryComponent {
      * {@inheritDoc}
      */
     public void forceWrite(final int address, final int data) {
-        int addr = address - offset;
+        int addr = address - offset + 0x2000 * bank;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
         }
@@ -120,6 +121,7 @@ public class Eram extends MemoryComponent {
     public void readState( FileInputStream fis ) throws IOException {
     	super.readState(fis);
     	bank = (int) FileIOStreamHelper.readData( fis, 4 );
+    	banks = (int) FileIOStreamHelper.readData( fis, 4 );
     }
     
     /**
@@ -128,5 +130,6 @@ public class Eram extends MemoryComponent {
     public void saveState( FileOutputStream fos ) throws IOException {
     	super.saveState(fos);
     	FileIOStreamHelper.writeData( fos, (long) bank, 4 );
+    	FileIOStreamHelper.writeData( fos, (long) banks, 4 );
     }
 }
