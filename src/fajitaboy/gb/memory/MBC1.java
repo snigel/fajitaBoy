@@ -1,7 +1,6 @@
 package fajitaboy.gb.memory;
 
-import static fajitaboy.constants.AddressConstants.ERAM_END;
-import static fajitaboy.constants.AddressConstants.ERAM_START;
+import static fajitaboy.constants.AddressConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,32 +29,47 @@ import fajitaboy.gb.StateMachine;
 
 public class MBC1 implements MemoryBankController {
     Eram eram;
-    ROM rom;
+	ROM rom;
     int romBank;
     int romBanks;
     int ramBank;
     int ramBanks;
     int ramSize;
+    int eramEnd;
     boolean romBankingMode;
     boolean ramEnable;
 
     public MBC1 (ROM cartridge){
         rom = cartridge;
         romBanks = rom.getRomBanks();
-        ramSize = rom.getRamSize();
-        int eramEnd;
-        if ( ramSize == 0x8000 ) {
+        int ramType = rom.read(ADDRESS_CARTRIDGE_TYPE);
+        
+        switch ( ramType ) {
+        case 1:
+        	ramBanks = 1;
+        	ramSize = 0x0800;
+        	eramEnd = ADDRESS_ERAM_START + 0x0800;
+        	break;
+        case 2:
+        	ramBanks = 1;
+        	ramSize = 0x2000;
+        	eramEnd = ADDRESS_ERAM_END;
+        	break;
+        case 3:
         	ramBanks = 4;
-        	eramEnd = ERAM_END;
-        } else if ( ramSize == 0x0800 ) {
-        	ramBanks = 1;
-        	eramEnd = ERAM_START + 0x0800;
-        } else {
-        	ramBanks = 1;
-        	eramEnd = ERAM_END;
+        	ramSize = 0x8000;
+        	eramEnd = ADDRESS_ERAM_END;
+        	break;
+        default:
+        	ramBanks = 0;
+        	ramSize = 0;
+        	eramEnd = ADDRESS_ERAM_START;
+        	break;
         }
         
-        eram = new Eram(ERAM_START, eramEnd, ramBanks);
+        if ( ramSize > 0 ) {
+        	eram = new Eram(ADDRESS_ERAM_START, eramEnd, ramBanks);
+        }
         System.out.println("This rom has "+romBanks+" banks");
     }
 
@@ -68,7 +82,12 @@ public class MBC1 implements MemoryBankController {
     }
 
     public int read(int address) {
-        return rom.read(address);
+    	if ( address >= 0x0000 && address < 0x8000 ) {
+    		return rom.read(address);
+    	} else if (address >= ADDRESS_ERAM_START && address < eramEnd && ramEnable && eram != null) {
+    		return eram.read(address);
+    	}
+    	return 0;
     }
 
     public void reset() {
@@ -80,13 +99,13 @@ public class MBC1 implements MemoryBankController {
     private void setRomBank(int bank){
         if (bank == 0) {
             rom.setBank(1);
-        }
-        else{
+        } else {
             rom.setBank(bank % romBanks);
         }
     }
     private void setRamBank(int bank){
-        eram.setBank(bank);
+    	if (eram != null)
+    		eram.setBank(bank);
     }
 
 
@@ -107,12 +126,15 @@ public class MBC1 implements MemoryBankController {
         } else if (address >= 0x4000 && address < 0x6000) {
             if ( romBankingMode ) {
             	setRomBank(((data & 0x03) << 5) + (romBank & 0x1F));
-            } else {
+            } else if (eram != null) {
             	setRamBank(data & 0x03);
             }
         } else if (address >= 0x6000 && address < 0x8000) {
             romBankingMode = ((data & 0x01) == 0);
+        } else if (address >= ADDRESS_ERAM_START && address < eramEnd && ramEnable && eram != null ) {
+        	eram.write(address, data);
         }
+    	
     }
 
     /**
@@ -125,6 +147,8 @@ public class MBC1 implements MemoryBankController {
     	romBanks = (int) FileIOStreamHelper.readData(fis, 4 );
     	ramBank = (int) FileIOStreamHelper.readData(fis, 4 );
     	ramBanks = (int) FileIOStreamHelper.readData(fis, 4 );
+    	ramSize = (int) FileIOStreamHelper.readData(fis, 4 );
+    	eramEnd = (int) FileIOStreamHelper.readData(fis, 4 );
     }
     
     /**
@@ -137,12 +161,15 @@ public class MBC1 implements MemoryBankController {
     	FileIOStreamHelper.writeData(fos, (long) romBanks, 4 );
     	FileIOStreamHelper.writeData(fos, (long) ramBank, 4 );
     	FileIOStreamHelper.writeData(fos, (long) ramBanks, 4 );
+    	FileIOStreamHelper.writeData(fos, (long) ramSize, 4 );
+    	FileIOStreamHelper.writeData(fos, (long) eramEnd, 4 );
     }
 
-    /**
-     * {@inheritDoc}
-     */
 	public Eram getEram() {
 		return eram;
+	}
+	
+	public ROM getRom() {
+		return rom;
 	}
 }

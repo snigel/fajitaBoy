@@ -10,10 +10,13 @@ import fajitaboy.FileIOStreamHelper;
  * External RAM that is located on the cartridge.
  * @author Adam Hulin, Johan Gustafsson
  */
-public class NoEram extends MemoryComponent {
+public class NoEram extends Eram {
+	
+	public NoEram() {
+	    super();	
+	}
 
-    
-    public void setBank(int bank) {
+	public void setBank(int bank) {
     }
 
     /**

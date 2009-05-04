@@ -1,15 +1,8 @@
 package fajitaboy.gbc.lcd;
 
-import static fajitaboy.constants.AddressConstants.ADDRESS_SCX;
-import static fajitaboy.constants.AddressConstants.ADDRESS_SCY;
-import static fajitaboy.constants.AddressConstants.ADDRESS_PALETTE_BG_DATA;
-import static fajitaboy.constants.LCDConstants.GB_LCD_H;
-import static fajitaboy.constants.LCDConstants.GB_LCD_W;
-import static fajitaboy.constants.LCDConstants.GB_MAP_H;
-import static fajitaboy.constants.LCDConstants.GB_MAP_VISIBLE_W;
-import static fajitaboy.constants.LCDConstants.GB_MAP_W;
-import static fajitaboy.constants.LCDConstants.GB_TILES;
-import static fajitaboy.constants.LCDConstants.GB_TILE_W;
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.LCDConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 import fajitaboy.gb.lcd.LCDC;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.AddressBus;
@@ -69,7 +62,7 @@ public class CGB_BackgroundMap {
             addr_base = 0x9800;
         }
         
-        for (int cx = 0; cx < GB_MAP_W; cx++) {
+        for (int cx = 0; cx < LCD_MAP_W; cx++) {
             /*
              * ty & tx, the index in the background array.
              * ty should be firstTileY or firstTileY + 1
@@ -77,7 +70,7 @@ public class CGB_BackgroundMap {
             int ty = firstTileY; // (firstTileY + (firstTileX + cx)/GB_MAP_H) % GB_MAP_H; 
 
             // addr, where we read the tile pattern nr.
-            int addr = addr_base + ty * GB_MAP_W + cx;
+            int addr = addr_base + ty * LCD_MAP_W + cx;
             
             tileAttributes[ty][cx].update(vram.read(addr, 1));
 
@@ -122,9 +115,9 @@ public class CGB_BackgroundMap {
         dy = (firstTileY)*8 - scy;
         datay = firstTileY % 32;
 
-        for ( int x = 0; x < GB_MAP_VISIBLE_W + 1; x++ ) {
+        for ( int x = 0; x < LCD_MAP_VISIBLE_W + 1; x++ ) {
             dx = (firstTileX + x)*GB_TILE_W - scx;
-            datax = (firstTileX + x) % GB_MAP_W;
+            datax = (firstTileX + x) % LCD_MAP_W;
             tileId = tileAddresses[datay][datax] + tileAttributes[datay][datax].vramBank * 2 * GB_TILES;
             screen.blitTile(tiles[tileId], tileAttributes[datay][datax].PaletteNo, dx, dy, ly, true);
             

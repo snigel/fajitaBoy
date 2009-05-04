@@ -101,11 +101,11 @@ public class SoundChannel3 implements StateMachine {
      */
     public final byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
-        if ((ab.read(NR30_REGISTER) & 0x80) == 0) {
+        if ((ab.read(ADDRESS_NR30) & 0x80) == 0) {
             return destBuff;
         }
 
-        if ((ab.read(NR33_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR33) & 0x100) == 0){
             calcFreq();
         }
 
@@ -135,7 +135,7 @@ public class SoundChannel3 implements StateMachine {
         }
 
         if (toneLength < 0 && lengthEnabled &&
-                (ab.read(NR31_REGISTER) & 0x100) == 0) {
+                (ab.read(ADDRESS_NR31) & 0x100) == 0) {
             calcToneLength();
         }
 
@@ -147,8 +147,8 @@ public class SoundChannel3 implements StateMachine {
      * parameters.
      */
     private void calcFreq() {
-        int low1 = ab.read(SOUND3_LOW);
-        int high1 = ab.read(SOUND3_HIGH) * 0x100;
+        int low1 = ab.read(ADDRESS_SOUND3_LOW);
+        int high1 = ab.read(ADDRESS_SOUND3_HIGH) * 0x100;
         int tmp = (2047 - (high1 + low1) & 0x7ff);
         if (tmp != 0) {
             freq = 65536 / tmp;
@@ -161,7 +161,7 @@ public class SoundChannel3 implements StateMachine {
             calcToneLength();
             calcWavePattern();
             oldFreq = freq;
-            ab.forceWrite(NR33_REGISTER, low1 + 0x100);
+            ab.forceWrite(ADDRESS_NR33, low1 + 0x100);
             return;
         }
     }
@@ -172,7 +172,7 @@ public class SoundChannel3 implements StateMachine {
      * @return The shift number.
      */
     private int calcShift() {
-        int nr32 = (ab.read(NR32_REGISTER) & 0x60) >> 5;
+        int nr32 = (ab.read(ADDRESS_NR32) & 0x60) >> 5;
         switch (nr32) {
         case 0:
             return 9;
@@ -197,10 +197,10 @@ public class SoundChannel3 implements StateMachine {
         }
         wavePattern = new byte[32];
         int k = 0;
-        for (int i = 0; i <= (SOUND3_WAVEPATTERN_END - SOUND3_WAVEPATTERN_START); i++) {
-            wavePattern[k] = (byte) (((ab.read((SOUND3_WAVEPATTERN_START + i)) & 0xF0) >> 4) * 2);
+        for (int i = 0; i <= (ADDRESS_SOUND3_WAVEPATTERN_END - ADDRESS_SOUND3_WAVEPATTERN_START); i++) {
+            wavePattern[k] = (byte) (((ab.read((ADDRESS_SOUND3_WAVEPATTERN_START + i)) & 0xF0) >> 4) * 2);
             k++;
-            wavePattern[k] = (byte) ((ab.read((SOUND3_WAVEPATTERN_START + i)) & 0xF) * 2);
+            wavePattern[k] = (byte) ((ab.read((ADDRESS_SOUND3_WAVEPATTERN_START + i)) & 0xF) * 2);
             k++;
         }
     }
@@ -210,13 +210,13 @@ public class SoundChannel3 implements StateMachine {
      * tone length.
      */
     private void calcToneLength() {
-        lengthEnabled = ((ab.read(NR34_REGISTER) & 0x40) > 0);
-        int nr31 = ab.read(NR31_REGISTER);
+        lengthEnabled = ((ab.read(ADDRESS_NR34) & 0x40) > 0);
+        int nr31 = ab.read(ADDRESS_NR31);
         if (lengthEnabled) {
             toneLength = (int) (((256 - ((double)
                     (nr31 & 0xFF))) / 256) * sampleRate);
             //Reset the length counter.
-            ab.forceWrite(NR31_REGISTER, nr31 + 0x100);
+            ab.forceWrite(ADDRESS_NR31, nr31 + 0x100);
         }
     }
 

@@ -148,11 +148,11 @@ public class SoundChannel1 implements StateMachine {
     public byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        if ((ab.read(NR13_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR13) & 0x100) == 0){
             calcFreq();
         }
         // If the sound channel is mute, return.
-        if (((ab.read(NR12_REGISTER) & 0xF0) >> 4) == 0) {
+        if (((ab.read(ADDRESS_NR12) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
 
@@ -181,16 +181,16 @@ public class SoundChannel1 implements StateMachine {
                 if (sweepLength != 0) {
                     if (((sweepPos % (sweepLength * samples)) == 0)
                           /*  && (sweepNr < sweepSteps)*/) {
-                        int nr13 = ab.read(NR13_REGISTER);
+                        int nr13 = ab.read(ADDRESS_NR13);
                         if (sweepDirection == 0) {
                             freq = freq + (int) (freq / (Math.pow(2, sweepNr)));
                             calcWavePattern();
-                            ab.forceWrite(NR13_REGISTER, nr13 + 0x100);
+                            ab.forceWrite(ADDRESS_NR13, nr13 + 0x100);
                             oldFreq = freq;
                         } else {
                             freq = freq - (int) (freq / (Math.pow(2, sweepNr)));
                             calcWavePattern();
-                            ab.forceWrite(NR13_REGISTER, nr13 + 0x100);
+                            ab.forceWrite(ADDRESS_NR13, nr13 + 0x100);
                             oldFreq = freq;
                         }
                     }
@@ -218,15 +218,15 @@ public class SoundChannel1 implements StateMachine {
         // It isn't pretty :) It checks if the forced written bit has
         // been reset. That indicates that we have a new length to work with.
         if (toneLength < 0 && lengthEnabled &&
-                (ab.read(NR11_REGISTER) & 0x100) == 0) {
+                (ab.read(ADDRESS_NR11) & 0x100) == 0) {
             calcToneLength();
         }
 
-        if ((ab.read(NR12_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR12) & 0x100) == 0){
             calcEnvelope();
         }
 
-        if ((ab.read(NR10_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR10) & 0x100) == 0){
             calcSweep();
         }
 
@@ -238,7 +238,7 @@ public class SoundChannel1 implements StateMachine {
      */
     private void calcEnvelope() {
         // Read the envelope register.
-        int nr12 = ab.read(NR12_REGISTER);
+        int nr12 = ab.read(ADDRESS_NR12);
         amp = ((nr12 & 0xF0) >> 4) * 2;
         envelopeStepLength = nr12 & 0x7;
         int direction = nr12 & 0x8;
@@ -248,7 +248,7 @@ public class SoundChannel1 implements StateMachine {
             envelopeStep = 2;
         }
         envelopePos = 0;
-        ab.forceWrite(NR12_REGISTER, nr12 + 0x100);
+        ab.forceWrite(ADDRESS_NR12, nr12 + 0x100);
     }
 
     /**
@@ -256,8 +256,8 @@ public class SoundChannel1 implements StateMachine {
      * parameters.
      */
     private void calcFreq() {
-        int low1 = ab.read(SOUND1_LOW);
-        int high1 = ab.read(SOUND1_HIGH) * 0x100;
+        int low1 = ab.read(ADDRESS_SOUND1_LOW);
+        int high1 = ab.read(ADDRESS_SOUND1_HIGH) * 0x100;
         // Calculate the frequency
         int tmp = (2047 - (high1 + low1) & 0x7ff);
         if (tmp != 0) {
@@ -273,7 +273,7 @@ public class SoundChannel1 implements StateMachine {
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
-            ab.forceWrite(SOUND1_LOW, low1 + 0x100);
+            ab.forceWrite(ADDRESS_SOUND1_LOW, low1 + 0x100);
         }
     }
 
@@ -282,14 +282,14 @@ public class SoundChannel1 implements StateMachine {
      * tone length.
      */
     private void calcToneLength() {
-        lengthEnabled = ((ab.read(NR14_REGISTER) & 0x40) > 0);
-        int nr11 = ab.read(NR11_REGISTER);
+        lengthEnabled = ((ab.read(ADDRESS_NR14) & 0x40) > 0);
+        int nr11 = ab.read(ADDRESS_NR11);
         if (lengthEnabled) {
             toneLength = (int) (((64 - ((double)
                     (nr11 & 0x3F))) / 256) * sampleRate);
             //Add a ninth bit to indicate that the length has been read.
             //If the bit is reset, we know that a write has taken place.
-            ab.forceWrite(NR11_REGISTER, nr11 + 0x100);
+            ab.forceWrite(ADDRESS_NR11, nr11 + 0x100);
         }
     }
 
@@ -299,8 +299,8 @@ public class SoundChannel1 implements StateMachine {
     private void calcSweep() {
         sweepNr = 0;
         sweepPos = 0;
-        int nr10 = ab.read(NR10_REGISTER);
-        ab.forceWrite(NR10_REGISTER, nr10 + 0x100);
+        int nr10 = ab.read(ADDRESS_NR10);
+        ab.forceWrite(ADDRESS_NR10, nr10 + 0x100);
         sweepNr = nr10 & 0x7;
         sweepDirection = nr10 & 0x8;
         int sweepTime = ((nr10 & 0x70) >> 4);
@@ -345,7 +345,7 @@ public class SoundChannel1 implements StateMachine {
         if (waveLength == 0) {
             waveLength = 1;
         }
-        int nr11 = ((ab.read(NR11_REGISTER) & 0xC0) >> 6);
+        int nr11 = ((ab.read(ADDRESS_NR11) & 0xC0) >> 6);
         switch (nr11) {
         case 0:
             return (int) ((float) waveLength * 0.125);

@@ -13,7 +13,7 @@ import fajitaboy.gb.StateMachine;
 
 import static fajitaboy.constants.AddressConstants.*;
 
-public class ROM implements MemoryBankController, MemoryBankInterface {
+public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
 
     /**
      * This array holds the memory space of RAM.
@@ -31,8 +31,6 @@ public class ROM implements MemoryBankController, MemoryBankInterface {
      * Chooses which Rom bank to use. Default is 1.
      */
     private int bank;
-    
-    private MemoryComponent eram;
 
     public void setBank(int bank) { // For MBC
         this.bank = bank;
@@ -47,27 +45,6 @@ public class ROM implements MemoryBankController, MemoryBankInterface {
         this.offset = start;
         setBank(1);
         readRom(romPath);
-        if ( ram[0x0147] == 0x00 ) {
-        	eram = new NoEram();
-        } else if ( ram[0x0147] == 0x08 || ram[0x0147] == 0x09 ) {
-        	
-        	// ROM has a normal Bank, initialise it.
-        	int ramSize = getRamSize();
-        	int ramBanks;
-            int eramEnd;
-            if ( ramSize == 0x8000 ) {
-            	ramBanks = 4;
-            	eramEnd = ERAM_END;
-            } else if ( ramSize == 0x0800 ) {
-            	ramBanks = 1;
-            	eramEnd = ERAM_START + 0x0800;
-            } else {
-            	ramBanks = 1;
-            	eramEnd = ERAM_END;
-            }
-            
-            eram = new Eram(ERAM_START, eramEnd, ramBanks);
-        }
     }
 
     public int forceRead(int address) {
@@ -94,11 +71,11 @@ public class ROM implements MemoryBankController, MemoryBankInterface {
     }
 
     public int getMBC() {
-        return ram[CARTRIDGE_TYPE];
+        return ram[ADDRESS_CARTRIDGE_TYPE];
     }
 
     public int getRomBanks() {
-        switch (ram[0x0148]) {
+        switch (ram[ADDRESS_ROM_SIZE]) {
         case 0:
             return 2;
         case 1:
@@ -124,21 +101,6 @@ public class ROM implements MemoryBankController, MemoryBankInterface {
         }
     }
     
-    public int getRamSize() {
-    	switch (ram[0x0149]) {
-        case 0:
-            return 0x0000;
-        case 1:
-            return 0x0800;
-        case 2:
-            return 0x2000;
-        case 3:
-            return 0x8000;
-        default:
-            return 0x0000;
-        }
-    }
-
     /**
      * This function reads a rom from a file into the ram array.
      * @param romPath
@@ -214,12 +176,4 @@ public class ROM implements MemoryBankController, MemoryBankInterface {
     		FileIOStreamHelper.writeData( fos, ram[i], 1 );
     	} */
     }
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Eram getEram() {
-		return null;
-	}
-
 }

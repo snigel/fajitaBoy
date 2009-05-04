@@ -1,6 +1,7 @@
 package fajitaboy.gb.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.CartridgeConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
 
 import java.io.FileInputStream;
@@ -8,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import fajitaboy.FileIOStreamHelper;
+import fajitaboy.constants.CartridgeConstants;
 import fajitaboy.gb.StateMachine;
 import fajitaboy.gb.memory.DebugMemory;
 
@@ -66,10 +68,7 @@ public class AddressBus implements MemoryInterface, StateMachine {
      *
      */
     protected Hram hram;
-    /**
-     * The external RAM that resides in the cartridge.
-     */
-    protected MemoryComponent eram;
+
     /**
      * All the input/output addresses.
      */
@@ -90,52 +89,49 @@ public class AddressBus implements MemoryInterface, StateMachine {
     protected void initializeModule(final String romPath) {
         // All modules must be initialized here
         debug = new DebugMemory();
-        initialize(debug, DEBUG_START, DEBUG_END);
+        initialize(debug, ADDRESS_DEBUG_START, ADDRESS_DEBUG_END);
 
-        io = new IO(IO_START, IO_END);
-        initialize(io, IO_START, IO_END);
+        io = new IO(ADDRESS_IO_START, ADDRESS_IO_END);
+        initialize(io, ADDRESS_IO_START, ADDRESS_IO_END);
 
-        ramh = new RamHigh(RAMH_START, RAMH_END);
-        initialize(ramh, RAMH_START, RAMH_END);
+        ramh = new RamHigh(ADDRESS_RAMH_START, ADDRESS_RAMH_END);
+        initialize(ramh, ADDRESS_RAMH_START, ADDRESS_RAMH_END);
 
-        raml = new RamLow(RAML_START, RAML_END);
-        initialize(raml, RAML_START, RAML_END);
+        raml = new RamLow(ADDRESS_RAML_START, ADDRESS_RAML_END);
+        initialize(raml, ADDRESS_RAML_START, ADDRESS_RAML_END);
 
-        echo = new Echo(this, RAML_START, ECHO_START);
-        initialize(echo, ECHO_START, ECHO_END);
+        echo = new Echo(this, ADDRESS_RAML_START, ADDRESS_ECHO_START);
+        initialize(echo, ADDRESS_ECHO_START, ADDRESS_ECHO_END);
 
-        vram = new Vram(VRAM_START, VRAM_END);
-        initialize(vram, VRAM_START, VRAM_END);
+        vram = new Vram(ADDRESS_VRAM_START, ADDRESS_VRAM_END);
+        initialize(vram, ADDRESS_VRAM_START, ADDRESS_VRAM_END);
 
-        hram = new Hram(HRAM_START, HRAM_END);
-        initialize(hram, HRAM_START, HRAM_END);
+        hram = new Hram(ADDRESS_HRAM_START, ADDRESS_HRAM_END);
+        initialize(hram, ADDRESS_HRAM_START, ADDRESS_HRAM_END);
 
-        oam = new Oam(OAM_START, OAM_END, this);
-        initialize(oam, OAM_START, OAM_END);
+        oam = new Oam(ADDRESS_OAM_START, ADDRESS_OAM_END, this);
+        initialize(oam, ADDRESS_OAM_START, ADDRESS_OAM_END);
         
-        rom = new ROM(CARTRIDGE_START, romPath);
+        rom = new ROM(ADDRESS_CARTRIDGE_START, romPath);
         mbc = setMBC();
-        
-        initialize(mbc, CARTRIDGE_START, CARTRIDGE_END);
+        initialize(mbc, ADDRESS_CARTRIDGE_START, ADDRESS_CARTRIDGE_END);
+        initialize(mbc, ADDRESS_ERAM_START, ADDRESS_ERAM_END);
         
         interruptRegister = new InterruptRegister();
-        module[INTERRUPT_ADDRESS] = interruptRegister;
+        module[ADDRESS_INTERRUPT] = interruptRegister;
 
         module[ADDRESS_DMA] = oam;
-        
-        eram = mbc.getEram();
-        initialize(eram, ERAM_START, ERAM_END);
     }
 
     protected MemoryBankController setMBC(){
         switch(rom.getMBC()){
-        case ROM: System.out.println("MBC: None"); return rom;
-        case MBC1:System.out.println("MBC: MBC1");  return new MBC1(rom);
-        case MBC1_RAM: System.out.println("MBC: MBC1+RAM");  return new MBC1(rom);
-        case MBC1_RAM_BATTERY:System.out.println("MBC: MBC1+RAM+BAT");  return new MBC1(rom);
-        //case MBC2: System.out.println("MBC: MBC2"); return new MBC2(rom);
-        //case MBC2_BATTERY: System.out.println("MBC: MBC2"); return new MBC2(rom);
-        default: System.out.println("MBC not supported!");return rom;
+        case CART_TYPE_ROM: System.out.println("MBC: None"); return new NoMBC(rom);
+        case CART_TYPE_MBC1:System.out.println("MBC: MBC1");  return new MBC1(rom);
+        case CART_TYPE_MBC1_RAM: System.out.println("MBC: MBC1+RAM");  return new MBC1(rom);
+        case CART_TYPE_MBC1_RAM_BATTERY:System.out.println("MBC: MBC1+RAM+BAT");  return new MBC1(rom);
+        //case CART_TYPE_MBC2: System.out.println("MBC: MBC2"); return new MBC2(rom);
+        //case CART_TYPE_MBC2_BATTERY: System.out.println("MBC: MBC2"); return new MBC2(rom);
+        default: System.out.println("MBC not supported!"); return null;
         }
     }
     /**
@@ -210,14 +206,9 @@ public class AddressBus implements MemoryInterface, StateMachine {
         vram.reset();
         oam.reset();
         hram.reset();
-        eram.reset();
         io.reset();
     }
 
-    /**
-     * DJ_BISSE WAS HERE
-     * @return Returns 
-     */
     public Vram getVram() {
     	return vram;
     }
@@ -238,7 +229,6 @@ public class AddressBus implements MemoryInterface, StateMachine {
         vram.readState(fis);
         oam.readState(fis);
         hram.readState(fis);
-        eram.readState(fis);
         io.readState(fis);
     }
     
@@ -254,7 +244,6 @@ public class AddressBus implements MemoryInterface, StateMachine {
         vram.saveState(fos);
         oam.saveState(fos);
         hram.saveState(fos);
-        eram.saveState(fos);
         io.saveState(fos);
     }
 }

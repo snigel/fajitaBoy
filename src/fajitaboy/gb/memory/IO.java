@@ -56,16 +56,16 @@ public class IO extends MemoryComponent {
                     String.format("RamLow.java: %04x", address));
         }
         switch (address) {
-            case DIV_REGISTER: ram[addr] = 0; break;
-            case LY_REGISTER: break;
+            case ADDRESS_DIV: ram[addr] = 0; break;
+            case ADDRESS_LY: break;
             //Used for hack to get sound length, envelope and sweep to work.
-            case NR10_REGISTER:ram[addr] = data & 0xFF; break;
-            case NR11_REGISTER:ram[addr] = data & 0xFF; break;
-            case NR12_REGISTER:ram[addr] = data & 0xFF; break;
-            case NR21_REGISTER:ram[addr] = data & 0xFF; break;            
-            case NR31_REGISTER:ram[addr] = data & 0xFF; break;
-            case NR41_REGISTER:ram[addr] = data & 0xFF; break;
-            case NR42_REGISTER:ram[addr] = data & 0xFF; break;
+            case ADDRESS_NR10:ram[addr] = data & 0xFF; break;
+            case ADDRESS_NR11:ram[addr] = data & 0xFF; break;
+            case ADDRESS_NR12:ram[addr] = data & 0xFF; break;
+            case ADDRESS_NR21:ram[addr] = data & 0xFF; break;            
+            case ADDRESS_NR31:ram[addr] = data & 0xFF; break;
+            case ADDRESS_NR41:ram[addr] = data & 0xFF; break;
+            case ADDRESS_NR42:ram[addr] = data & 0xFF; break;
             case ADDRESS_JOYPAD: ram[addr] = data; jp.refresh(); break;
             default: ram[addr] = data; break;
 
@@ -77,26 +77,26 @@ public class IO extends MemoryComponent {
      */
     public final void reset() {
         ram = new int[length];
-        write(NR10_REGISTER, 0x80);
-        write(NR11_REGISTER, 0xBF);
-        write(NR12_REGISTER, 0xF3);
-        write(NR14_REGISTER, 0xBF);
-        write(NR21_REGISTER, 0x3F);
-        write(NR24_REGISTER, 0xBF);
-        write(NR30_REGISTER, 0x7F);
-        write(NR31_REGISTER, 0xFF);
-        write(NR32_REGISTER, 0x9F);
-        write(NR34_REGISTER, 0xBF);
-        write(NR41_REGISTER, 0xFF);
-        write(NR44_REGISTER, 0xBF);
-        write(NR50_REGISTER, 0x77);
-        write(NR51_REGISTER, 0xF3);
-        write(NR52_REGISTER, 0xF1); // SGB uses F0 instead.
-        write(LCDC_REGISTER, 0x91);
-        write(BGB_REGISTER, 0xFC);
-        write(OBP0_REGISTER, 0xFF);
-        write(OBP1_REGISTER, 0xFF);
-        write(SOUND_ON_OFF, 0x80);
+        write(ADDRESS_NR10, 0x80);
+        write(ADDRESS_NR11, 0xBF);
+        write(ADDRESS_NR12, 0xF3);
+        write(ADDRESS_NR14, 0xBF);
+        write(ADDRESS_NR21, 0x3F);
+        write(ADDRESS_NR24, 0xBF);
+        write(ADDRESS_NR30, 0x7F);
+        write(ADDRESS_NR31, 0xFF);
+        write(ADDRESS_NR32, 0x9F);
+        write(ADDRESS_NR34, 0xBF);
+        write(ADDRESS_NR41, 0xFF);
+        write(ADDRESS_NR44, 0xBF);
+        write(ADDRESS_NR50, 0x77);
+        write(ADDRESS_NR51, 0xF3);
+        write(ADDRESS_NR52, 0xF1); // SGB uses F0 instead.
+        write(ADDRESS_LCDC, 0x91);
+        write(ADDRESS_BGB, 0xFC);
+        write(ADDRESS_OBP0, 0xFF);
+        write(ADDRESS_OBP1, 0xFF);
+        write(ADDRESS_SOUND_ON_OFF, 0x80);
     }
 
     /**
@@ -155,12 +155,12 @@ public class IO extends MemoryComponent {
             boolean direction = (joyPad & 0x10) == 0;
 
             // reset lower nibble
-            joyPad &= UPPER_NIBBLE_MASK;
+            joyPad &= BITMASK_UPPER_NIBBLE_MASK;
             if (!(button ^ direction)) {
                 // if neither direction nor button is selected
                 // or if both are selected, set lower nibble to
                 // 1 == no button pressed
-                joyPad |= LOWER_NIBBLE_MASK;
+                joyPad |= BITMASK_LOWER_NIBBLE_MASK;
             } else if (button) {
                 joyPad |= a ? 0x00 : 0x01;
                 joyPad |= b ? 0x00 : 0x02;

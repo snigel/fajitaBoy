@@ -1,5 +1,7 @@
 package fajitaboy.constants;
 
+// Constant prefix GB/CGB shows which hardware type the constant regards.
+
 public final class HardwareConstants {
 	public static final int GB_CLOCK_FREQUENCY = 4194304; // MHz
 	public static final int GB_CYCLES_PER_LINE = 456;
@@ -16,12 +18,11 @@ public final class HardwareConstants {
 	public static final int GB_TIMER_CLOCK_3 = 256;
 	public static final int GB_DIV_CLOCK = 64;
 	public static final int GB_ADDRESS_SPACE = 0x10000;
-	
-	public static final int ROM = 0x00;
-	public static final int MBC1 = 0x01;
-	public static final int MBC1_RAM = 0x02;
-	public static final int MBC1_RAM_BATTERY = 0x03;
-	public static final int MBC2 = 0x05;
-	public static final int MBC2_BATTERY = 0x06;
+	public static final int GB_SPRITES = 192;
+    public static final int GB_SPRITE_ATTRIBUTES = 40;
+	public static final int GB_TILES = 192;
+	public static final int GB_TILE_W = 8;
+	public static final int GB_TILE_H = 8;
+	public static final int CGB_TILES = 384;
 	
 }

@@ -21,8 +21,8 @@ public class CGB_IO extends IO {
     public void write(final int address, final int data) {
         int addr = address - offset;
         switch (address) {
-            case SVBK_REGISTER: ram[addr] = data;wram.setBank(data & 0x07); break;
-            case VRAM_BANK: vram.setBank(data & 0x01); break;
+            case ADDRESS_SVBK: ram[addr] = data;wram.setBank(data & 0x07); break;
+            case ADDRESS_VRAM_BANK: vram.setBank(data & 0x01); break;
             /*case VRAM_DMA_START: 
                 // start VRAM DMA transfer
                 int src = 

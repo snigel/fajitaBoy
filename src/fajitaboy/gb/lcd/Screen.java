@@ -9,7 +9,7 @@ public class Screen {
 	public int bits[][];
 
 	public Screen() {
-		bits = new int[GB_LCD_H][GB_LCD_W];
+		bits = new int[LCD_H][LCD_W];
 	}
 	
 	/**
@@ -25,7 +25,7 @@ public class Screen {
 	 * @param clr Color to fill screen with
 	 */
 	public void clear(int clr) {
-		for ( int x = 0; x < GB_LCD_H; x++ ) {
+		for ( int x = 0; x < LCD_H; x++ ) {
 			clearLine(x, clr);
 		}
 	}
@@ -36,7 +36,7 @@ public class Screen {
 	 * @param ly Line to clear
 	 */
 	public void clearLine(int clr, int ly) {
-		for ( int x = 0; x < GB_LCD_W; x++ ) {
+		for ( int x = 0; x < LCD_W; x++ ) {
 			bits[ly][x] = clr;
 		}
 	}

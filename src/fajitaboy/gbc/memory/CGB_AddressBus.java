@@ -38,42 +38,39 @@ public class CGB_AddressBus extends AddressBus {
         
         // All modules must be initialized here
         debug = new DebugMemory();
-        initialize(debug, DEBUG_START, DEBUG_END);
+        initialize(debug, ADDRESS_DEBUG_START, ADDRESS_DEBUG_END);
 
-        ramh = new CGB_RamHigh(RAMH_START, RAMH_END);
-        initialize(ramh, RAMH_START, RAMH_END);
+        ramh = new CGB_RamHigh(ADDRESS_RAMH_START, ADDRESS_RAMH_END);
+        initialize(ramh, ADDRESS_RAMH_START, ADDRESS_RAMH_END);
 
-        raml = new RamLow(RAML_START, RAML_END);
-        initialize(raml, RAML_START, RAML_END);
+        raml = new RamLow(ADDRESS_RAML_START, ADDRESS_RAML_END);
+        initialize(raml, ADDRESS_RAML_START, ADDRESS_RAML_END);
 
-        echo = new Echo(this, RAML_START, ECHO_START);
-        initialize(echo, ECHO_START, ECHO_END);
+        echo = new Echo(this, ADDRESS_RAML_START, ADDRESS_ECHO_START);
+        initialize(echo, ADDRESS_ECHO_START, ADDRESS_ECHO_END);
 
-        vram = new CGB_Vram(VRAM_START, VRAM_END, this);
-        initialize(vram, VRAM_START, VRAM_END);
+        vram = new CGB_Vram(ADDRESS_VRAM_START, ADDRESS_VRAM_END, this);
+        initialize(vram, ADDRESS_VRAM_START, ADDRESS_VRAM_END);
 
-        hram = new Hram(HRAM_START, HRAM_END);
-        initialize(hram, HRAM_START, HRAM_END);
+        hram = new Hram(ADDRESS_HRAM_START, ADDRESS_HRAM_END);
+        initialize(hram, ADDRESS_HRAM_START, ADDRESS_HRAM_END);
 
-        oam = new Oam(OAM_START, OAM_END, this);
-        initialize(oam, OAM_START, OAM_END);
+        oam = new Oam(ADDRESS_OAM_START, ADDRESS_OAM_END, this);
+        initialize(oam, ADDRESS_OAM_START, ADDRESS_OAM_END);
         
-        rom = new ROM(CARTRIDGE_START, romPath);
+        rom = new ROM(ADDRESS_CARTRIDGE_START, romPath);
         mbc = setMBC();
+        initialize(mbc, ADDRESS_CARTRIDGE_START, ADDRESS_CARTRIDGE_END);
+        initialize(mbc, ADDRESS_ERAM_START, ADDRESS_ERAM_END);
         
-        initialize(mbc, CARTRIDGE_START, CARTRIDGE_END);
-        
-        io = new CGB_IO(IO_START, IO_END, ramh, vram);
-        initialize(io, IO_START, IO_END);
+        io = new CGB_IO(ADDRESS_IO_START, ADDRESS_IO_END, ramh, vram);
+        initialize(io, ADDRESS_IO_START, ADDRESS_IO_END);
         
         interruptRegister = new InterruptRegister();
-        module[INTERRUPT_ADDRESS] = interruptRegister;
+        module[ADDRESS_INTERRUPT] = interruptRegister;
 
-        eram = mbc.getEram();
-        initialize(eram, ERAM_START, ERAM_END);
-        
         module[ADDRESS_DMA] = oam;        
-        module[VRAM_DMA_START] = vram;
+        module[ADDRESS_VRAM_DMA_START] = vram;
         
         backgroundPaletteMemory = new PaletteMemory(ADDRESS_PALETTE_BACKGROUND_INDEX, 
                                                     ADDRESS_PALETTE_BACKGROUND_DATA);

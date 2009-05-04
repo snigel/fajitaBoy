@@ -54,7 +54,7 @@ public class LCDC {
 	 * @param ram
 	 */
 	public void readLCDC() {
-		int b = ram.read(LCDC_REGISTER);
+		int b = ram.read(ADDRESS_LCDC);
 		lcdDisplayEnable = (b & 0x80) > 0;
 		windowTileMapSelect = (b & 0x40) > 0;
 		windowDisplayEnable = (b & 0x20) > 0;

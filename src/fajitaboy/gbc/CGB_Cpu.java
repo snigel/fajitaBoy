@@ -42,15 +42,15 @@ public class CGB_Cpu extends Cpu {
      * If the Prepare Speed Switch is activated the speed is changed
      */
     protected void stopActions() {
-        int data = ram.read(SPEED_SWITCH_REGISTER);
+        int data = ram.read(ADDRESS_SPEED_SWITCH);
         
         if ((data & 0x01) == 1 ) {
             speedSwitch.toggleSpeed();
             
             if (speedSwitch.getSpeed() == 2) {
-                ram.write(0x80, SPEED_SWITCH_REGISTER);
+                ram.write(0x80, ADDRESS_SPEED_SWITCH);
             } else {
-                ram.write(0x00, SPEED_SWITCH_REGISTER);
+                ram.write(0x00, ADDRESS_SPEED_SWITCH);
             }
         }
     }

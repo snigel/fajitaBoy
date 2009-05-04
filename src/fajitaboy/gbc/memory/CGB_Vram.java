@@ -2,6 +2,7 @@ package fajitaboy.gbc.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.LCDConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.MemoryBankInterface;
 import fajitaboy.gb.memory.MemoryInterface;
@@ -50,7 +51,7 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
         int addr = (address - offset);
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
             return tiles[(addr / 16) + bank * 2 * GB_TILES].read(address);
         } else {
             return ram[addr + bank * length];
@@ -63,11 +64,11 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
      */
     public void write(final int address, final int data) {
         int addr = (address - offset);
-        if (address == VRAM_DMA_START) {
+        if (address == ADDRESS_VRAM_DMA_START) {
             dmaTransfer(data);
         } else if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
             tiles[(addr / 16) + bank * 2 * GB_TILES].write(address, data);
         } else  {
             ram[addr + bank * length] = data;
@@ -88,7 +89,7 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
         int addr = (address - offset);
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
             return tiles[(addr / 16) + bank * 2 * GB_TILES].read(address);
         } else {
             return ram[addr + bank * length];
@@ -104,8 +105,8 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
     // TODO Implement support for H-Blank Transfer
     private void dmaTransfer(int data) {
         
-        int src  = memInt.read(VRAM_DMA_SOURCE_H) * 0x100 + (memInt.read(VRAM_DMA_SOURCE_L) & 0xF0); 
-        int dest = memInt.read(VRAM_DMA_DESTINATION_H) * 0x100 + (memInt.read(VRAM_DMA_DESTINATION_L) & 0xF0);
+        int src  = memInt.read(ADDRESS_VRAM_DMA_SOURCE_H) * 0x100 + (memInt.read(ADDRESS_VRAM_DMA_SOURCE_L) & 0xF0); 
+        int dest = memInt.read(ADDRESS_VRAM_DMA_DEST_H) * 0x100 + (memInt.read(ADDRESS_VRAM_DMA_DEST_L) & 0xF0);
         
         if ( dest < 0x8000 || dest >= 0xA000 )
         	return;  // Erroneous destination
@@ -119,7 +120,7 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
         }
         
         // bit 7 is 0 and shows that DMA is not Active
-        ram[VRAM_DMA_START - offset] = (data & 0x7F);
+        ram[ADDRESS_VRAM_DMA_START - offset] = (data & 0x7F);
     }
     
     /**

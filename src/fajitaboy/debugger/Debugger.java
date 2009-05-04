@@ -32,6 +32,7 @@ import static java.lang.Math.*;
 
 import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 
 /**
  * Debugger is a class that creates an CPU object and an AdressBus object and
@@ -201,8 +202,8 @@ public final class Debugger implements DrawsGameboyScreen {
 
 				int zoom = 2;
 				panelScreen = new GamePanel(zoom);
-				panelScreen.setPreferredSize(new Dimension(zoom * GB_LCD_W,
-						zoom * GB_LCD_H));
+				panelScreen.setPreferredSize(new Dimension(zoom * LCD_W,
+						zoom * LCD_H));
 				jfr.setContentPane(panelScreen);
 				jfr.addKeyListener(new SimpleKeyInputController(addressBus.getJoyPad()));
 				jfr.pack();
@@ -455,7 +456,7 @@ public final class Debugger implements DrawsGameboyScreen {
 
 	private void spriteTable() {
 		for (int i = 0; i < GB_SPRITE_ATTRIBUTES; i++) {
-			int addr = SPRITE_ATTRIBUTE_TABLE + i * 4;
+			int addr = ADDRESS_SPRITE_ATTRIBUTE_TABLE + i * 4;
 			int y = addressBus.read(addr);
 			int x = addressBus.read(addr + 1);
 			int id = addressBus.read(addr + 2);
@@ -466,8 +467,8 @@ public final class Debugger implements DrawsGameboyScreen {
 	}
 
 	private void showBackgroundNumbers(int addr, int scx, int scy) {
-		for (int y = 0; y < GB_LCD_H / GB_TILE_H; y++) {
-			for (int x = 0; x < GB_LCD_W / GB_TILE_W; x++) {
+		for (int y = 0; y < LCD_H / GB_TILE_H; y++) {
+			for (int x = 0; x < LCD_W / GB_TILE_W; x++) {
 				int ay = (scy + y) % 32;
 				int ax = (scx + x) % 32;
 				int nr = addressBus.read(addr + ay * 32 + ax);

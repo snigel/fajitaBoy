@@ -1,6 +1,7 @@
 package fajitaboy.gb.lcd;
 
 import static fajitaboy.constants.LCDConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 
 import java.util.PriorityQueue;
 import java.util.Queue;

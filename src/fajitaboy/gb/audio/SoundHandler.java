@@ -170,7 +170,7 @@ public class SoundHandler implements StateMachine {
      * Sets up the flag that controls the stereo outputs.
      */
     private void stereoSelect() {
-        int nr51 = ab.read(NR51_REGISTER);
+        int nr51 = ab.read(ADDRESS_NR51);
         ch1Left = ((nr51 & 0x1) > 0);
         ch2Left = ((nr51 & 0x2) > 0);
         ch3Left = ((nr51 & 0x4) > 0);

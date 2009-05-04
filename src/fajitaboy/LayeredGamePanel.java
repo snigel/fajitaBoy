@@ -5,8 +5,8 @@ import java.awt.Dimension;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 
-import static fajitaboy.constants.LCDConstants.GB_LCD_H;
-import static fajitaboy.constants.LCDConstants.GB_LCD_W;
+import static fajitaboy.constants.LCDConstants.LCD_H;
+import static fajitaboy.constants.LCDConstants.LCD_W;
 
 /**
  * Game panel, possibly + menus.
@@ -84,11 +84,11 @@ public class LayeredGamePanel extends JLayeredPane {
     public final void updateSize(int width, int height) {
         this.width = width;
         this.height = height;
-        int zoom = Math.min(width / GB_LCD_W, height / GB_LCD_H);
-        int x = (width - GB_LCD_W * zoom) / 2;
-        int y = (height - GB_LCD_H * zoom) / 2;
+        int zoom = Math.min(width / LCD_W, height / LCD_H);
+        int x = (width - LCD_W * zoom) / 2;
+        int y = (height - LCD_H * zoom) / 2;
         System.out.println("x: " + x + "y: " + y);
-        gamePanel.setBounds(x, y, GB_LCD_W * zoom, GB_LCD_H * zoom);
+        gamePanel.setBounds(x, y, LCD_W * zoom, LCD_H * zoom);
         gamePanel.setZoom(zoom);
 
         if (overlapingPane != null) {

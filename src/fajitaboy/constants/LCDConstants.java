@@ -1,20 +1,15 @@
 package fajitaboy.constants;
 
+import static fajitaboy.constants.HardwareConstants.*;
+
 public final class LCDConstants {
-	public static final int GB_LCD_W = 160;
-	public static final int GB_LCD_H = 144;
-	public static final int GB_SPRITES = 192;
-    public static final int GB_SPRITE_ATTRIBUTES = 40;
-    
-	public static final int GB_TILES = 192;
-	public static final int CGB_TILES = 384;
+	public static final int LCD_W = 160;
+	public static final int LCD_H = 144;
 	
-	public static final int GB_MAP_W = 32;
-	public static final int GB_MAP_H = 32;
-	public static final int GB_TILE_W = 8;
-	public static final int GB_TILE_H = 8;
+	public static final int LCD_MAP_W = 32;
+	public static final int LCD_MAP_H = 32;
 	
-	public static final int GB_MAP_VISIBLE_W = GB_LCD_W/GB_TILE_W;
-	public static final int GB_MAP_VISIBLE_H = GB_LCD_H/GB_TILE_H;
+	public static final int LCD_MAP_VISIBLE_W = LCD_W/GB_TILE_W;
+	public static final int LCD_MAP_VISIBLE_H = LCD_H/GB_TILE_H;
 	
 }

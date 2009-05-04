@@ -41,8 +41,8 @@ public class WindowMap {
 		}
 
 		// read tile numbers
-		for (int i = 0; i < GB_MAP_H; i++) {
-			for (int j = 0; j < GB_MAP_W; j++, addr_base++) {
+		for (int i = 0; i < LCD_MAP_H; i++) {
+			for (int j = 0; j < LCD_MAP_W; j++, addr_base++) {
 				int pnr = ram.read(addr_base);
 				if ( lcdc.tileDataSelect ) {
 					tileAddresses[i][j] = pnr;
@@ -84,10 +84,10 @@ public class WindowMap {
 		}
 		
         // only reads relevant tiles
-        for (int cx = scx, tx = firstTileX; cx < GB_LCD_W; cx += 8, tx++) {
+        for (int cx = scx, tx = firstTileX; cx < LCD_W; cx += 8, tx++) {
             int ty = firstTileY;
             // addr, where we read the tile pattern nr.
-            int addr = addr_base + ty * GB_MAP_W + tx; 
+            int addr = addr_base + ty * LCD_MAP_W + tx; 
             
             int pnr = ram.read(addr);
             if ( lcdc.tileDataSelect ) {
@@ -129,7 +129,7 @@ public class WindowMap {
         int sy = firstTileY * 8 + scy; // ly - (ly - scy); 
        
         
-        for (int x = scx, tx = firstTileX; x < GB_LCD_W; x += 8, tx++) {
+        for (int x = scx, tx = firstTileX; x < LCD_W; x += 8, tx++) {
             int tileId = tileAddresses[firstTileY][tx];
             
             screen.blitTile(tiles[tileId], p, x, sy, ly, false);
@@ -161,10 +161,10 @@ public class WindowMap {
 		Tile[] tiles = vram.getTiles();
 		int datax, datay = 0, tileId;
 		// For each row...
-		for ( int y = scy; y <= GB_LCD_H; y += 8 ) {
+		for ( int y = scy; y <= LCD_H; y += 8 ) {
 			datax = 0;
 			// For each column...
-			for ( int x = scx; x <= GB_LCD_W; x += 8 ) {
+			for ( int x = scx; x <= LCD_W; x += 8 ) {
 				tileId = tileAddresses[datay][datax];
 				screen.blitTile(tiles[tileId], ram.read(ADDRESS_PALETTE_BG_DATA), x, y, ly, false);
 				datax++;

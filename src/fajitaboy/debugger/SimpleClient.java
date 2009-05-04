@@ -23,8 +23,8 @@ public class SimpleClient {
             
             int zoom = 2;
             GamePanel panelScreen = new GamePanel(zoom);
-            panelScreen.setPreferredSize(new Dimension(zoom * GB_LCD_W,
-                    zoom * GB_LCD_H));
+            panelScreen.setPreferredSize(new Dimension(zoom * LCD_W,
+                    zoom * LCD_H));
             jfr.setContentPane(panelScreen);
             jfr.pack();
             

@@ -22,8 +22,8 @@ public class Eram extends MemoryComponent {
      */
     protected int[] ram;
 
-    private int bank;
-    private int banks;
+    protected int bank;
+    protected int banks;
 
     /**
      * The offset value is used for subtracting the high incoming addresses to a
@@ -32,14 +32,8 @@ public class Eram extends MemoryComponent {
      */
     protected int offset;
 
-    /**
-     * @param start
-     *            , address representing where beginning of the memory space
-     * @param end
-     *            , address representing where the end in memory space These two
-     *            values are used for creating the right size of the
-     *            memorycomponent array and for setting the offset value.
-     */
+    public Eram() {
+    }
 
     /**
      * @param start

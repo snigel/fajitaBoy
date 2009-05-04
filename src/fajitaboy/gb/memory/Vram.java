@@ -8,6 +8,7 @@ import fajitaboy.FileIOStreamHelper;
 import fajitaboy.gb.lcd.Tile;
 import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 /**
  * Represents the graphic ram, also known as VRAM.
  *
@@ -33,7 +34,7 @@ public class Vram extends MemoryComponent {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
         	return tiles[addr / 16].read(address);
         } else {
         	return ram[addr];
@@ -47,7 +48,7 @@ public class Vram extends MemoryComponent {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
         	tiles[(addr & 0xFFF0) / 16].write(address, data);
         } else {
         	ram[addr] = data;
@@ -73,7 +74,7 @@ public class Vram extends MemoryComponent {
     	int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
         	return tiles[(addr & 0xFFF0) / 16].read(address);
         } else {
         	return ram[addr];
@@ -87,7 +88,7 @@ public class Vram extends MemoryComponent {
         int addr = address - offset;
         if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamHigh.java");
-        } else if ( address < TILE_DATA_END ) {
+        } else if ( address < ADDRESS_TILE_DATA_END ) {
         	tiles[(addr & 0xFFF0) / 16].write(address, data);
         } else {
         	ram[addr] = data;
@@ -106,7 +107,7 @@ public class Vram extends MemoryComponent {
     	
     	// Special write to memory, to restore tiles
     	int data;
-    	for ( int address = offset; address < TILE_DATA_END; address++ ) {
+    	for ( int address = offset; address < ADDRESS_TILE_DATA_END; address++ ) {
     		data = (int) FileIOStreamHelper.readData( fis, 1 ); 
     		write(address, data);
     	}
@@ -120,7 +121,7 @@ public class Vram extends MemoryComponent {
     	
     	// Special read from memory to access tile data
     	int data;
-    	for ( int address = offset; address < TILE_DATA_END; address++ ) {
+    	for ( int address = offset; address < ADDRESS_TILE_DATA_END; address++ ) {
     		data = read(address);
     		FileIOStreamHelper.writeData( fos, (long) data, 1 );
     	}

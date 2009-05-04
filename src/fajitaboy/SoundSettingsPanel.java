@@ -30,8 +30,8 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      */
     public SoundSettingsPanel() {
 
-        volume = new JSlider(JSlider.VERTICAL, VOLUME_MIN, VOLUME_MAX,
-                VOLUME_INIT);
+        volume = new JSlider(JSlider.VERTICAL, AUDIO_VOLUME_MIN, AUDIO_VOLUME_MAX,
+                AUDIO_VOLUME_INIT);
         add(volume);
 
         volume.setPreferredSize(new Dimension(100, 150));
@@ -43,7 +43,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         Hashtable<Integer, JLabel> labelTable;
         labelTable = new Hashtable<Integer, JLabel>();
         labelTable.put(new Integer(0), new JLabel("Mute"));
-        labelTable.put(new Integer(VOLUME_MAX), new JLabel("Max"));
+        labelTable.put(new Integer(AUDIO_VOLUME_MAX), new JLabel("Max"));
         volume.setLabelTable(labelTable);
 
         volume.addChangeListener(this);
@@ -81,7 +81,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         if (!oscillator.isAudioEnabled()) {
             volume.setValue(0);
         } else {
-            volume.setValue(VOLUME_MAX);
+            volume.setValue(AUDIO_VOLUME_MAX);
             // int vol = oscillator.getVolume();
             // vol = Math.max(0, vol);
             // vol = Math.min(100, vol);

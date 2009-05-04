@@ -119,11 +119,11 @@ public class SoundChannel4 implements StateMachine {
     public final byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        if ((ab.read(NR43_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR43) & 0x100) == 0){
             calcFreq();
         }
 
-        if (((ab.read(NR42_REGISTER) & 0xF0) >> 4) == 0) {
+        if (((ab.read(ADDRESS_NR42) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
 
@@ -169,11 +169,11 @@ public class SoundChannel4 implements StateMachine {
         }
 
         if (toneLength < 0 && lengthEnabled &&
-                (ab.read(NR41_REGISTER) & 0x100) == 0) {
+                (ab.read(ADDRESS_NR41) & 0x100) == 0) {
             calcToneLength();
         }
 
-        if ((ab.read(NR42_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR42) & 0x100) == 0){
             calcEnvelope();
         }
 
@@ -186,7 +186,7 @@ public class SoundChannel4 implements StateMachine {
      * parameters.
      */
     private void calcFreq() {
-        int nr43 = ab.read(NR43_REGISTER);
+        int nr43 = ab.read(ADDRESS_NR43);
         int s = (nr43 & 0xF0) >> 4;
         double r = nr43 & 0x7;
         if (r == 0) {
@@ -203,7 +203,7 @@ public class SoundChannel4 implements StateMachine {
             calcEnvelope();
             calcToneLength();
             oldFreq = freq;
-            ab.forceWrite(NR43_REGISTER, nr43 + 0x100);
+            ab.forceWrite(ADDRESS_NR43, nr43 + 0x100);
         }
     }
 
@@ -211,7 +211,7 @@ public class SoundChannel4 implements StateMachine {
      * Calculates the envelope parameters.
      */
     private void calcEnvelope() {
-        int nr42 = ab.read(NR42_REGISTER);
+        int nr42 = ab.read(ADDRESS_NR42);
         amp = ((nr42 & 0xF0) >> 4) * 2;
         envelopeStepLength = nr42 & 0x7;
         int direction = nr42 & 0x8;
@@ -221,7 +221,7 @@ public class SoundChannel4 implements StateMachine {
             envelopeStep = 2;
         }
         envelopePos = 0;
-        ab.forceWrite(NR42_REGISTER, nr42 + 0x100);
+        ab.forceWrite(ADDRESS_NR42, nr42 + 0x100);
 
     }
 
@@ -230,13 +230,13 @@ public class SoundChannel4 implements StateMachine {
      * tone length.
      */
     private void calcToneLength() {
-        lengthEnabled = ((ab.read(NR44_REGISTER) & 0x40) > 0);
-        int nr41 = ab.read(NR41_REGISTER);
+        lengthEnabled = ((ab.read(ADDRESS_NR44) & 0x40) > 0);
+        int nr41 = ab.read(ADDRESS_NR41);
         if (lengthEnabled) {
             toneLength = (int) (((64 - ((double)
                     (nr41 & 0x3F))) / 256) * sampleRate);
             //Reset length counter
-            ab.forceWrite(NR41_REGISTER, nr41 + 0x100);
+            ab.forceWrite(ADDRESS_NR41, nr41 + 0x100);
         }
     }
 

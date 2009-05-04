@@ -124,11 +124,11 @@ public class SoundChannel2 implements StateMachine {
     public byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        if ((ab.read(NR23_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR23) & 0x100) == 0){
             calcFreq();
         }
 
-        if (((ab.read(NR22_REGISTER) & 0xF0) >> 4) == 0) {
+        if (((ab.read(ADDRESS_NR22) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
 
@@ -170,11 +170,11 @@ public class SoundChannel2 implements StateMachine {
         }
 
         if (toneLength < 0 && lengthEnabled &&
-                (ab.read(NR21_REGISTER) & 0x100) == 0) {
+                (ab.read(ADDRESS_NR21) & 0x100) == 0) {
             calcToneLength();
         }
 
-        if ((ab.read(NR22_REGISTER) & 0x100) == 0){
+        if ((ab.read(ADDRESS_NR22) & 0x100) == 0){
             calcEnvelope();
         }
         return destBuff;
@@ -184,7 +184,7 @@ public class SoundChannel2 implements StateMachine {
      * Calculates the envelope parameters.
      */
     private void calcEnvelope() {
-        int nr22 = ab.read(NR22_REGISTER);
+        int nr22 = ab.read(ADDRESS_NR22);
         amp = ((nr22 & 0xF0) >> 4) * 2;
         envelopeStepLength = nr22 & 0x7;
         int direction = nr22 & 0x8;
@@ -194,7 +194,7 @@ public class SoundChannel2 implements StateMachine {
             envelopeStep = 2;
         }
         envelopePos = 0;
-        ab.forceWrite(NR22_REGISTER, nr22 + 0x100);
+        ab.forceWrite(ADDRESS_NR22, nr22 + 0x100);
     }
 
     /**
@@ -202,8 +202,8 @@ public class SoundChannel2 implements StateMachine {
      * parameters.
      */
     private void calcFreq() {
-        int low1 = ab.read(SOUND2_LOW);
-        int high1 = ab.read(SOUND2_HIGH) * 0x100;
+        int low1 = ab.read(ADDRESS_SOUND2_LOW);
+        int high1 = ab.read(ADDRESS_SOUND2_HIGH) * 0x100;
         int tmp = (2047 - (high1 + low1) & 0x7ff);
         if (tmp != 0) {
             freq = 131072 / tmp;
@@ -217,7 +217,7 @@ public class SoundChannel2 implements StateMachine {
             calcEnvelope();
             dutyLength = calcWavePattern();
             oldFreq = freq;
-            ab.forceWrite(NR23_REGISTER, low1 + 0x100);
+            ab.forceWrite(ADDRESS_NR23, low1 + 0x100);
         }
     }
 
@@ -229,7 +229,7 @@ public class SoundChannel2 implements StateMachine {
         if (waveLength == 0) {
             waveLength = 1;
         }
-        int nr21 = ((ab.read(NR21_REGISTER) & 0xC0) >> 6);
+        int nr21 = ((ab.read(ADDRESS_NR21) & 0xC0) >> 6);
         switch (nr21) {
         case 0:
             return (int) ((float) waveLength * 0.125);
@@ -249,13 +249,13 @@ public class SoundChannel2 implements StateMachine {
      * tone length.
      */
     private void calcToneLength() {
-        lengthEnabled = ((ab.read(NR24_REGISTER) & 0x40) > 0);
-        int nr21 = ab.read(NR21_REGISTER);
+        lengthEnabled = ((ab.read(ADDRESS_NR24) & 0x40) > 0);
+        int nr21 = ab.read(ADDRESS_NR21);
         if (lengthEnabled) {
             toneLength = (int) (((64 - ((double)
                     (nr21 & 0x3F))) / 256) * sampleRate);
             //Reset length counter
-            ab.forceWrite(NR21_REGISTER, nr21 + 0x100);
+            ab.forceWrite(ADDRESS_NR21, nr21 + 0x100);
         }
     }
 

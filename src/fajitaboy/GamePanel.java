@@ -20,7 +20,7 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
 
     public GamePanel(int zoom) {
         setIgnoreRepaint(true);
-        setPreferredSize(new Dimension(GB_LCD_W * zoom, GB_LCD_H * zoom));
+        setPreferredSize(new Dimension(LCD_W * zoom, LCD_H * zoom));
 
         pixels = new int[160 * 144];
         this.zoom = zoom;
