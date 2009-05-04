@@ -81,6 +81,8 @@ public class Oscillator implements Runnable, StateMachine {
      */
     private int samples = 735;
     
+    protected Oscillator() {}
+    
 
     /**
      * Creates a new Oscillator with default values.
