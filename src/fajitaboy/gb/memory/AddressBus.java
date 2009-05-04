@@ -126,11 +126,34 @@ public class AddressBus implements MemoryInterface, StateMachine {
     protected MemoryBankController setMBC(){
         switch(rom.getMBC()){
         case CART_TYPE_ROM: System.out.println("MBC: None"); return new NoMBC(rom);
+        case CART_TYPE_ROM_RAM: System.out.println("MBC: ROM+RAM"); return new NoMBC(rom);
+        case CART_TYPE_ROM_RAM_BATTERY: System.out.println("MBC: ROM+RAM+BATTERY"); return new NoMBC(rom);
         case CART_TYPE_MBC1:System.out.println("MBC: MBC1");  return new MBC1(rom);
         case CART_TYPE_MBC1_RAM: System.out.println("MBC: MBC1+RAM");  return new MBC1(rom);
         case CART_TYPE_MBC1_RAM_BATTERY:System.out.println("MBC: MBC1+RAM+BAT");  return new MBC1(rom);
-        //case CART_TYPE_MBC2: System.out.println("MBC: MBC2"); return new MBC2(rom);
-        //case CART_TYPE_MBC2_BATTERY: System.out.println("MBC: MBC2"); return new MBC2(rom);
+        case CART_TYPE_MBC2: System.out.println("MBC: MBC2"); return new MBC2(rom);
+        case CART_TYPE_MBC2_BATTERY: System.out.println("MBC: MBC2_BATTERY"); return new MBC2(rom);
+        case CART_TYPE_MBC3_TIMER_BATTERY: System.out.println("MBC: MBC3+TIMER+BATTERY"); return new MBC3(rom);
+        case CART_TYPE_MBC3_TIMER_RAM_BATTERY: System.out.println("MBC: MBC3+TIMER+RAM_BATTERY"); return new MBC3(rom);
+        case CART_TYPE_MBC3: System.out.println("MBC: MBC3"); return new MBC3(rom);
+        case CART_TYPE_MBC3_RAM: System.out.println("MBC: MBC3+RAM"); return new MBC3(rom);
+        case CART_TYPE_MBC3_RAM_BATTERY: System.out.println("MBC: MBC3+RAM+BATTERY"); return new MBC3(rom);
+        case CART_TYPE_MBC4: System.out.println("MBC: MBC4"); return null;
+        case CART_TYPE_MBC4_RAM: System.out.println("MBC: MBC4+RAM"); return null;
+        case CART_TYPE_MBC4_RAM_BATTERY: System.out.println("MBC: MBC4+RAM+BATTERY"); return null;
+        case CART_TYPE_MBC5: System.out.println("MBC: MBC5"); return null;
+        case CART_TYPE_MBC5_RAM: System.out.println("MBC: MBC5+RAM"); return null;
+        case CART_TYPE_MBC5_RAM_BATTERY: System.out.println("MBC: MBC5+RAM+BATTERY"); return null;
+        case CART_TYPE_MBC5_RUMBLE: System.out.println("MBC: MBC5+RUMBLE"); return null;
+        case CART_TYPE_MBC5_RUMBLE_RAM: System.out.println("MBC: MBC5+RUMBLE+RAM"); return null;
+        case CART_TYPE_MBC5_RUMBLE_RAM_BATTERY: System.out.println("MBC: MBC5+RUMBLE+RAM+BATTERY"); return null;
+        case CART_TYPE_MMM01: System.out.println("MBC: MMM01"); return null;
+        case CART_TYPE_MMM01_RAM: System.out.println("MBC: MMM01+RAM"); return null;
+        case CART_TYPE_MMM01_RAM_BATTERY: System.out.println("MBC: MMM01+RAM+BATTERY"); return null;
+        case CART_TYPE_POCKET_CAMERA: System.out.println("MBC: POCKET CAMERA"); return null;
+        case CART_TYPE_BANDAI_TAMA5: System.out.println("MBC: BANDAI TAMA5"); return null;
+        case CART_TYPE_HUC3: System.out.println("MBC: HuC3"); return null;
+        case CART_TYPE_MUC1_RAM_BATTERY: System.out.println("MBC: HuC1+RAM+BATTERY"); return null;
         default: System.out.println("MBC not supported!"); return null;
         }
     }

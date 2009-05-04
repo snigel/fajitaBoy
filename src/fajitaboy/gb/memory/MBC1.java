@@ -97,10 +97,11 @@ public class MBC1 implements MemoryBankController {
         ramEnable = false;
     }
     private void setRomBank(int bank){
+    	bank = bank % romBanks;
         if (bank == 0) {
             rom.setBank(1);
         } else {
-            rom.setBank(bank % romBanks);
+            rom.setBank(bank);
         }
     }
     private void setRamBank(int bank){

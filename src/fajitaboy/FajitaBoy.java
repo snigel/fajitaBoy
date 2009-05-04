@@ -547,8 +547,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
                 dis.skipBytes(0x143);
                 int cgbFlag = dis.readUnsignedByte();
+                boolean forceGb = ((cgbFlag & 0x40) != 0) && ((cgbFlag & 0x06) != 0);
                 dis.close();
-                if ((cgbFlag & 0x80) != 0) {
+                if ((cgbFlag == 0x80 || cgbFlag == 0xC0) && !forceGb) {
                     // Color!!
                     gamePanel = new ColorGamePanel(2);
                     SpeedSwitch speedSwitch = new SpeedSwitch();
