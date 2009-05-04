@@ -11,7 +11,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.KeyStroke;
 
 import fajitaboy.FajitaBoy.GameState;
-import fajitaboy.memory.IO.JoyPad;
+import fajitaboy.gb.memory.IO.JoyPad;
 
 import static fajitaboy.constants.PanelConstants.*;
 

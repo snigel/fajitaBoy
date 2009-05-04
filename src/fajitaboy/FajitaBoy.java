@@ -29,9 +29,14 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import fajitaboy.lcd.LCD;
-import fajitaboy.memory.AddressBus;
-import fajitaboy.memory.AddressBusCgb;
+import fajitaboy.gb.Cpu;
+import fajitaboy.gb.Oscillator;
+import fajitaboy.gb.StateMachine;
+import fajitaboy.gb.lcd.LCD;
+import fajitaboy.gb.memory.AddressBus;
+import fajitaboy.gbc.CpuCgb;
+import fajitaboy.gbc.OscillatorCgb;
+import fajitaboy.gbc.memory.AddressBusCgb;
 import static fajitaboy.constants.PanelConstants.*;
 
 /**

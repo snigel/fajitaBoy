@@ -21,13 +21,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import fajitaboy.Cpu;
 import fajitaboy.DrawsGameboyScreen;
 import fajitaboy.GamePanel;
-import fajitaboy.Oscillator;
-import fajitaboy.lcd.LCD;
-import fajitaboy.memory.IO;
-import fajitaboy.memory.RomWriteException;
+import fajitaboy.gb.Cpu;
+import fajitaboy.gb.Oscillator;
+import fajitaboy.gb.lcd.LCD;
+import fajitaboy.gb.memory.IO;
+import fajitaboy.gb.memory.RomWriteException;
 import static java.lang.Math.*;
 
 import static fajitaboy.constants.LCDConstants.*;

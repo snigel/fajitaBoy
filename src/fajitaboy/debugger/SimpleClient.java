@@ -5,10 +5,10 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
-import fajitaboy.Cpu;
 import fajitaboy.GamePanel;
-import fajitaboy.Oscillator;
-import fajitaboy.memory.AddressBus;
+import fajitaboy.gb.Cpu;
+import fajitaboy.gb.Oscillator;
+import fajitaboy.gb.memory.AddressBus;
 import static fajitaboy.constants.LCDConstants.*;
 
 public class SimpleClient {

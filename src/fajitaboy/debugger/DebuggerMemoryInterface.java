@@ -3,7 +3,7 @@ package fajitaboy.debugger;
 import java.util.LinkedList;
 import java.util.List;
 
-import fajitaboy.memory.AddressBus;
+import fajitaboy.gb.memory.AddressBus;
 
 /**
  * DebuggerMemoryInterface works like a wrapper around an memory interface, but it

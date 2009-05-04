@@ -3,7 +3,7 @@ package fajitaboy.debugger;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import fajitaboy.memory.IO.JoyPad;
+import fajitaboy.gb.memory.IO.JoyPad;
 
 /**
  * Handles the key input.

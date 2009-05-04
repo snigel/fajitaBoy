@@ -3,7 +3,7 @@ package fajitaboy.debugger;
 import java.util.List;
 import java.util.LinkedList;
 
-import fajitaboy.memory.MemoryInterface;
+import fajitaboy.gb.memory.MemoryInterface;
 import static fajitaboy.debugger.InstructionSet.*;
 
 /**

@@ -1,6 +1,8 @@
 package fajitaboy;
 
-import fajitaboy.memory.AddressBus;
+import fajitaboy.gb.Cpu;
+import fajitaboy.gb.Oscillator;
+import fajitaboy.gb.memory.AddressBus;
 
 /**
  * A simple benchmark for instructions.
