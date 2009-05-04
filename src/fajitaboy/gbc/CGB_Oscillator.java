@@ -32,7 +32,11 @@ public class CGB_Oscillator extends Oscillator {
      *            Pointer to SpeedSwitch instance.
      */
     public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, SpeedSwitch ss) {
-        super(cpu, ram, new CGB_LCD(ram), new Timer());   
+        this.cpu = cpu;
+        this.ram = ram;
+        this.lcd = new CGB_LCD(ram);
+        this.timer = new Timer();
+        reset();  
         speedSwitch = ss;
     }
 
@@ -49,11 +53,15 @@ public class CGB_Oscillator extends Oscillator {
      */
     public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, SpeedSwitch ss, DrawsGameboyScreen dgs,
             boolean enableAudio) {
-        super(cpu, ram, new CGB_LCD(ram), new Timer());
+        this.cpu = cpu;
+        this.ram = ram;
+        this.lcd = new CGB_LCD(ram);
+        this.timer = new Timer();
+        speedSwitch = ss;
+        reset();
         this.dgs = dgs;
         if ( enableAudio )
             enableAudio();
-        speedSwitch = ss;
     }
     
     /**
@@ -63,7 +71,7 @@ public class CGB_Oscillator extends Oscillator {
     	super.reset();
     	speedSwitch.reset();
     }
-    
+
     /**
      * {@inheritDoc}
      */
