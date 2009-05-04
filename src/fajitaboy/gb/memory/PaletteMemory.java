@@ -1,13 +1,7 @@
 package fajitaboy.gb.memory;
 
 import fajitaboy.gb.memory.MemoryInterface;
-/**
- * ...
- * The read and write methods can look a bit complicated but the reason is that
- * the palettes will be more frequently used by the LCD than through read/write
- * therefore more work is done in the read/write to make it in a good and easy
- * format for the LCD to use.
- */
+
 public class PaletteMemory implements MemoryInterface {
     
     /**
@@ -58,9 +52,9 @@ public class PaletteMemory implements MemoryInterface {
             int colorNo = (index & 7) >> 1;
             boolean evenIndex = (index & 0x01) == 0;
             if (evenIndex) {
-                return (palettes[paletteNo][colorNo] & 0xFF); 
+                return (palettes[paletteNo][colorNo] >>> 8); 
             } else {
-                return (palettes[paletteNo][colorNo] >>> 8);
+                return (palettes[paletteNo][colorNo] & 0xFF);
             }
         } 
         return -1;

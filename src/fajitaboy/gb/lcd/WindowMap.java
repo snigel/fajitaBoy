@@ -125,7 +125,7 @@ public class WindowMap {
         
 		//	Draw tiles
         
-        int p = ram.read(PALETTE_BG_DATA);
+        int p = ram.read(ADDRESS_PALETTE_BG_DATA);
         int sy = firstTileY * 8 + scy; // ly - (ly - scy); 
        
         
@@ -166,7 +166,7 @@ public class WindowMap {
 			// For each column...
 			for ( int x = scx; x <= GB_LCD_W; x += 8 ) {
 				tileId = tileAddresses[datay][datax];
-				screen.blitTile(tiles[tileId], ram.read(PALETTE_BG_DATA), x, y, ly, false);
+				screen.blitTile(tiles[tileId], ram.read(ADDRESS_PALETTE_BG_DATA), x, y, ly, false);
 				datax++;
 			}
 			datay++;

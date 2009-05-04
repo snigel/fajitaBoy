@@ -49,7 +49,7 @@ public class SpriteAttribute implements Comparable {
         behindBG = (flags & 0x80) > 0;
         flipY = (flags & 0x40) > 0;
         flipX = (flags & 0x20) > 0; 
-        paletteAddr = (flags & 0x10) > 0 ? PALETTE_SPRITE1_DATA : PALETTE_SPRITE0_DATA;
+        paletteAddr = (flags & 0x10) > 0 ? ADDRESS_PALETTE_SPRITE1_DATA : ADDRESS_PALETTE_SPRITE0_DATA;
     }
     
     public int compareTo(Object other) {

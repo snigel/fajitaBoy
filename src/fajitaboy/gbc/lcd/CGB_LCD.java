@@ -1,7 +1,7 @@
 package fajitaboy.gbc.lcd;
 
 import static fajitaboy.constants.AddressConstants.ADDRESS_LY;
-import static fajitaboy.constants.AddressConstants.PALETTE_BG_DATA;
+import static fajitaboy.constants.AddressConstants.ADDRESS_PALETTE_BG_DATA;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.memory.CGB_AddressBus;
@@ -49,7 +49,7 @@ public class CGB_LCD extends LCD {
              * Draw graphic objects
              */
             // TODO find out what color to clear line with.
-            int bgclr = ram.read(PALETTE_BG_DATA) & 0x03;
+            int bgclr = ram.read(ADDRESS_PALETTE_BG_DATA) & 0x03;
             int ly = ram.read(ADDRESS_LY);
             screen.clearLine(bgclr, ly);
 

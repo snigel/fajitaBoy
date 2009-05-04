@@ -163,7 +163,7 @@ public class BackgroundMap {
 			dx = (firstTileX + x)*GB_TILE_W - scx;
 			datax = (firstTileX + x) % GB_MAP_W;
 			tileId = tileAddresses[datay][datax]; 
-			screen.blitTile(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, true);
+			screen.blitTile(tiles[tileId], ram.read(ADDRESS_PALETTE_BG_DATA), dx, dy, ly, true);
 		}
 	}
 	
@@ -237,7 +237,7 @@ public class BackgroundMap {
 				dx = (firstTileX+x)*8 - scx;
 				datax = (firstTileX+x) % 32;
 				tileId = tileAddresses[datay][datax];
-				screen.blitTile(tiles[tileId], ram.read(PALETTE_BG_DATA), dx, dy, ly, true);
+				screen.blitTile(tiles[tileId], ram.read(ADDRESS_PALETTE_BG_DATA), dx, dy, ly, true);
 			}
 		}
 	}

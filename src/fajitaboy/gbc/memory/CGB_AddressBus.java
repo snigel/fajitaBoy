@@ -75,14 +75,14 @@ public class CGB_AddressBus extends AddressBus {
         module[ADDRESS_DMA] = oam;        
         module[VRAM_DMA_START] = vram;
         
-        backgroundPaletteMemory = new PaletteMemory(C_PALETTE_BACKGROUND_INDEX, 
-                                                    C_PALETTE_BACKGROUND_DATA);
-        spritePaletteMemory = new PaletteMemory(C_PALETTE_SPRITE_INDEX, 
-                                                    C_PALETTE_SPRITE_DATA);
-        module[C_PALETTE_BACKGROUND_INDEX] = backgroundPaletteMemory;
-        module[C_PALETTE_BACKGROUND_DATA] = backgroundPaletteMemory;
-        module[C_PALETTE_SPRITE_INDEX] = spritePaletteMemory;
-        module[C_PALETTE_SPRITE_DATA] = spritePaletteMemory;
+        backgroundPaletteMemory = new PaletteMemory(ADDRESS_PALETTE_BACKGROUND_INDEX, 
+                                                    ADDRESS_PALETTE_BACKGROUND_DATA);
+        spritePaletteMemory = new PaletteMemory(ADDRESS_PALETTE_SPRITE_INDEX, 
+                                                    ADDRESS_PALETTE_SPRITE_DATA);
+        module[ADDRESS_PALETTE_BACKGROUND_INDEX] = backgroundPaletteMemory;
+        module[ADDRESS_PALETTE_BACKGROUND_DATA] = backgroundPaletteMemory;
+        module[ADDRESS_PALETTE_SPRITE_INDEX] = spritePaletteMemory;
+        module[ADDRESS_PALETTE_SPRITE_DATA] = spritePaletteMemory;
         
         
         

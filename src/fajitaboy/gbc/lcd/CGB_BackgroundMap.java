@@ -2,7 +2,7 @@ package fajitaboy.gbc.lcd;
 
 import static fajitaboy.constants.AddressConstants.ADDRESS_SCX;
 import static fajitaboy.constants.AddressConstants.ADDRESS_SCY;
-import static fajitaboy.constants.AddressConstants.PALETTE_BG_DATA;
+import static fajitaboy.constants.AddressConstants.ADDRESS_PALETTE_BG_DATA;
 import static fajitaboy.constants.LCDConstants.GB_LCD_H;
 import static fajitaboy.constants.LCDConstants.GB_LCD_W;
 import static fajitaboy.constants.LCDConstants.GB_MAP_H;

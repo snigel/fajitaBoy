@@ -34,27 +34,27 @@ public class Oscillator implements Runnable, StateMachine {
     /**
      * Cycles since Oscillator initialization.
      */
-    private long cycles;
+    protected long cycles;
 
     /**
      * Pointer to CPU instance.
      */
-    private Cpu cpu;
+    protected Cpu cpu;
 
     /**
      * Pointer to MemoryInterface instance.
      */
-    private MemoryInterface ram;
+    protected MemoryInterface ram;
 
     /**
      * Pointer to LCD instance.
      */
-    private LCD lcd;
+    protected LCD lcd;
 
     /**
      * Pointer to Timer instance.
      */
-    private Timer timer;
+    protected Timer timer;
 
     /**
      * Pointer to a class with the proper interface to draw the GB pixels to screen.
@@ -81,12 +81,6 @@ public class Oscillator implements Runnable, StateMachine {
      */
     private int samples = 735;
     
-    /**
-     * To know if the speed is normal or double.
-     * The speed should always be normal here but is here to reduce duplicate
-     * code in OscillatorCgb.
-     */
-    protected SpeedSwitch speedSwitch;
 
     /**
      * Creates a new Oscillator with default values.
@@ -97,7 +91,6 @@ public class Oscillator implements Runnable, StateMachine {
      */
     public Oscillator(Cpu cpu, AddressBus ram) {
         this(cpu, ram, new LCD(ram), new Timer());
-        speedSwitch = new SpeedSwitch();
     }
     
     protected Oscillator(Cpu cpu, AddressBus ram, LCD lcd, Timer timer) {
@@ -119,7 +112,6 @@ public class Oscillator implements Runnable, StateMachine {
      */
     public Oscillator(Cpu cpu, AddressBus ram, DrawsGameboyScreen dgs, boolean enableAudio ) {
         this(cpu,ram);
-        speedSwitch = new SpeedSwitch();
         this.dgs = dgs;
         if ( enableAudio )
             enableAudio();
@@ -129,14 +121,12 @@ public class Oscillator implements Runnable, StateMachine {
      * Resets the Oscillator to default values.
      */
     public void reset() {
-        speedSwitch = new SpeedSwitch();
         cycles = 0;
-        nextHaltCycle = GB_CYCLES_PER_FRAME * speedSwitch.getSpeed();
+        nextHaltCycle = GB_CYCLES_PER_FRAME;
         running = false;
         timer.reset();
         disableAudio();
         resetAudio();
-        speedSwitch.reset();
     }
 
     /**
@@ -175,7 +165,7 @@ public class Oscillator implements Runnable, StateMachine {
 
         // Update LCD
         // hack so that LCD never will have to care about speedSwitch (ugly or beautiful?).
-        lcd.updateLCD(cycleInc / speedSwitch.getSpeed());
+        lcd.updateLCD(cycleInc);
         if ( dgs != null && lcd.newScreenAvailable() ) {
             dgs.drawGameboyScreen(lcd.getScreen());
         }
@@ -219,7 +209,7 @@ public class Oscillator implements Runnable, StateMachine {
                     lcd.enableFrameSkip();
                     frameSkipCount++;
                 }
-                nextHaltCycle += GB_CYCLES_PER_FRAME * speedSwitch.getSpeed();
+                nextHaltCycle += GB_CYCLES_PER_FRAME;
             }
         }
     }

@@ -15,7 +15,14 @@ import fajitaboy.gbc.memory.CGB_AddressBus;
  */
 public class CGB_Oscillator extends Oscillator {
     
-    /**
+	/**
+     * To know if the speed is normal or double.
+     * The speed should always be normal here but is here to reduce duplicate
+     * code in OscillatorCgb.
+     */
+    protected SpeedSwitch speedSwitch;
+	
+	/**
      * Creates a new OscillatorCgb object.
      * @param cpu
      *            Pointer to CPU instance.
@@ -47,5 +54,35 @@ public class CGB_Oscillator extends Oscillator {
         if ( enableAudio )
             enableAudio();
         speedSwitch = ss;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void reset() {
+    	super.reset();
+    	speedSwitch.reset();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public int step() {
+        // Step CPU
+        int cycleInc = cpu.step();
+        if ( speedSwitch.getSpeed() == 2)
+        	cycleInc >>= 1;
+        cycles += cycleInc;
+
+        timer.update(cycleInc, ram);
+
+        // Update LCD
+        // hack so that LCD never will have to care about speedSwitch (ugly or beautiful?).
+        lcd.updateLCD(cycleInc);
+        if ( dgs != null && lcd.newScreenAvailable() ) {
+            dgs.drawGameboyScreen(lcd.getScreen());
+        }
+
+        return cycleInc;
     }
 }

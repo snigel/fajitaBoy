@@ -1,15 +1,16 @@
 package fajitaboy.gbc.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.LCDConstants.GB_TILES;
+import static fajitaboy.constants.LCDConstants.*;
 import fajitaboy.gb.lcd.Tile;
+import fajitaboy.gb.memory.MemoryBankInterface;
 import fajitaboy.gb.memory.MemoryInterface;
 import fajitaboy.gb.memory.Vram;
 
 /**
  * Vram with switchable bank (0-1).
  */
-public class CGB_Vram extends Vram {
+public class CGB_Vram extends Vram implements MemoryBankInterface {
     
     /**
      * Current switch bank used.
@@ -28,6 +29,17 @@ public class CGB_Vram extends Vram {
         super(start, end);
         this.memInt = memInt;
         bank = 0;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void reset() {
+        ram = new int[length*2];
+        tiles = new Tile[2*CGB_TILES];
+        for ( int i = 0; i < 2*CGB_TILES; i++) {
+        	tiles[i] = new Tile();
+        }
     }
 
     /**
@@ -61,23 +73,12 @@ public class CGB_Vram extends Vram {
             ram[addr + bank * length] = data;
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void reset() {
-        ram = new int[2 * length];
-        tiles = new Tile[4*GB_TILES];
-        for ( int i = 0; i < 4*GB_TILES; i++) {
-            tiles[i] = new Tile();
-        }
-    }
     
     /**
      * @param newBank bank to use.
      */
     public void setBank(int newBank) {
-        bank = newBank;
+        bank = newBank & 0x01;
     }
     
     /**
@@ -96,19 +97,23 @@ public class CGB_Vram extends Vram {
     
     
     /**
-     * Starts VRAM DMA Transfer.
-     * This method has not been tested!
-     * TODO: test!
-     * The data is transfered with no delay as it is now.
+     * Starts Vram Data Transfer
+     * 
+     * @param data Data written to 0xFF55
      */
+    // TODO Implement support for H-Blank Transfer
     private void dmaTransfer(int data) {
-        // what should happen if the src and dest point to wrong area?
+        
         int src  = memInt.read(VRAM_DMA_SOURCE_H) * 0x100 + (memInt.read(VRAM_DMA_SOURCE_L) & 0xF0); 
         int dest = memInt.read(VRAM_DMA_DESTINATION_H) * 0x100 + (memInt.read(VRAM_DMA_DESTINATION_L) & 0xF0);
         
-        int length = (data & 0x7F) / 0x10 - 1;
-        //int mode = data >>> 7; 
-        // TODO make something else if mode 1
+        if ( dest < 0x8000 || dest >= 0xA000 )
+        	return;  // Erroneous destination
+        if ( src >= 0xE000 || (src < 0xA000 && src >= 0x8000) )
+        	return;  // Erroneous destination
+        
+        
+        int length = ((data & 0x7F) * 0x10) + 0x10;
         for (int i = 0; i < length; i++) {
             memInt.write(dest + i, memInt.read(src + i));
         }

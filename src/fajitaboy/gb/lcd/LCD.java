@@ -110,7 +110,7 @@ public class LCD implements StateMachine {
             /*
              * Draw graphic objects
              */
-            int bgclr = ram.read(PALETTE_BG_DATA) & 0x03;
+            int bgclr = ram.read(ADDRESS_PALETTE_BG_DATA) & 0x03;
             int ly = ram.read(ADDRESS_LY);
             screen.clearLine(bgclr, ly);
 

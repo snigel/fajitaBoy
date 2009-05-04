@@ -7,6 +7,7 @@ public final class LCDConstants {
     public static final int GB_SPRITE_ATTRIBUTES = 40;
     
 	public static final int GB_TILES = 192;
+	public static final int CGB_TILES = 384;
 	
 	public static final int GB_MAP_W = 32;
 	public static final int GB_MAP_H = 32;
