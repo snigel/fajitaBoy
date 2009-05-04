@@ -354,9 +354,10 @@ public class KeyInputController implements CookieEater {
      * Attempts to save keybindings to browser cookie.
      */
     public final void exportKeys() {
-        String bindings;
+        String bindings = "v1";
 
-        bindings = getKey("Up");
+        
+        bindings += ";" + getKey("Up");
         bindings += ";" + getKey("Down");
         bindings += ";" + getKey("Left");
         bindings += ";" + getKey("Right");
@@ -383,7 +384,7 @@ public class KeyInputController implements CookieEater {
         }
         String[] keys = cookie.split(";");
 
-        if (keys.length != 8) {
+        if (keys.length != 9) {
             return;
         }
 
@@ -393,14 +394,14 @@ public class KeyInputController implements CookieEater {
                 "pushFullscreen");
         setKey(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0, false), "pushMute");
 
-        setKey(keys[0], "Up");
-        setKey(keys[1], "Down");
-        setKey(keys[2], "Left");
-        setKey(keys[3], "Right");
-        setKey(keys[4], "A");
-        setKey(keys[5], "B");
-        setKey(keys[6], "Start");
-        setKey(keys[7], "Select");
+        setKey(keys[1], "Up");
+        setKey(keys[2], "Down");
+        setKey(keys[3], "Left");
+        setKey(keys[4], "Right");
+        setKey(keys[5], "A");
+        setKey(keys[6], "B");
+        setKey(keys[7], "Start");
+        setKey(keys[8], "Select");
 
         keySettingsPanel.refreshLabels();
     }
