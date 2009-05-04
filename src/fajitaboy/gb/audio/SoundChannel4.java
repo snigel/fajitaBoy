@@ -81,6 +81,11 @@ public class SoundChannel4 implements StateMachine {
     private int toneLength;
 
     /**
+     * Holds the value of the percent of the volume output.
+     */
+    private double volume;
+
+    /**
      * Constructor for SoundChannel 4.
      *
      * @param ab
@@ -95,6 +100,7 @@ public class SoundChannel4 implements StateMachine {
         amp = 32;
         oldFreq = 0;
         lengthEnabled = false;
+        volume = 1;
     }
 
     /**
@@ -116,7 +122,7 @@ public class SoundChannel4 implements StateMachine {
         if ((ab.read(NR43_REGISTER) & 0x100) == 0){
             calcFreq();
         }
-    
+
         if (((ab.read(NR42_REGISTER) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
@@ -141,11 +147,13 @@ public class SoundChannel4 implements StateMachine {
                 }
 
                 if (left) {
-                    destBuff[k] += (byte) finalAmp / 2;
+                    //The amplitude is divided by half, because testing showed that
+                    //this channel was to loud.
+                    destBuff[k] += (byte) ((double)finalAmp * volume) / 2;
                 }
                 k++;
                 if (right) {
-                    destBuff[k] += (byte) finalAmp / 2;
+                    destBuff[k] += (byte) ((double)finalAmp * volume) / 2;
                 }
                 k++;
 
@@ -160,11 +168,11 @@ public class SoundChannel4 implements StateMachine {
             }
         }
 
-        if (toneLength < 0 && lengthEnabled && 
+        if (toneLength < 0 && lengthEnabled &&
                 (ab.read(NR41_REGISTER) & 0x100) == 0) {
             calcToneLength();
         }
-        
+
         if ((ab.read(NR42_REGISTER) & 0x100) == 0){
             calcEnvelope();
         }
@@ -231,7 +239,18 @@ public class SoundChannel4 implements StateMachine {
             ab.forceWrite(NR41_REGISTER, nr41 + 0x100);
         }
     }
-    
+
+    /**
+     * Sets the volume.
+     * @param volume Should be a value between 0-1.
+     */
+    public final void setVolume(final double volume) {
+        if(volume >= 0 && volume <= 1) {
+            this.volume = volume;
+        }
+    }
+
+
     /**
 	 * {@inheritDoc}
 	 */

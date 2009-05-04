@@ -158,10 +158,10 @@ public class SoundHandler implements StateMachine {
             finalSamples = samples;
         }
         stereoSelect();
-         au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
-         au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
-         au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
-         au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
+        au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
+        au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
+        au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
+        au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
 
         sdl.write(destBuff, 0, destBuff.length);
     }
@@ -187,7 +187,16 @@ public class SoundHandler implements StateMachine {
     public final void close() {
         sdl.close();
     }
-    
+
+    public final void setVolume(int volume) {
+        double vol = ((double) volume) / 100;
+        au1.setVolume(vol);
+        au2.setVolume(vol);
+        au3.setVolume(vol);
+        au4.setVolume(vol);
+
+    }
+
     /**
 	 * {@inheritDoc}
 	 */
@@ -201,7 +210,7 @@ public class SoundHandler implements StateMachine {
 		ch3Right = FileIOStreamHelper.readBoolean(is);
 		ch4Left = FileIOStreamHelper.readBoolean(is);
 		ch4Right = FileIOStreamHelper.readBoolean(is);
-		
+
 		au1.readState(is);
 		au2.readState(is);
 		au3.readState(is);
@@ -221,7 +230,7 @@ public class SoundHandler implements StateMachine {
 		FileIOStreamHelper.writeBoolean(os, ch3Right);
 		FileIOStreamHelper.writeBoolean(os, ch4Left);
 		FileIOStreamHelper.writeBoolean(os, ch4Right);
-		
+
 		au1.saveState(os);
 		au2.saveState(os);
 		au3.saveState(os);

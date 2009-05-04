@@ -65,6 +65,11 @@ public class SoundChannel3 implements StateMachine {
     private int toneLength;
 
     /**
+     * Holds the value of the percent of the volume output.
+     */
+    private double volume;
+
+    /**
      * Constructor for SoundChannel 3.
      *
      * @param ab
@@ -78,6 +83,7 @@ public class SoundChannel3 implements StateMachine {
         oldFreq = 0;
         pos = 0;
         lengthEnabled = false;
+        volume = 1;
     }
 
     /**
@@ -115,11 +121,11 @@ public class SoundChannel3 implements StateMachine {
                 amp = (byte)
                     (wavePattern[((32 * pos) / waveLength) % 32] >> shift);
                 if (left) {
-                    destBuff[k] += amp;
+                    destBuff[k] += (byte) ((double) amp * volume);
                 }
                 k++;
                 if (right) {
-                    destBuff[k] += amp;
+                    destBuff[k] += (byte) ((double) amp * volume);
                 }
                 k++;
 
@@ -128,7 +134,7 @@ public class SoundChannel3 implements StateMachine {
 
         }
 
-        if (toneLength < 0 && lengthEnabled && 
+        if (toneLength < 0 && lengthEnabled &&
                 (ab.read(NR31_REGISTER) & 0x100) == 0) {
             calcToneLength();
         }
@@ -207,13 +213,23 @@ public class SoundChannel3 implements StateMachine {
         lengthEnabled = ((ab.read(NR34_REGISTER) & 0x40) > 0);
         int nr31 = ab.read(NR31_REGISTER);
         if (lengthEnabled) {
-            toneLength = (int) (((256 - ((double) 
+            toneLength = (int) (((256 - ((double)
                     (nr31 & 0xFF))) / 256) * sampleRate);
             //Reset the length counter.
             ab.forceWrite(NR31_REGISTER, nr31 + 0x100);
         }
     }
-    
+
+    /**
+     * Sets the volume.
+     * @param volume Should be a value between 0-1.
+     */
+    public final void setVolume(final double volume) {
+        if(volume >= 0 && volume <= 1) {
+            this.volume = volume;
+        }
+    }
+
     /**
 	 * {@inheritDoc}
 	 */
@@ -225,7 +241,7 @@ public class SoundChannel3 implements StateMachine {
 		sampleRate = (int) FileIOStreamHelper.readData(is, 4);
 		toneLength = (int) FileIOStreamHelper.readData(is, 4);
 		waveLength = (int) FileIOStreamHelper.readData(is, 4);
-		
+
 		int wavePatternLength = (int) FileIOStreamHelper.readData(is, 4);
 		wavePattern = new byte[wavePatternLength];
 		long readData;
@@ -246,7 +262,7 @@ public class SoundChannel3 implements StateMachine {
 		FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
 		FileIOStreamHelper.writeData(os, (long) toneLength, 4);
 		FileIOStreamHelper.writeData(os, (long) waveLength, 4);
-		
+
 		int wavePatternLength = wavePattern.length;
 		FileIOStreamHelper.writeData(os, (long) wavePatternLength, 4);
 		long writeData;

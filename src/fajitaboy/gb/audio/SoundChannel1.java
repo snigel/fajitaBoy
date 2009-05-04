@@ -110,6 +110,11 @@ public class SoundChannel1 implements StateMachine {
     private int toneLength;
 
     /**
+     * Holds the value of the percent of the volume output.
+     */
+    private double volume;
+
+    /**
      * Constructor for SoundChannel 1.
      *
      * @param ab
@@ -124,6 +129,7 @@ public class SoundChannel1 implements StateMachine {
         oldFreq = 0;
         amp = 32;
         lengthEnabled = false;
+        volume = 1;
     }
 
     /**
@@ -198,24 +204,24 @@ public class SoundChannel1 implements StateMachine {
                 }
 
                 if (left) {
-                    destBuff[k] += (byte) finalAmp;
+                    destBuff[k] += (byte) ((double)finalAmp * volume);
                 }
                 k++;
                 if (right) {
-                    destBuff[k] += (byte) finalAmp;
+                    destBuff[k] += (byte) ((double)finalAmp * volume);
                 }
                 k++;
                 pos = (pos + 1) % waveLength;
-            }   
+            }
         }
         // This is needed for get the length to work correctly,
         // It isn't pretty :) It checks if the forced written bit has
         // been reset. That indicates that we have a new length to work with.
-        if (toneLength < 0 && lengthEnabled && 
+        if (toneLength < 0 && lengthEnabled &&
                 (ab.read(NR11_REGISTER) & 0x100) == 0) {
             calcToneLength();
         }
-        
+
         if ((ab.read(NR12_REGISTER) & 0x100) == 0){
             calcEnvelope();
         }
@@ -351,6 +357,16 @@ public class SoundChannel1 implements StateMachine {
             return (int) ((float) waveLength * 0.75);
         default:
             return 0;
+        }
+    }
+
+    /**
+     * Sets the volume.
+     * @param volume Should be a value between 0-1.
+     */
+    public final void setVolume(final double volume) {
+        if(volume >= 0 && volume <= 1) {
+            this.volume = volume;
         }
     }
 

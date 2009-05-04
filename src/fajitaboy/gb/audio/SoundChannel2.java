@@ -85,6 +85,12 @@ public class SoundChannel2 implements StateMachine {
     private int toneLength;
 
     /**
+     * Holds the value of the percent of the volume output.
+     */
+    private double volume;
+
+
+    /**
      * Constructor for SoundChannel 2.
      *
      * @param ab
@@ -99,6 +105,7 @@ public class SoundChannel2 implements StateMachine {
         oldFreq = 0;
         amp = 32;
         lengthEnabled = false;
+        volume = 1;
     }
 
     /**
@@ -151,18 +158,18 @@ public class SoundChannel2 implements StateMachine {
                     finalAmp = amp;
                 }
                 if (left) {
-                    destBuff[k] += (byte) finalAmp;
+                    destBuff[k] += (byte) ((double)finalAmp * volume);
                 }
                 k++;
                 if (right) {
-                    destBuff[k] += (byte) finalAmp;
+                    destBuff[k] += (byte) ((double)finalAmp * volume);
                 }
                 k++;
                 pos = (pos + 1) % waveLength;
-            }            
+            }
         }
 
-        if (toneLength < 0 && lengthEnabled && 
+        if (toneLength < 0 && lengthEnabled &&
                 (ab.read(NR21_REGISTER) & 0x100) == 0) {
             calcToneLength();
         }
@@ -251,7 +258,17 @@ public class SoundChannel2 implements StateMachine {
             ab.forceWrite(NR21_REGISTER, nr21 + 0x100);
         }
     }
-    
+
+    /**
+     * Sets the volume.
+     * @param volume Should be a value between 0-1.
+     */
+    public final void setVolume(final double volume) {
+        if(volume >= 0 && volume <= 1) {
+            this.volume = volume;
+        }
+    }
+
     /**
 	 * {@inheritDoc}
 	 */
