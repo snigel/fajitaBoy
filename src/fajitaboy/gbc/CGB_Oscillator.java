@@ -7,13 +7,13 @@ import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.Timer;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
-import fajitaboy.gbc.lcd.ColorLCD;
-import fajitaboy.gbc.memory.AddressBusCgb;
+import fajitaboy.gbc.lcd.CGB_LCD;
+import fajitaboy.gbc.memory.CGB_AddressBus;
 
 /**
  * Oscillator in CGB mode.
  */
-public class OscillatorCgb extends Oscillator {
+public class CGB_Oscillator extends Oscillator {
     
     /**
      * Creates a new OscillatorCgb object.
@@ -24,8 +24,8 @@ public class OscillatorCgb extends Oscillator {
      * @param ss
      *            Pointer to SpeedSwitch instance.
      */
-    public OscillatorCgb(Cpu cpu, AddressBusCgb ram, SpeedSwitch ss) {
-        super(cpu, ram, new ColorLCD(ram), new Timer());   
+    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, SpeedSwitch ss) {
+        super(cpu, ram, new CGB_LCD(ram), new Timer());   
         speedSwitch = ss;
     }
 
@@ -40,9 +40,9 @@ public class OscillatorCgb extends Oscillator {
      * @param dgs
      *            Pointer to DrawsGameboyScreen instance.
      */
-    public OscillatorCgb(Cpu cpu, AddressBusCgb ram, SpeedSwitch ss, DrawsGameboyScreen dgs,
+    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, SpeedSwitch ss, DrawsGameboyScreen dgs,
             boolean enableAudio) {
-        super(cpu, ram, new ColorLCD(ram), new Timer());
+        super(cpu, ram, new CGB_LCD(ram), new Timer());
         this.dgs = dgs;
         if ( enableAudio )
             enableAudio();

@@ -3,12 +3,12 @@ package fajitaboy.gbc.memory;
 import static fajitaboy.constants.AddressConstants.*;
 import fajitaboy.gb.memory.IO;
 
-public class IOCgb extends IO {
+public class CGB_IO extends IO {
 
-    RamHighCgb wram;
-    VramCgb vram;
+    CGB_RamHigh wram;
+    CGB_Vram vram;
     
-    public IOCgb(int start, int end, RamHighCgb wram, VramCgb vram) {
+    public CGB_IO(int start, int end, CGB_RamHigh wram, CGB_Vram vram) {
         super(start, end);
         this.wram = wram;
         this.vram = vram;

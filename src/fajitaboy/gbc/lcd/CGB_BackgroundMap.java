@@ -15,28 +15,28 @@ import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gb.memory.MemoryInterface;
 import fajitaboy.gb.memory.Vram;
-import fajitaboy.gbc.memory.AddressBusCgb;
-import fajitaboy.gbc.memory.VramCgb;
+import fajitaboy.gbc.memory.CGB_AddressBus;
+import fajitaboy.gbc.memory.CGB_Vram;
 
 /**
  * BackgroundMap that handles colors.
  */
-public class ColorBackgroundMap {
+public class CGB_BackgroundMap {
     /**
      * Contains the id of each tile to be displayed.
      */
     private int[][] tileAddresses = new int[32][32];
-    private ColorMapAttribute[][] tileAttributes = new ColorMapAttribute[32][32];
+    private CGB_MapAttribute[][] tileAttributes = new CGB_MapAttribute[32][32];
 
     /**
      * Default constructor.
      */
-    public ColorBackgroundMap() {
+    public CGB_BackgroundMap() {
         reset();
         
         for(int i = 0; i < 32; i++) {
             for(int j = 0; j < 32; j++) {
-                tileAttributes[i][j] = new ColorMapAttribute();
+                tileAttributes[i][j] = new CGB_MapAttribute();
             }
         }
     }
@@ -46,7 +46,7 @@ public class ColorBackgroundMap {
      */
     public void reset() {
         tileAddresses = new int[32][32];
-        tileAttributes = new ColorMapAttribute[32][32];
+        tileAttributes = new CGB_MapAttribute[32][32];
     }
     
     /**
@@ -55,7 +55,7 @@ public class ColorBackgroundMap {
      * @param ram Pointer to memory interface
      * @param lcdc Pointer to LCDC information
      */
-    public void readBackgroundWholeLine(int ly, MemoryInterface ram, VramCgb vram, LCDC lcdc) {
+    public void readBackgroundWholeLine(int ly, MemoryInterface ram, CGB_Vram vram, LCDC lcdc) {
         int scy, firstTileY;
         
         scy = ram.read(ADDRESS_SCY);
@@ -101,7 +101,7 @@ public class ColorBackgroundMap {
      * @param vram Pointer to VRAM
      * @param ly Screen line to draw onto
      */
-    public void drawLine(ColorScreen screen, MemoryInterface ram, VramCgb vram, int ly) {
+    public void drawLine(CGB_Screen screen, MemoryInterface ram, CGB_Vram vram, int ly) {
         int scx, scy, firstTileX, firstTileY;
         Tile[] tiles = vram.getTiles();
 

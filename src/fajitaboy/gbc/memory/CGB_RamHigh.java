@@ -6,7 +6,7 @@ import fajitaboy.gb.memory.RamHigh;
  * RamHigh (WRAM) memory in CGB mode.
  * Switchable banks 1-7.
  */
-public class RamHighCgb extends RamHigh {
+public class CGB_RamHigh extends RamHigh {
 
     /**
      * Current bank used.
@@ -16,7 +16,7 @@ public class RamHighCgb extends RamHigh {
     /**
      * {@inheritDoc}
      */
-    public RamHighCgb(final int start, final int end) {
+    public CGB_RamHigh(final int start, final int end) {
         super(start, end);
         ram = new int[7 * length];
         bank = 1;

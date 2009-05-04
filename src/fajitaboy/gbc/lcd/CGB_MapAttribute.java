@@ -2,7 +2,7 @@ package fajitaboy.gbc.lcd;
 
 import fajitaboy.gb.memory.MemoryInterface;
 
-public class ColorMapAttribute {
+public class CGB_MapAttribute {
 
     /**
      * Bit 0-2  Background Palette number  (BGP0-7)

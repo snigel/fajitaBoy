@@ -34,9 +34,9 @@ import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.StateMachine;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
-import fajitaboy.gbc.CpuCgb;
-import fajitaboy.gbc.OscillatorCgb;
-import fajitaboy.gbc.memory.AddressBusCgb;
+import fajitaboy.gbc.CGB_Cpu;
+import fajitaboy.gbc.CGB_Oscillator;
+import fajitaboy.gbc.memory.CGB_AddressBus;
 import static fajitaboy.constants.PanelConstants.*;
 
 /**
@@ -552,10 +552,10 @@ public class FajitaBoy extends JApplet implements ComponentListener {
                     // Color!!
                     gamePanel = new ColorGamePanel(2);
                     SpeedSwitch speedSwitch = new SpeedSwitch();
-                    AddressBusCgb addressBusCgb = new AddressBusCgb(path);
+                    CGB_AddressBus addressBusCgb = new CGB_AddressBus(path);
                     addressBus = addressBusCgb;
-                    cpu = new CpuCgb(addressBus, speedSwitch);
-                    oscillator = new OscillatorCgb(cpu, addressBusCgb, speedSwitch, gamePanel, true);
+                    cpu = new CGB_Cpu(addressBus, speedSwitch);
+                    oscillator = new CGB_Oscillator(cpu, addressBusCgb, speedSwitch, gamePanel, true);
                     
                 } else {
                     // not color :(

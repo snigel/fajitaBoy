@@ -10,19 +10,19 @@ import fajitaboy.gb.lcd.LCDC;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.MemoryInterface;
 import fajitaboy.gb.memory.Vram;
-import fajitaboy.gbc.memory.VramCgb;
+import fajitaboy.gbc.memory.CGB_Vram;
 
-public class ColorSpriteAttributeTable {
+public class CGB_SpriteAttributeTable {
     
     /**
      * Collection of sprites to be rendered behind background.
      */
-    Queue<ColorSpriteAttribute> behindBG = new PriorityQueue<ColorSpriteAttribute>();
+    Queue<CGB_SpriteAttribute> behindBG = new PriorityQueue<CGB_SpriteAttribute>();
     
     /**
      * Collection of sprites to be rendered above background.
      */
-    Queue<ColorSpriteAttribute> aboveBG = new PriorityQueue<ColorSpriteAttribute>();
+    Queue<CGB_SpriteAttribute> aboveBG = new PriorityQueue<CGB_SpriteAttribute>();
     
     /**
      * Reads the sprite attribute table from memory.
@@ -35,7 +35,7 @@ public class ColorSpriteAttributeTable {
         aboveBG.clear();
         for ( int i = 0; i < GB_SPRITE_ATTRIBUTES; i++ ) {
             int saa = spriteAttrAddr + i*4;
-            ColorSpriteAttribute sa =  new ColorSpriteAttribute();
+            CGB_SpriteAttribute sa =  new CGB_SpriteAttribute();
             sa.read(ram, saa);
             if (sa.behindBG) {
                 behindBG.add(sa);
@@ -55,8 +55,8 @@ public class ColorSpriteAttributeTable {
      * @param vram Pointer to VRAM
      * @param ly Screen line to blit at
      */
-    public void draw(ColorScreen screen, boolean drawBehindBG, MemoryInterface ram, LCDC lcdc, VramCgb vram, int ly) {
-        Queue<ColorSpriteAttribute> toDraw;
+    public void draw(CGB_Screen screen, boolean drawBehindBG, MemoryInterface ram, LCDC lcdc, CGB_Vram vram, int ly) {
+        Queue<CGB_SpriteAttribute> toDraw;
         if (drawBehindBG) {
             toDraw = behindBG;
         } else {
@@ -65,7 +65,7 @@ public class ColorSpriteAttributeTable {
         
         Tile[] tiles = vram.getTiles();
         
-        for (ColorSpriteAttribute sa : toDraw) {
+        for (CGB_SpriteAttribute sa : toDraw) {
             int id = sa.patternNr + sa.vramBank * 2 * GB_TILES;
             
             int palette = sa.paletteNumber;

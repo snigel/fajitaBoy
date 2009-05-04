@@ -9,7 +9,7 @@ import fajitaboy.gb.memory.MemoryInterface;
 /**
  * Cpu in CGB mode·.
  */
-public class CpuCgb extends Cpu {
+public class CGB_Cpu extends Cpu {
     
     /**
      * SpeedSwitch object. Used to change the speed.
@@ -21,7 +21,7 @@ public class CpuCgb extends Cpu {
      * @param addressbus
      * @param ss SpeedSwitch object that to use if the speed should be changed.
      */
-    public CpuCgb(MemoryInterface addressbus, SpeedSwitch ss) {
+    public CGB_Cpu(MemoryInterface addressbus, SpeedSwitch ss) {
         super(addressbus);
         speedSwitch = ss;
     }

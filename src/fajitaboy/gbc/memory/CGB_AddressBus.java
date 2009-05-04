@@ -22,15 +22,15 @@ import fajitaboy.gb.memory.RamLow;
  * constructor. Maybe that is not very nice. Another way is to have one AddressBus
  * that handles both cases but it feels wrong. xD
  */
-public class AddressBusCgb extends AddressBus {
+public class CGB_AddressBus extends AddressBus {
 
     private PaletteMemory backgroundPaletteMemory;
     private PaletteMemory spritePaletteMemory;
     
-    private RamHighCgb ramh;
-    private VramCgb vram;
+    private CGB_RamHigh ramh;
+    private CGB_Vram vram;
     
-    public AddressBusCgb(String romPath) {
+    public CGB_AddressBus(String romPath) {
         super(romPath);
     }
     
@@ -40,7 +40,7 @@ public class AddressBusCgb extends AddressBus {
         debug = new DebugMemory();
         initialize(debug, DEBUG_START, DEBUG_END);
 
-        ramh = new RamHighCgb(RAMH_START, RAMH_END);
+        ramh = new CGB_RamHigh(RAMH_START, RAMH_END);
         initialize(ramh, RAMH_START, RAMH_END);
 
         raml = new RamLow(RAML_START, RAML_END);
@@ -49,7 +49,7 @@ public class AddressBusCgb extends AddressBus {
         echo = new Echo(this, RAML_START, ECHO_START);
         initialize(echo, ECHO_START, ECHO_END);
 
-        vram = new VramCgb(VRAM_START, VRAM_END, this);
+        vram = new CGB_Vram(VRAM_START, VRAM_END, this);
         initialize(vram, VRAM_START, VRAM_END);
 
         hram = new Hram(HRAM_START, HRAM_END);
@@ -63,7 +63,7 @@ public class AddressBusCgb extends AddressBus {
         
         initialize(mbc, CARTRIDGE_START, CARTRIDGE_END);
         
-        io = new IOCgb(IO_START, IO_END, ramh, vram);
+        io = new CGB_IO(IO_START, IO_END, ramh, vram);
         initialize(io, IO_START, IO_END);
         
         interruptRegister = new InterruptRegister();
@@ -156,7 +156,7 @@ public class AddressBusCgb extends AddressBus {
     }
     
     
-    public VramCgb getVram() { 
+    public CGB_Vram getVram() { 
         return vram;
     }
     

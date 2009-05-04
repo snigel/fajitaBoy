@@ -9,7 +9,7 @@ import fajitaboy.gb.memory.Vram;
 /**
  * Vram with switchable bank (0-1).
  */
-public class VramCgb extends Vram {
+public class CGB_Vram extends Vram {
     
     /**
      * Current switch bank used.
@@ -24,7 +24,7 @@ public class VramCgb extends Vram {
      * @param end
      * @param memInt 
      */
-    public VramCgb(final int start, final int end, MemoryInterface memInt) {
+    public CGB_Vram(final int start, final int end, MemoryInterface memInt) {
         super(start, end);
         this.memInt = memInt;
         bank = 0;

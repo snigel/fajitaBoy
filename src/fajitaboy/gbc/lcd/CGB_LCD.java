@@ -4,32 +4,32 @@ import static fajitaboy.constants.AddressConstants.ADDRESS_LY;
 import static fajitaboy.constants.AddressConstants.PALETTE_BG_DATA;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
-import fajitaboy.gbc.memory.AddressBusCgb;
+import fajitaboy.gbc.memory.CGB_AddressBus;
 /**
  * 
  */
-public class ColorLCD extends LCD {
+public class CGB_LCD extends LCD {
     
 
-    private ColorSpriteAttributeTable sat;
+    private CGB_SpriteAttributeTable sat;
 
-    private AddressBusCgb ram;
+    private CGB_AddressBus ram;
     
-    private ColorScreen screen;
+    private CGB_Screen screen;
     
-    private ColorBackgroundMap bgm;
+    private CGB_BackgroundMap bgm;
     
     /**
      * Creates a new ColorLCD with default values.
      * @param ram
      *            Pointer to an AddressBusCgb.
      */
-    public ColorLCD(AddressBusCgb ram) {
+    public CGB_LCD(CGB_AddressBus ram) {
         super(ram);
         this.ram = ram;
-        sat = new ColorSpriteAttributeTable();
-        screen = new ColorScreen( ram.getBackgroundPaletteMemory(), ram.getSpritePaletteMemory());
-        bgm = new ColorBackgroundMap();
+        sat = new CGB_SpriteAttributeTable();
+        screen = new CGB_Screen( ram.getBackgroundPaletteMemory(), ram.getSpritePaletteMemory());
+        bgm = new CGB_BackgroundMap();
     }
     
     /**

@@ -4,7 +4,7 @@ import fajitaboy.gb.lcd.Screen;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.PaletteMemory;
 
-public class ColorScreen extends Screen {
+public class CGB_Screen extends Screen {
     
     /**
      * Pointer to the Background Palette Memory.
@@ -21,7 +21,7 @@ public class ColorScreen extends Screen {
      * @param bpm Reference to Background Palette Memory.
      * @param spm Reference to Sprite Palette Memory.
      */
-    public ColorScreen(PaletteMemory bpm, PaletteMemory spm) {
+    public CGB_Screen(PaletteMemory bpm, PaletteMemory spm) {
         backgroundPaletteMemory = bpm;
         spritePaletteMemory = spm;
     }
