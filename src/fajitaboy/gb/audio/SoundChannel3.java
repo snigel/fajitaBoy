@@ -105,9 +105,7 @@ public class SoundChannel3 implements StateMachine {
             return destBuff;
         }
 
-        if ((ab.read(ADDRESS_NR33) & 0x100) == 0){
-            calcFreq();
-        }
+        updateParameters();
 
         if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
             if (lengthEnabled) {
@@ -133,12 +131,6 @@ public class SoundChannel3 implements StateMachine {
             }
 
         }
-
-        if (toneLength < 0 && lengthEnabled &&
-                (ab.read(ADDRESS_NR31) & 0x100) == 0) {
-            calcToneLength();
-        }
-
         return destBuff;
     }
 
@@ -155,15 +147,14 @@ public class SoundChannel3 implements StateMachine {
         } else {
             freq = 65536;
         }
-        if (freq == oldFreq) {
-            return;
-        } else {
-            calcToneLength();
-            calcWavePattern();
-            oldFreq = freq;
-            ab.forceWrite(ADDRESS_NR33, low1 + 0x100);
-            return;
+
+        waveLength = (int) ((sampleRate) / (float) freq);
+        if (waveLength == 0) {
+            waveLength = 1;
         }
+        calcToneLength();
+        calcWavePattern();
+        ab.forceWrite(ADDRESS_NR33, low1 + 0x100);
     }
 
     /**
@@ -191,18 +182,17 @@ public class SoundChannel3 implements StateMachine {
      * Calculates the wave pattern that a wavelength should have.
      */
     private void calcWavePattern() {
-        waveLength = (int) ((sampleRate) / (float) freq);
-        if (waveLength == 0) {
-            waveLength = 1;
-        }
         wavePattern = new byte[32];
         int k = 0;
+        int start = ab.read(ADDRESS_SOUND3_WAVEPATTERN_START);
         for (int i = 0; i <= (ADDRESS_SOUND3_WAVEPATTERN_END - ADDRESS_SOUND3_WAVEPATTERN_START); i++) {
             wavePattern[k] = (byte) (((ab.read((ADDRESS_SOUND3_WAVEPATTERN_START + i)) & 0xF0) >> 4) * 2);
             k++;
             wavePattern[k] = (byte) ((ab.read((ADDRESS_SOUND3_WAVEPATTERN_START + i)) & 0xF) * 2);
             k++;
         }
+        ab.forceWrite(ADDRESS_SOUND3_WAVEPATTERN_START, start + 0x100);
+
     }
 
     /**
@@ -231,44 +221,64 @@ public class SoundChannel3 implements StateMachine {
     }
 
     /**
-	 * {@inheritDoc}
-	 */
-	public void readState(FileInputStream is) throws IOException {
-		freq = (int) FileIOStreamHelper.readData(is, 4);
-		lengthEnabled = FileIOStreamHelper.readBoolean(is);
-		oldFreq = (int) FileIOStreamHelper.readData(is, 4);
-		pos = (int) FileIOStreamHelper.readData(is, 4);
-		sampleRate = (int) FileIOStreamHelper.readData(is, 4);
-		toneLength = (int) FileIOStreamHelper.readData(is, 4);
-		waveLength = (int) FileIOStreamHelper.readData(is, 4);
+     * Checks the registers and updates the parameters.
+     */
+    private void updateParameters() {
 
-		int wavePatternLength = (int) FileIOStreamHelper.readData(is, 4);
-		wavePattern = new byte[wavePatternLength];
-		long readData;
-		for ( int i = 0; i < wavePatternLength; i++ ) {
-			readData = FileIOStreamHelper.readData(is, 1);
-			wavePattern[i] |= readData;
-		}
-	}
+        if ((ab.read(ADDRESS_NR33) & 0x100) == 0){
+            calcFreq();
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void saveState(FileOutputStream os) throws IOException {
-		FileIOStreamHelper.writeData(os, (long) freq, 4);
-		FileIOStreamHelper.writeBoolean(os, lengthEnabled);
-		FileIOStreamHelper.writeData(os, (long) oldFreq, 4);
-		FileIOStreamHelper.writeData(os, (long) pos, 4);
-		FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
-		FileIOStreamHelper.writeData(os, (long) toneLength, 4);
-		FileIOStreamHelper.writeData(os, (long) waveLength, 4);
+        if (toneLength < 0 && lengthEnabled &&
+                (ab.read(ADDRESS_NR31) & 0x100) == 0) {
+            calcToneLength();
+        }
+/*
+        if ((ab.read(SOUND3_WAVEPATTERN_START) & 0x100) == 0){
+            calcWavePattern();
+        }
+*/
+    }
 
-		int wavePatternLength = wavePattern.length;
-		FileIOStreamHelper.writeData(os, (long) wavePatternLength, 4);
-		long writeData;
-		for ( int i = 0; i < wavePatternLength; i++ ) {
-			writeData = 0 | wavePattern[i];
-			FileIOStreamHelper.writeData(os, writeData, 1);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void readState(FileInputStream is) throws IOException {
+        freq = (int) FileIOStreamHelper.readData(is, 4);
+        lengthEnabled = FileIOStreamHelper.readBoolean(is);
+        oldFreq = (int) FileIOStreamHelper.readData(is, 4);
+        pos = (int) FileIOStreamHelper.readData(is, 4);
+        sampleRate = (int) FileIOStreamHelper.readData(is, 4);
+        toneLength = (int) FileIOStreamHelper.readData(is, 4);
+        waveLength = (int) FileIOStreamHelper.readData(is, 4);
+
+        int wavePatternLength = (int) FileIOStreamHelper.readData(is, 4);
+        wavePattern = new byte[wavePatternLength];
+        long readData;
+        for ( int i = 0; i < wavePatternLength; i++ ) {
+            readData = FileIOStreamHelper.readData(is, 1);
+            wavePattern[i] |= readData;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState(FileOutputStream os) throws IOException {
+        FileIOStreamHelper.writeData(os, (long) freq, 4);
+        FileIOStreamHelper.writeBoolean(os, lengthEnabled);
+        FileIOStreamHelper.writeData(os, (long) oldFreq, 4);
+        FileIOStreamHelper.writeData(os, (long) pos, 4);
+        FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
+        FileIOStreamHelper.writeData(os, (long) toneLength, 4);
+        FileIOStreamHelper.writeData(os, (long) waveLength, 4);
+
+        int wavePatternLength = wavePattern.length;
+        FileIOStreamHelper.writeData(os, (long) wavePatternLength, 4);
+        long writeData;
+        for ( int i = 0; i < wavePatternLength; i++ ) {
+            writeData = 0 | wavePattern[i];
+            FileIOStreamHelper.writeData(os, writeData, 1);
+        }
+    }
 }

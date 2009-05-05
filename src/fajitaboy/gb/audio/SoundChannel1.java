@@ -17,17 +17,16 @@ import fajitaboy.gb.memory.AddressBus;
  * @author Adam Hulin, Johan Gustafsson
  *
  */
+/**
+ * @author Adam Hulin, Johan Gustafsson
+ *
+ */
 public class SoundChannel1 implements StateMachine {
 
     /**
      * The sample rate the sound should be sampled.
      */
     private float sampleRate;
-
-    /**
-     * The old frequency that the last tone had.
-     */
-    private int oldFreq;
 
     /**
      * The waves current amplitude.
@@ -126,10 +125,10 @@ public class SoundChannel1 implements StateMachine {
         this.ab = ab;
         this.sampleRate = sampleRate;
         pos = 0;
-        oldFreq = 0;
         amp = 32;
         lengthEnabled = false;
         volume = 1;
+        toneLength = -1;
     }
 
     /**
@@ -148,9 +147,7 @@ public class SoundChannel1 implements StateMachine {
     public byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        if ((ab.read(ADDRESS_NR13) & 0x100) == 0){
-            calcFreq();
-        }
+        updateParameters();
         // If the sound channel is mute, return.
         if (((ab.read(ADDRESS_NR12) & 0xF0) >> 4) == 0) {
             return destBuff;
@@ -185,13 +182,13 @@ public class SoundChannel1 implements StateMachine {
                         if (sweepDirection == 0) {
                             freq = freq + (int) (freq / (Math.pow(2, sweepNr)));
                             calcWavePattern();
+                            calcWaveLength();
                             ab.forceWrite(ADDRESS_NR13, nr13 + 0x100);
-                            oldFreq = freq;
                         } else {
                             freq = freq - (int) (freq / (Math.pow(2, sweepNr)));
                             calcWavePattern();
+                            calcWaveLength();
                             ab.forceWrite(ADDRESS_NR13, nr13 + 0x100);
-                            oldFreq = freq;
                         }
                     }
                     sweepPos++;
@@ -214,22 +211,7 @@ public class SoundChannel1 implements StateMachine {
                 pos = (pos + 1) % waveLength;
             }
         }
-        // This is needed for get the length to work correctly,
-        // It isn't pretty :) It checks if the forced written bit has
-        // been reset. That indicates that we have a new length to work with.
-        if (toneLength < 0 && lengthEnabled &&
-                (ab.read(ADDRESS_NR11) & 0x100) == 0) {
-            calcToneLength();
-        }
-
-        if ((ab.read(ADDRESS_NR12) & 0x100) == 0){
-            calcEnvelope();
-        }
-
-        if ((ab.read(ADDRESS_NR10) & 0x100) == 0){
-            calcSweep();
-        }
-
+        
         return destBuff;
     }
 
@@ -265,16 +247,10 @@ public class SoundChannel1 implements StateMachine {
         } else {
             freq = 131072;
         }
-        if (freq == oldFreq) {
-            return;
-        } else {
-            calcToneLength();
-            calcSweep();
-            calcEnvelope();
-            dutyLength = calcWavePattern();
-            oldFreq = freq;
-            ab.forceWrite(ADDRESS_SOUND1_LOW, low1 + 0x100);
-        }
+        calcWaveLength();
+        calcToneLength();
+        calcWavePattern();
+        ab.forceWrite(ADDRESS_SOUND1_LOW, low1 + 0x100);        
     }
 
     /**
@@ -340,23 +316,20 @@ public class SoundChannel1 implements StateMachine {
     /**
      * Calculates the wave pattern.
      */
-    private int calcWavePattern() {
-        waveLength = (int) ((sampleRate) / (float) freq);
-        if (waveLength == 0) {
-            waveLength = 1;
-        }
+    private void calcWavePattern() {
         int nr11 = ((ab.read(ADDRESS_NR11) & 0xC0) >> 6);
+//        ab.forceWrite(ADDRESS_NR11, nr11 + 0x100);
         switch (nr11) {
         case 0:
-            return (int) ((float) waveLength * 0.125);
+            dutyLength = (int) ((float) waveLength * 0.125); break;
         case 1:
-            return (int) ((float) waveLength * 0.25);
+            dutyLength = (int) ((float) waveLength * 0.25); break;
         case 2:
-            return (int) ((float) waveLength * 0.50);
+            dutyLength = (int) ((float) waveLength * 0.50); break;
         case 3:
-            return (int) ((float) waveLength * 0.75);
+            dutyLength = (int) ((float) waveLength * 0.75); break;
         default:
-            return 0;
+            dutyLength = 0; break;
         }
     }
 
@@ -369,50 +342,81 @@ public class SoundChannel1 implements StateMachine {
             this.volume = volume;
         }
     }
+    
+    /**
+     * Checks the registers and updates the parameters.
+     */
+    private void updateParameters() {
+
+        if ((ab.read(ADDRESS_NR13) & 0x100) == 0){
+            calcFreq();
+        }
+
+        if ((ab.read(ADDRESS_NR11) & 0x100) == 0){
+            if (toneLength < 0 && lengthEnabled) {
+                calcToneLength();
+            }
+//            calcWavePattern();
+        }
+
+        
+        if ((ab.read(ADDRESS_NR12) & 0x100) == 0){
+            calcEnvelope();
+        }
+
+        if ((ab.read(ADDRESS_NR10) & 0x100) == 0){
+            calcSweep();
+        }
+    }
+    
+    private void calcWaveLength() {
+        waveLength = (int) ((sampleRate) / (float) freq);
+        if (waveLength == 0) {
+            waveLength = 1;
+        }
+    }
 
     /**
-	 * {@inheritDoc}
-	 */
-	public void readState(FileInputStream is) throws IOException {
-		amp = (int) FileIOStreamHelper.readData(is, 4);
-		dutyLength = (int) FileIOStreamHelper.readData(is, 4);
-		envelopePos = (int) FileIOStreamHelper.readData(is, 4);
-		envelopeStep = (int) FileIOStreamHelper.readData(is, 4);
-		envelopeStepLength = (int) FileIOStreamHelper.readData(is, 4);
-		freq = (int) FileIOStreamHelper.readData(is, 4);
-		lengthEnabled = FileIOStreamHelper.readBoolean(is);
-		oldFreq = (int) FileIOStreamHelper.readData(is, 4);
-		pos = (int) FileIOStreamHelper.readData(is, 4);
-		sampleRate = (int) FileIOStreamHelper.readData(is, 4);
-		sweepDirection = (int) FileIOStreamHelper.readData(is, 4);
-		sweepLength = (int) FileIOStreamHelper.readData(is, 4);
-		sweepNr = (int) FileIOStreamHelper.readData(is, 4);
-		sweepPos = (int) FileIOStreamHelper.readData(is, 4);
-		sweepSteps = (int) FileIOStreamHelper.readData(is, 4);
-		toneLength = (int) FileIOStreamHelper.readData(is, 4);
-		waveLength = (int) FileIOStreamHelper.readData(is, 4);
-	}
+     * {@inheritDoc}
+     */
+    public void readState(FileInputStream is) throws IOException {
+        amp = (int) FileIOStreamHelper.readData(is, 4);
+        dutyLength = (int) FileIOStreamHelper.readData(is, 4);
+        envelopePos = (int) FileIOStreamHelper.readData(is, 4);
+        envelopeStep = (int) FileIOStreamHelper.readData(is, 4);
+        envelopeStepLength = (int) FileIOStreamHelper.readData(is, 4);
+        freq = (int) FileIOStreamHelper.readData(is, 4);
+        lengthEnabled = FileIOStreamHelper.readBoolean(is);
+        pos = (int) FileIOStreamHelper.readData(is, 4);
+        sampleRate = (int) FileIOStreamHelper.readData(is, 4);
+        sweepDirection = (int) FileIOStreamHelper.readData(is, 4);
+        sweepLength = (int) FileIOStreamHelper.readData(is, 4);
+        sweepNr = (int) FileIOStreamHelper.readData(is, 4);
+        sweepPos = (int) FileIOStreamHelper.readData(is, 4);
+        sweepSteps = (int) FileIOStreamHelper.readData(is, 4);
+        toneLength = (int) FileIOStreamHelper.readData(is, 4);
+        waveLength = (int) FileIOStreamHelper.readData(is, 4);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void saveState(FileOutputStream os) throws IOException {
-		FileIOStreamHelper.writeData(os, (long) amp, 4);
-		FileIOStreamHelper.writeData(os, (long) dutyLength, 4);
-		FileIOStreamHelper.writeData(os, (long) envelopePos, 4);
-		FileIOStreamHelper.writeData(os, (long) envelopeStep, 4);
-		FileIOStreamHelper.writeData(os, (long) envelopeStepLength, 4);
-		FileIOStreamHelper.writeData(os, (long) freq, 4);
-		FileIOStreamHelper.writeBoolean(os, lengthEnabled);
-		FileIOStreamHelper.writeData(os, (long) oldFreq, 4);
-		FileIOStreamHelper.writeData(os, (long) pos, 4);
-		FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
-		FileIOStreamHelper.writeData(os, (long) sweepDirection, 4);
-		FileIOStreamHelper.writeData(os, (long) sweepLength, 4);
-		FileIOStreamHelper.writeData(os, (long) sweepNr, 4);
-		FileIOStreamHelper.writeData(os, (long) sweepPos, 4);
-		FileIOStreamHelper.writeData(os, (long) sweepSteps, 4);
-		FileIOStreamHelper.writeData(os, (long) toneLength, 4);
-		FileIOStreamHelper.writeData(os, (long) waveLength, 4);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState(FileOutputStream os) throws IOException {
+        FileIOStreamHelper.writeData(os, (long) amp, 4);
+        FileIOStreamHelper.writeData(os, (long) dutyLength, 4);
+        FileIOStreamHelper.writeData(os, (long) envelopePos, 4);
+        FileIOStreamHelper.writeData(os, (long) envelopeStep, 4);
+        FileIOStreamHelper.writeData(os, (long) envelopeStepLength, 4);
+        FileIOStreamHelper.writeData(os, (long) freq, 4);
+        FileIOStreamHelper.writeBoolean(os, lengthEnabled);
+        FileIOStreamHelper.writeData(os, (long) pos, 4);
+        FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
+        FileIOStreamHelper.writeData(os, (long) sweepDirection, 4);
+        FileIOStreamHelper.writeData(os, (long) sweepLength, 4);
+        FileIOStreamHelper.writeData(os, (long) sweepNr, 4);
+        FileIOStreamHelper.writeData(os, (long) sweepPos, 4);
+        FileIOStreamHelper.writeData(os, (long) sweepSteps, 4);
+        FileIOStreamHelper.writeData(os, (long) toneLength, 4);
+        FileIOStreamHelper.writeData(os, (long) waveLength, 4);
+    }
 }

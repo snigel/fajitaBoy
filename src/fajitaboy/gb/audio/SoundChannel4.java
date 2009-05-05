@@ -119,13 +119,11 @@ public class SoundChannel4 implements StateMachine {
     public final byte[] generateTone(final byte[] destBuff, final boolean left,
             final boolean right, final int samples) {
 
-        if ((ab.read(ADDRESS_NR43) & 0x100) == 0){
-            calcFreq();
-        }
-
         if (((ab.read(ADDRESS_NR42) & 0xF0) >> 4) == 0) {
             return destBuff;
         }
+
+        updateParameters();
 
         if ((toneLength > 0 && lengthEnabled) || !lengthEnabled) {
             if (lengthEnabled) {
@@ -167,17 +165,6 @@ public class SoundChannel4 implements StateMachine {
                 }
             }
         }
-
-        if (toneLength < 0 && lengthEnabled &&
-                (ab.read(ADDRESS_NR41) & 0x100) == 0) {
-            calcToneLength();
-        }
-
-        if ((ab.read(ADDRESS_NR42) & 0x100) == 0){
-            calcEnvelope();
-        }
-
-
         return destBuff;
     }
 
@@ -193,18 +180,13 @@ public class SoundChannel4 implements StateMachine {
             r = 0.5;
         }
         freq = (int) ((524288 / r) / (Math.pow(2, (s + 1))));
-        if (freq == oldFreq) {
-            return;
-        } else {
-            finalFreq = (int) (sampleRate / freq);
-            if (finalFreq == 0) {
-                finalFreq = 1;
-            }
-            calcEnvelope();
-            calcToneLength();
-            oldFreq = freq;
-            ab.forceWrite(ADDRESS_NR43, nr43 + 0x100);
+        finalFreq = (int) (sampleRate / freq);
+        if (finalFreq == 0) {
+            finalFreq = 1;
         }
+        calcToneLength();
+        ab.forceWrite(ADDRESS_NR43, nr43 + 0x100);
+
     }
 
     /**
@@ -241,6 +223,25 @@ public class SoundChannel4 implements StateMachine {
     }
 
     /**
+     * Checks the registers and updates the parameters.
+     */
+    private void updateParameters() {
+
+        if ((ab.read(ADDRESS_NR43) & 0x100) == 0){
+            calcFreq();
+        }
+
+        if ((ab.read(ADDRESS_NR41) & 0x100) == 0 && toneLength < 0 /*&& lengthEnabled*/) {
+                calcToneLength();
+        }
+
+        if ((ab.read(ADDRESS_NR42) & 0x100) == 0){
+            calcEnvelope();
+        }
+    }
+
+
+    /**
      * Sets the volume.
      * @param volume Should be a value between 0-1.
      */
@@ -252,34 +253,34 @@ public class SoundChannel4 implements StateMachine {
 
 
     /**
-	 * {@inheritDoc}
-	 */
-	public void readState(FileInputStream is) throws IOException {
-		amp = (int) FileIOStreamHelper.readData(is, 4);
-		envelopePos = (int) FileIOStreamHelper.readData(is, 4);
-		envelopeStep = (int) FileIOStreamHelper.readData(is, 4);
-		envelopeStepLength = (int) FileIOStreamHelper.readData(is, 4);
-		finalFreq = (int) FileIOStreamHelper.readData(is, 4);
-		freq = (int) FileIOStreamHelper.readData(is, 4);
-		lengthEnabled = FileIOStreamHelper.readBoolean(is);
-		oldFreq = (int) FileIOStreamHelper.readData(is, 4);
-		sampleRate = (int) FileIOStreamHelper.readData(is, 4);
-		toneLength = (int) FileIOStreamHelper.readData(is, 4);
-	}
+     * {@inheritDoc}
+     */
+    public void readState(FileInputStream is) throws IOException {
+        amp = (int) FileIOStreamHelper.readData(is, 4);
+        envelopePos = (int) FileIOStreamHelper.readData(is, 4);
+        envelopeStep = (int) FileIOStreamHelper.readData(is, 4);
+        envelopeStepLength = (int) FileIOStreamHelper.readData(is, 4);
+        finalFreq = (int) FileIOStreamHelper.readData(is, 4);
+        freq = (int) FileIOStreamHelper.readData(is, 4);
+        lengthEnabled = FileIOStreamHelper.readBoolean(is);
+        oldFreq = (int) FileIOStreamHelper.readData(is, 4);
+        sampleRate = (int) FileIOStreamHelper.readData(is, 4);
+        toneLength = (int) FileIOStreamHelper.readData(is, 4);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void saveState(FileOutputStream os) throws IOException {
-		FileIOStreamHelper.writeData(os, (long) amp, 4);
-		FileIOStreamHelper.writeData(os, (long) envelopePos, 4);
-		FileIOStreamHelper.writeData(os, (long) envelopeStep, 4);
-		FileIOStreamHelper.writeData(os, (long) envelopeStepLength, 4);
-		FileIOStreamHelper.writeData(os, (long) finalFreq, 4);
-		FileIOStreamHelper.writeData(os, (long) freq, 4);
-		FileIOStreamHelper.writeBoolean(os, lengthEnabled);
-		FileIOStreamHelper.writeData(os, (long) oldFreq, 4);
-		FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
-		FileIOStreamHelper.writeData(os, (long) toneLength, 4);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState(FileOutputStream os) throws IOException {
+        FileIOStreamHelper.writeData(os, (long) amp, 4);
+        FileIOStreamHelper.writeData(os, (long) envelopePos, 4);
+        FileIOStreamHelper.writeData(os, (long) envelopeStep, 4);
+        FileIOStreamHelper.writeData(os, (long) envelopeStepLength, 4);
+        FileIOStreamHelper.writeData(os, (long) finalFreq, 4);
+        FileIOStreamHelper.writeData(os, (long) freq, 4);
+        FileIOStreamHelper.writeBoolean(os, lengthEnabled);
+        FileIOStreamHelper.writeData(os, (long) oldFreq, 4);
+        FileIOStreamHelper.writeData(os, (long) sampleRate, 4);
+        FileIOStreamHelper.writeData(os, (long) toneLength, 4);
+    }
 }
