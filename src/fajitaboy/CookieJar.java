@@ -43,8 +43,6 @@ public class CookieJar {
      * @param cookieData data
      */
     public final void _JS_setCookie(String cookieData) {
-        System.out.println("DATAGET " + cookieData);
-
         String versionCheck = cookieName + "=" + version;
         String key, value;
         String[] rawCookies;
@@ -59,20 +57,14 @@ public class CookieJar {
         cEnd = cookieData.indexOf(";");
 
         if (cStart == 0) {
-            System.out.println("No cookies found.");
             return;
         }
 
         if (cEnd == -1) {
             cEnd = cookieData.length();
         }
-
         rawCookies = cookieData.substring(cStart, cEnd).split("&");
-
-        System.out.println("Nr of cookies found: " + rawCookies.length);
-
         for (int i = 0; i < rawCookies.length; i++) {
-            System.out.println("Cookie nr " + i + " = " + rawCookies[i]);
             cName = rawCookies[i].indexOf("#");
             key = rawCookies[i].substring(0, cName);
             value = rawCookies[i].substring(cName + 1);
@@ -98,9 +90,6 @@ public class CookieJar {
 
             data += "&" + name + "#" + value;
         }
-
-        System.out.println("Saving cookie: " + data);
-
         return data;
     }
 

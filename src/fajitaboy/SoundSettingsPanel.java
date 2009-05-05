@@ -41,8 +41,6 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         volumeSlider = new JSlider(JSlider.VERTICAL, AUDIO_VOLUME_MIN,
                 AUDIO_VOLUME_MAX, AUDIO_VOLUME_MAX);
 
-        System.out.println("Init sound.");
-
         cookieJar = fb.getCookieJar();
 
         volumeSlider.setPreferredSize(new Dimension(100, 150));

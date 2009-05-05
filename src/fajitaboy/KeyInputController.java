@@ -383,8 +383,7 @@ public class KeyInputController {
         bindings += ":" + getKey("B");
         bindings += ":" + getKey("Start");
         bindings += ":" + getKey("Select");
-
-        System.out.println("Keys put cookie " + bindings);
+        
         cookieJar.put(COOKIE_KEYBIND, bindings);
 
     }
