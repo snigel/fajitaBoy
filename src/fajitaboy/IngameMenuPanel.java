@@ -27,8 +27,7 @@ public class IngameMenuPanel extends JTabbedPane {
     /**
      * Default constructor.
      * 
-     * @param fb
-     *            applet
+     * @param fb applet
      */
     public IngameMenuPanel(final FajitaBoy fb) {
 
@@ -40,7 +39,7 @@ public class IngameMenuPanel extends JTabbedPane {
 
         main = new IngameMenuMain(fb);
         keys = new KeySettingsPanel(fb);
-        sound = new SoundSettingsPanel();
+        sound = new SoundSettingsPanel(fb);
 
         setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
@@ -65,10 +64,9 @@ public class IngameMenuPanel extends JTabbedPane {
     /**
      * Sets sound panel oscillator for audiocontrol.
      * 
-     * @param oscillator
-     *            to fix sound
+     * @param oscillator to fix sound
      */
-    public final void setOscillator(Oscillator oscillator) {
+    public final void setOscillator(final Oscillator oscillator) {
         sound.setOscillator(oscillator);
     }
 

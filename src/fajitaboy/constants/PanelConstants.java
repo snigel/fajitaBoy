@@ -11,6 +11,7 @@ public class PanelConstants {
     public static final int LAYOUT_PADDING = 5;
     public static final int BUTTONWIDTH = 40;
     public static final int BUTTONHEIGHT = 30;
-    public static final String KEYBIND_COOKIE = "keybindings";
+    public static final String COOKIE_KEYBIND = "keybindings";
+    public static final String COOKIE_SOUND = "soundSettings";
 
 }

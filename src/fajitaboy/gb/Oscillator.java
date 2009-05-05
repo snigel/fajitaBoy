@@ -80,9 +80,14 @@ public class Oscillator implements Runnable, StateMachine {
      * Sound samples per frame... or something?
      */
     private int samples = 735;
-    
+
+    /**
+     * Sound volume.
+     */
+    private int volume = 100;
+
     protected Oscillator() {}
-    
+
 
     /**
      * Creates a new Oscillator with default values.
@@ -235,6 +240,7 @@ public class Oscillator implements Runnable, StateMachine {
         if ( audioEnabled == false ) {
             audioEnabled = true;
             resetAudio();
+            setVolume(volume);
         }
     }
 
@@ -243,6 +249,25 @@ public class Oscillator implements Runnable, StateMachine {
             soundHandler.close();
         }
         audioEnabled = false;
+    }
+
+    /**
+     * Sets emulator volume.
+     *
+     * @param volume
+     */
+    public final void setVolume(int vol) {
+        volume = Math.max(0, vol);
+        volume = Math.min(100, volume);
+        soundHandler.setVolume(volume);
+    }
+
+    /**
+     * Returns emulator volume.
+     * @return int
+     */
+    public final int getVolume() {
+        return volume;
     }
 
     /**

@@ -2,7 +2,8 @@ package fajitaboy;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Class for managing cookies for the FajitaBoy. All but the get and put methods
@@ -11,41 +12,72 @@ import java.util.Hashtable;
  */
 public class CookieJar {
 
-    /** Cookie name. */
-    private String name;
-    /** Cookie data. */
-    private String data;
-
     /** Applet with JS pages. */
     private FajitaBoy fajitaBoy;
 
-    /** Stores references between cookie names and cookie owners. */
-    private Hashtable<String, CookieEater> cookieOwners;
+    /** All cookies. */
+    private HashMap<String, String> cookies;
+
+    /** Cookie version. */
+    private final String version = "fbcv001";
+
+    /** Cookie name. */
+    private final String cookieName = "fajitaSettings";
 
     /**
      * Constructor.
      * 
-     * @param fb
-     *            FajitaBoy
+     * @param fb FajitaBoy
      */
     public CookieJar(final FajitaBoy fb) {
-        cookieOwners = new Hashtable<String, CookieEater>();
+        cookies = new HashMap<String, String>();
         fajitaBoy = fb;
-        name = "";
-        data = "";
+
+        executeJS("loadCookie()");
     }
 
     /**
      * Used by JS when reading from cookie.
      * 
-     * @param name
-     *            owner
-     * @param cookieData
-     *            data
+     * @param name owner
+     * @param cookieData data
      */
-    public final void setCookieData(final String name, final String cookieData) {
-        if (cookieOwners.containsKey(name)) {
-            cookieOwners.get(name).recieveCookie(cookieData);
+    public final void _JS_setCookie(String cookieData) {
+        System.out.println("DATAGET " + cookieData);
+
+        String versionCheck = cookieName + "=" + version;
+        String key, value;
+        String[] rawCookies;
+        int cStart, cEnd, cName;
+
+        if (!cookieData.startsWith(versionCheck, 0)) {
+            System.out.println("Cookie version missmatch!");
+            return;
+        }
+
+        cStart = cookieData.indexOf("&") + 1;
+        cEnd = cookieData.indexOf(";");
+
+        if (cStart == 0) {
+            System.out.println("No cookies found.");
+            return;
+        }
+
+        if (cEnd == -1) {
+            cEnd = cookieData.length();
+        }
+
+        rawCookies = cookieData.substring(cStart, cEnd).split("&");
+
+        System.out.println("Nr of cookies found: " + rawCookies.length);
+
+        for (int i = 0; i < rawCookies.length; i++) {
+            System.out.println("Cookie nr " + i + " = " + rawCookies[i]);
+            cName = rawCookies[i].indexOf("#");
+            key = rawCookies[i].substring(0, cName);
+            value = rawCookies[i].substring(cName + 1);
+
+            cookies.put(key, value);
         }
     }
 
@@ -54,55 +86,53 @@ public class CookieJar {
      * 
      * @return data to save
      */
-    public final String getCookieData() {
-        return data;
-    }
+    public final String _JS_getCookie() {
+        String data = cookieName + "=" + version;
+        String name, value;
 
-    /**
-     * Used by JS when saving to cookie.
-     * 
-     * @return cookie name
-     */
-    public final String getCookieName() {
-        return name;
+        Iterator<String> it = cookies.keySet().iterator();
+
+        while (it.hasNext()) {
+            name = it.next();
+            value = cookies.get(name);
+
+            data += "&" + name + "#" + value;
+        }
+
+        System.out.println("Saving cookie: " + data);
+
+        return data;
     }
 
     /**
      * Saves some data in a cookie with specified name.
      * 
-     * @param cookieName
-     *            String
-     * @param value
-     *            String
+     * @param name String
+     * @param value String
      */
-    public final void put(final String cookieName, final String value) {
-        name = cookieName;
-        data = value;
-
+    public final void put(final String name, final String value) {
+        cookies.put(name, value);
         executeJS("saveCookie()");
     }
 
     /**
      * Loads some data from a cookie with specified name.
      * 
-     * @param cookieName
-     *            String
-     * @param owner
-     *            CookieEater
+     * @param name String
+     * @return value String
      */
-    public final void get(final String cookieName, final CookieEater owner) {
-        cookieOwners.put(cookieName, owner);
-        name = cookieName;
-        data = "";
+    public final String get(final String name) {
+        if (cookies.containsKey(name)) {
+            return cookies.get(name);
+        }
 
-        executeJS("loadCookie()");
+        return null;
     }
 
     /**
      * Runs some javascript on the fajita-page.
      * 
-     * @param script
-     *            JS-string to run
+     * @param script JS-string to run
      */
     private void executeJS(final String script) {
         try {

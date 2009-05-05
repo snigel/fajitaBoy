@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
@@ -128,6 +127,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         } catch (Exception e) {
         }
         addComponentListener(this);
+        cookieJar = new CookieJar(this);
 
         // Appletviewer resize
         resize(frameSize);
@@ -141,7 +141,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         // Init panels
         startScreen = new StartScreenPanel(this);
         singleplayerLoadscreen = new SingleplayerLoadPanel(this, fileChooser);
-        ingameMenuPanel = new IngameMenuPanel(this);
 
         fullScreenPlaceHolder = new JLabel("Click to exit fullscreen mode!");
 
@@ -168,8 +167,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
                 Toolkit.getDefaultToolkit().createImage(
                         new MemoryImageSource(0, 0, new int[0], 0, 0)),
                 new Point(0, 0), "hiddenCursor");
-
-        cookieJar = new CookieJar(this);
     }
 
     /** {@inheritDoc} */
@@ -183,6 +180,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
     /** {@inheritDoc} */
     public final void destroy() {
+        if (emulator != null) {
+            emulator.oscillator.disableAudio();
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -192,8 +192,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /**
      * Changes what panel to show.
      * 
-     * @param state
-     *            the state/panel
+     * @param state the state/panel
      */
     public final void changeGameState(final GameState state) {
 
@@ -267,19 +266,20 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /**
      * Changes to game view and starts emulation of the rom with given path.
      * 
-     * @param path
-     *            filepath to rom
+     * @param path filepath to rom
      */
     public final void startGame(final String path) {
 
         showStatus("Loading...");
         gamePanel = new GamePanel(2);
         emulator = new Emulator(path);
+        ingameMenuPanel = new IngameMenuPanel(this);
         layeredGamePanel = new LayeredGamePanel(gamePanel);
         layeredGamePanel.updateSize(getWidth(), getHeight());
 
         kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
-                emulator.addressBus.getJoyPad(), cookieJar);
+                emulator.addressBus.getJoyPad());
+        kic.importKeys();
 
         ingameMenuPanel.refreshLabels();
         ingameMenuPanel.setOscillator(emulator.oscillator);
@@ -362,6 +362,15 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     }
 
     /**
+     * Returns the cookieJar.
+     * 
+     * @return cookieJar
+     */
+    public final CookieJar getCookieJar() {
+        return cookieJar;
+    }
+
+    /**
      * Save emulator state.
      */
     public final void saveState() {
@@ -432,8 +441,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /**
      * Checks if the file is readable etc.
      * 
-     * @param file
-     *            file to check
+     * @param file file to check
      * @return true if everythings cool
      */
     public static boolean checkFile(final File file) {
@@ -455,8 +463,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /**
      * Shows an error message.
      * 
-     * @param msg
-     *            What to show in the box
+     * @param msg What to show in the box
      */
     public static void errorMsg(final String msg) {
         Toolkit.getDefaultToolkit().beep();
@@ -467,13 +474,11 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /**
      * Used by JS when reading from cookie.
      * 
-     * @param name
-     *            owner
-     * @param cookieData
-     *            data
+     * @param name owner
+     * @param cookieData data
      */
-    public final void setCookieData(final String owner, final String cookieData) {
-        cookieJar.setCookieData(owner, cookieData);
+    public final void _JS_setCookie(final String cookieData) {
+        cookieJar._JS_setCookie(cookieData);
     }
 
     /**
@@ -481,17 +486,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
      * 
      * @return data to save
      */
-    public final String getCookieData() {
-        return cookieJar.getCookieData();
-    }
-
-    /**
-     * Used by JS when saving to cookie.
-     * 
-     * @return cookie name
-     */
-    public final String getCookieName() {
-        return cookieJar.getCookieName();
+    public final String _JS_getCookie() {
+        return cookieJar._JS_getCookie();
     }
 
     /** {@inheritDoc} */
@@ -536,8 +532,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         /**
          * Standard constructor.
          * 
-         * @param path
-         *            Rom path
+         * @param path Rom path
          */
         Emulator(final String path) {
             // Temporarily solution.
@@ -547,7 +542,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
                 dis.skipBytes(0x143);
                 int cgbFlag = dis.readUnsignedByte();
-                boolean forceGb = ((cgbFlag & 0x40) != 0) && ((cgbFlag & 0x06) != 0);
+                boolean forceGb = ((cgbFlag & 0x40) != 0)
+                        && ((cgbFlag & 0x06) != 0);
                 dis.close();
                 if ((cgbFlag == 0x80 || cgbFlag == 0xC0) && !forceGb) {
                     // Color!!
@@ -556,19 +552,21 @@ public class FajitaBoy extends JApplet implements ComponentListener {
                     CGB_AddressBus addressBusCgb = new CGB_AddressBus(path);
                     addressBus = addressBusCgb;
                     cpu = new CGB_Cpu(addressBus, speedSwitch);
-                    oscillator = new CGB_Oscillator(cpu, addressBusCgb, speedSwitch, gamePanel, true);
-                    
+                    oscillator = new CGB_Oscillator(cpu, addressBusCgb,
+                            speedSwitch, gamePanel, true);
+
                 } else {
                     // not color :(
                     addressBus = new AddressBus(path);
                     cpu = new Cpu(addressBus);
-                    oscillator = new Oscillator(cpu, addressBus, gamePanel, true);
+                    oscillator = new Oscillator(cpu, addressBus, gamePanel,
+                            true);
                 }
-            
+
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }            
+            }
         }
 
         /**
@@ -612,8 +610,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         /**
          * Makes sure that the applet can regain the focus by clicking on it.
          * 
-         * @param e
-         *            mouseevent
+         * @param e mouseevent
          */
         public void mousePressed(final MouseEvent e) {
             if (gameState == GameState.PLAYGAME

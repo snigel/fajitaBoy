@@ -18,7 +18,7 @@ import static fajitaboy.constants.PanelConstants.*;
 /**
  * Handles the key input.
  */
-public class KeyInputController implements CookieEater {
+public class KeyInputController {
 
     /** Joypad object. */
     private JoyPad joypad;
@@ -28,6 +28,7 @@ public class KeyInputController implements CookieEater {
     /** gamepanel. */
     private LayeredGamePanel gamePanel;
 
+    /** keysettings. */
     private IngameMenuPanel keySettingsPanel;
 
     /** cookies. */
@@ -54,30 +55,22 @@ public class KeyInputController implements CookieEater {
     /**
      * Creates a new KeyInputController object that handles key input.
      * 
-     * @param fb
-     *            mainframe
-     * @param lgp
-     *            layeredgameframe
-     * @param ksp
-     *            keysettingspanel
-     * @param jp
-     *            the JoyPad object
-     * @param cj
-     *            cookieJar
+     * @param fb mainframe
+     * @param lgp layeredgameframe
+     * @param ksp keysettingspanel
+     * @param jp the JoyPad object
      */
     public KeyInputController(final FajitaBoy fb, final LayeredGamePanel lgp,
-            final IngameMenuPanel ksp, final JoyPad jp, final CookieJar cj) {
+            final IngameMenuPanel ksp, final JoyPad jp) {
         fajitaBoy = fb;
         joypad = jp;
         gamePanel = lgp;
         keySettingsPanel = ksp;
-        cookieJar = cj;
+        cookieJar = fb.getCookieJar();
 
         initActions();
         initActionMap();
         initInputMap();
-
-        importKeys();
     }
 
     /**
@@ -274,10 +267,8 @@ public class KeyInputController implements CookieEater {
      * the key a to joypad left
      * 
      * @see setKey(int,String,boolean)
-     * @param key
-     *            Key pressed, taken from KeyEvent
-     * @param actionMapKey
-     *            The string for a certain action
+     * @param key Key pressed, taken from KeyEvent
+     * @param actionMapKey The string for a certain action
      */
     public final void setKey(final int key, final String actionMapKey) {
         setKey(KeyStroke.getKeyStroke(key, 0, true), "release" + actionMapKey);
@@ -290,12 +281,8 @@ public class KeyInputController implements CookieEater {
      * triggers on release or on press
      * 
      * @see setKey(int,String)
-     * @param key
-     *            Key pressed, taken from KeyEvent
-     * @param actionMapKey
-     *            The string for a certain action
-     * @param onRelease
-     *            trigger on key released
+     * @param key Key pressed, taken from KeyEvent
+     * @param actionMapKey The string for a certain action
      */
     public final void setKey(final KeyStroke key, final String actionMapKey) {
         InputMap ip = gamePanel
@@ -310,11 +297,15 @@ public class KeyInputController implements CookieEater {
             }
         }
         ip.remove(key);
-
         ip.put(key, actionMapKey);
-
     }
 
+    /**
+     * Set a key.
+     * 
+     * @param key ie A
+     * @param actionMapKey ie Left
+     */
     public final void setKey(final String key, final String actionMapKey) {
         setKey(KeyStroke.getKeyStroke("pressed " + key), "push" + actionMapKey);
         setKey(KeyStroke.getKeyStroke("released " + key), "release"
@@ -324,8 +315,7 @@ public class KeyInputController implements CookieEater {
     /**
      * Fetches the keyboard key bound to a fajitabutton.
      * 
-     * @param mapValue
-     *            string value of fajitabutton
+     * @param mapValue string value of fajitabutton
      * @return keyboard key as string
      */
     public final String getKey(final String mapValue) {
@@ -339,7 +329,7 @@ public class KeyInputController implements CookieEater {
                 return k.toString().substring(8).trim();
             }
         }
-        return "Unbound";
+        return "None";
 
     }
 
@@ -347,44 +337,17 @@ public class KeyInputController implements CookieEater {
      * Attempts to read keybindings from browser cookie.
      */
     public final void importKeys() {
-        cookieJar.get(KEYBIND_COOKIE, this);
-    }
+        String cookie;
 
-    /**
-     * Attempts to save keybindings to browser cookie.
-     */
-    public final void exportKeys() {
-        String bindings = "v1";
+        cookie = cookieJar.get(COOKIE_KEYBIND);
 
-        
-        bindings += ";" + getKey("Up");
-        bindings += ";" + getKey("Down");
-        bindings += ";" + getKey("Left");
-        bindings += ";" + getKey("Right");
-        bindings += ";" + getKey("A");
-        bindings += ";" + getKey("B");
-        bindings += ";" + getKey("Start");
-        bindings += ";" + getKey("Select");
-
-        cookieJar.put(KEYBIND_COOKIE, bindings);
-
-    }
-
-    /**
-     * Resets keys to default values.
-     */
-    public final void reset() {
-        initInputMap();
-    }
-
-    /** {@inheritDoc} */
-    public final void recieveCookie(final String cookie) {
-        if (cookie == "") {
+        if (cookie == null) {
             return;
         }
-        String[] keys = cookie.split(";");
 
-        if (keys.length != 9) {
+        String[] keys = cookie.split(":");
+
+        if (keys.length != 8) {
             return;
         }
 
@@ -394,15 +357,42 @@ public class KeyInputController implements CookieEater {
                 "pushFullscreen");
         setKey(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0, false), "pushMute");
 
-        setKey(keys[1], "Up");
-        setKey(keys[2], "Down");
-        setKey(keys[3], "Left");
-        setKey(keys[4], "Right");
-        setKey(keys[5], "A");
-        setKey(keys[6], "B");
-        setKey(keys[7], "Start");
-        setKey(keys[8], "Select");
+        setKey(keys[0], "Up");
+        setKey(keys[1], "Down");
+        setKey(keys[2], "Left");
+        setKey(keys[3], "Right");
+        setKey(keys[4], "A");
+        setKey(keys[5], "B");
+        setKey(keys[6], "Start");
+        setKey(keys[7], "Select");
 
         keySettingsPanel.refreshLabels();
+    }
+
+    /**
+     * Attempts to save keybindings to browser cookie.
+     */
+    public final void exportKeys() {
+        String bindings;
+
+        bindings = getKey("Up");
+        bindings += ":" + getKey("Down");
+        bindings += ":" + getKey("Left");
+        bindings += ":" + getKey("Right");
+        bindings += ":" + getKey("A");
+        bindings += ":" + getKey("B");
+        bindings += ":" + getKey("Start");
+        bindings += ":" + getKey("Select");
+
+        System.out.println("Keys put cookie " + bindings);
+        cookieJar.put(COOKIE_KEYBIND, bindings);
+
+    }
+
+    /**
+     * Resets keys to default values.
+     */
+    public final void reset() {
+        initInputMap();
     }
 }
