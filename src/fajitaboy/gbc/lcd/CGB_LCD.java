@@ -59,15 +59,13 @@ public class CGB_LCD extends LCD {
             screen.clearLine(bgclr, ly);
 
             /*
-             * Paint objects in the following order: 1. Sprites that are under
-             * background & window. (bit7=1 in sprite attribute) Will be painted
-             * in order of ascending x-position. 2. Background. BG color 0 is
-             * always behind OBJ (Sprite). This means, that color 0 should only
-             * be painted, if that pixel is not painted by an sprite in step 1.
-             * 3. Window. 4. Sprites that are above bg & window (bit7=0 in
-             * sprite attribute) Will be painted in order of ascending
-             * x-position.
+			 * Window should Always be above background. But window and
+			 * background tiles can have different BG-to-OAM Priority
+			 * which make things more complicated. Sprites is always
+			 * above background/window color 0.
              */
+            
+            // Read and draw Sprites behind background and window.
             if (lcdc.objSpriteDisplay) {
                 sat.readSpriteAttributes(ram);
                 sat.draw(screen, true, ram, lcdc, ram.getVram(), ly);
@@ -81,8 +79,7 @@ public class CGB_LCD extends LCD {
 
             // Read and draw window if enabled.
             if (lcdc.windowDisplayEnable) {
-                // not color compatible yet.
-                wnd.readWindowLine(ly, ram, ram.getVram(), lcdc);
+            	wnd.readWindowLine(ly, ram, ram.getVram(), lcdc);
                 wnd.drawLine(screen, false, ram, ram.getVram(), ly);
             }
 
@@ -94,14 +91,11 @@ public class CGB_LCD extends LCD {
             
             // Read and draw background tiles that overrides oam priority.
             if (lcdc.bgDisplay) {
-                bgm.readBackgroundWholeLine(ly, ram, ram.getVram(), lcdc);
                 bgm.drawLine(screen, true, ram, ram.getVram(), ly);
             }
             
             // Read and draw window tiles that overrides oam priority.
             if (lcdc.windowDisplayEnable) {
-                // not color compatible yet.
-                wnd.readWindowLine(ly, ram, ram.getVram(), lcdc);
                 wnd.drawLine(screen, true, ram, ram.getVram(), ly);
             }
             

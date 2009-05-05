@@ -4,6 +4,7 @@ import static fajitaboy.constants.HardwareConstants.*;
 
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import fajitaboy.gb.lcd.LCDC;
 import fajitaboy.gb.lcd.Tile;
@@ -16,12 +17,12 @@ public class CGB_SpriteAttributeTable {
     /**
      * Collection of sprites to be rendered behind background.
      */
-    Queue<CGB_SpriteAttribute> behindBG = new PriorityQueue<CGB_SpriteAttribute>();
+    Queue<CGB_SpriteAttribute> behindBG = new LinkedBlockingQueue<CGB_SpriteAttribute>();
     
     /**
      * Collection of sprites to be rendered above background.
      */
-    Queue<CGB_SpriteAttribute> aboveBG = new PriorityQueue<CGB_SpriteAttribute>();
+    Queue<CGB_SpriteAttribute> aboveBG = new LinkedBlockingQueue<CGB_SpriteAttribute>();
     
     /**
      * Reads the sprite attribute table from memory.

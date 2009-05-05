@@ -90,10 +90,10 @@ public class CGB_BackgroundMap {
         }
     }
     
-    
     /**
      * Draws one line of the BackgroundMap onto the screen.
      * @param screen Pointer to screen surface
+     * @param drawAboveSprite Draws the GB tiles with map attribute BG-to-OAM Priority set if true.
      * @param ram Pointer to memory interface
      * @param vram Pointer to VRAM
      * @param ly Screen line to draw onto
@@ -125,11 +125,11 @@ public class CGB_BackgroundMap {
 	        CGB_MapAttribute tileAttr = tileAttributes[datay][datax];
 	        if (tileAttr.aboveSprites == drawAboveSprite) {
 	            tileId = tileAddresses[datay][datax] + tileAttr.vramBank * GB_TILES;
-	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, dx, dy, ly, true, tileAttr.flipX, tileAttr.flipY);
+	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, dx, dy, ly, tileAttr.flipX, tileAttr.flipY, false);
 	       	}
             
         }
 
     }
- 
+    
 }

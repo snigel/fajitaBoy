@@ -5,7 +5,7 @@ import fajitaboy.gb.memory.MemoryInterface;
 /**
  * Sprite Attribute in CGB mode.
  */
-public class CGB_SpriteAttribute implements Comparable {
+public class CGB_SpriteAttribute {
     /**
      * Sprite X coordinate + 8
      */
@@ -59,14 +59,5 @@ public class CGB_SpriteAttribute implements Comparable {
         vramBank = (flags & 0x08) >> 3;
         paletteNumber = (flags & 0x07);
 
-    }
-    
-    public int compareTo(Object other) {
-        if (other != null) {
-            CGB_SpriteAttribute so = (CGB_SpriteAttribute)other;
-            return new Integer(this.x).compareTo(new Integer(so.x));
-        } else {
-            throw new NullPointerException();
-        }
     }
 }

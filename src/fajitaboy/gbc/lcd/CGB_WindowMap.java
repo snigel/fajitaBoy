@@ -89,10 +89,10 @@ public class CGB_WindowMap {
         }
 	}
 	
-	
 	/**
+	 * 
 	 * Draws one line of the window onto the screen.
-	 * @param screen Pointer to screen surface
+	 * @param drawAboveSprite Draws the window tiles with map attribute BG-to-OAM Priority set if true.
 	 * @param ram Pointer to memory interface
 	 * @param vram Pointer to VRAM
 	 * @param ly Screen line to draw onto
@@ -123,7 +123,7 @@ public class CGB_WindowMap {
         	CGB_MapAttribute tileAttr = tileAttributes[firstTileY][tx];
         	if (tileAttr.aboveSprites == drawAboveSprite) {
 	            int tileId = tileAddresses[firstTileY][tx] + tileAttr.vramBank * GB_TILES;
-	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, x, sy, ly, false, tileAttr.flipX, tileAttr.flipY);
+	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, x, sy, ly, tileAttr.flipX, tileAttr.flipY, true);
         	}
         }
 	}

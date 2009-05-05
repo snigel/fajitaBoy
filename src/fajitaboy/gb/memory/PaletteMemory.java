@@ -93,6 +93,13 @@ public class PaletteMemory implements MemoryInterface {
         index = 0;
         autoIncrement = false;
         palettes = new int[8][4];
+        
+        // Initially all colors are initialized as white.
+        for (int p = 0; p < 8; p++) {
+        	for (int c = 0; c < 4; c++) {
+        		palettes[p][c] = 0x7FFF; //white
+        	}
+        }
     }
     
     /**
