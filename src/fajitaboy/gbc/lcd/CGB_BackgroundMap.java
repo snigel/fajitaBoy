@@ -3,6 +3,10 @@ package fajitaboy.gbc.lcd;
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
+
+import java.util.PriorityQueue;
+import java.util.Queue;
+
 import fajitaboy.gb.lcd.LCDC;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.AddressBus;
@@ -94,7 +98,7 @@ public class CGB_BackgroundMap {
      * @param vram Pointer to VRAM
      * @param ly Screen line to draw onto
      */
-    public void drawLine(CGB_Screen screen, MemoryInterface ram, CGB_Vram vram, int ly) {
+    public void drawLine(CGB_Screen screen, boolean drawAboveSprite, MemoryInterface ram, CGB_Vram vram, int ly) {
         int scx, scy, firstTileX, firstTileY;
         Tile[] tiles = vram.getTiles();
 
@@ -116,14 +120,16 @@ public class CGB_BackgroundMap {
         datay = firstTileY % 32;
 
         for ( int x = 0; x < LCD_MAP_VISIBLE_W + 1; x++ ) {
-            dx = (firstTileX + x)*GB_TILE_W - scx;
-            datax = (firstTileX + x) % LCD_MAP_W;
-            tileId = tileAddresses[datay][datax] + tileAttributes[datay][datax].vramBank * 2 * GB_TILES;
-            screen.blitTile(tiles[tileId], tileAttributes[datay][datax].PaletteNo, dx, dy, ly, true);
+			dx = (firstTileX + x)*GB_TILE_W - scx;
+			datax = (firstTileX + x) % LCD_MAP_W;
+	        CGB_MapAttribute tileAttr = tileAttributes[datay][datax];
+	        if (tileAttr.aboveSprites == drawAboveSprite) {
+	            tileId = tileAddresses[datay][datax] + tileAttr.vramBank * GB_TILES;
+	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, dx, dy, ly, true, tileAttr.flipX, tileAttr.flipY);
+	       	}
             
         }
 
     }
-    
-
+ 
 }

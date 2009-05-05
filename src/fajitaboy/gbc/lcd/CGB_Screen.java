@@ -87,6 +87,75 @@ public class CGB_Screen extends Screen {
      * @param ly Line to blit to on screen
      * @param transparent If true, palette index 0 is not rendered. 
      */
+    public void blitTile(Tile t, int palette, int x, int y, int ly, boolean transp, boolean xFlip, boolean yFlip  ) {
+        // Abort if no blitting occurs
+        if ( y > ly || y + 8 <= ly || x <= -8 || x >= 160 )
+            return;
+        // Prepare variables
+        int sx, sy, tx, ty;
+        sy = ly;
+        sx = Math.max(0, x);
+        if ( x < 0 ) {
+            tx = -x;
+        } else {
+            tx = 0;
+        }
+        ty = ly - y;
+        
+        if ( yFlip ) {
+            ty = 7 - ty;
+        }
+
+        // Blit pixels to screen            
+        if(xFlip) {
+        	tx = 7 - tx;
+	        if ( transp ) {
+	            while( sx < 160 && tx >= 0 ) {
+	                int newidx = t.bits[ty][tx];
+	                if (newidx != 0) {
+	                    bits[sy][sx] = backgroundPaletteMemory.getPalette(palette)[newidx];
+	                }
+	                sx++;
+	                tx--;
+	            }
+	        } else {
+	            while( sx < 160 && tx >= 0 ) {
+	                int newidx = t.bits[ty][tx];
+	                bits[sy][sx] = backgroundPaletteMemory.getPalette(palette)[newidx];
+	                sx++;
+	                tx--;
+	            }   
+	        }
+        } else {
+        	if ( transp ) {
+	            while( sx < 160 && tx < 8 ) {
+	                int newidx = t.bits[ty][tx];
+	                if (newidx != 0) {
+	                    bits[sy][sx] = backgroundPaletteMemory.getPalette(palette)[newidx];
+	                }
+	                sx++;
+	                tx++;
+	            }
+	        } else {
+	            while( sx < 160 && tx < 8 ) {
+	                int newidx = t.bits[ty][tx];
+	                bits[sy][sx] = backgroundPaletteMemory.getPalette(palette)[newidx];
+	                sx++;
+	                tx++;
+	            }   
+	        }
+        }
+    }
+    
+    /**
+     * Blits a tile onto the screen
+     * 
+     * @param t Tile to be drawn
+     * @param x X-position to draw tile at
+     * @param y Y-position to draw tile at
+     * @param ly Line to blit to on screen
+     * @param transparent If true, palette index 0 is not rendered. 
+     */
     public void blitTile(Tile t, int palette, int x, int y, int ly, boolean transp ) {
         // Abort if no blitting occurs
         if ( y > ly || y + 8 <= ly || x <= -8 || x >= 160 )

@@ -27,7 +27,7 @@ public class CGB_MapAttribute {
     /**
      * Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
      */
-    boolean priority;
+    boolean aboveSprites;
     
     /**
      * Updates values.
@@ -37,7 +37,7 @@ public class CGB_MapAttribute {
         vramBank = (flags & 0x08) >> 3;
         flipX = (flags & 0x20) > 0;
         flipY = (flags & 0x40) > 0;
-        priority = (flags & 0x80) > 0;
+        aboveSprites = (flags & 0x80) > 0;
     }
     
 }

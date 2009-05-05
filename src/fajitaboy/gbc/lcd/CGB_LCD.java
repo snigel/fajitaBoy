@@ -2,7 +2,9 @@ package fajitaboy.gbc.lcd;
 
 import static fajitaboy.constants.AddressConstants.ADDRESS_LY;
 import static fajitaboy.constants.AddressConstants.ADDRESS_PALETTE_BG_DATA;
+import fajitaboy.gb.lcd.BackgroundMap;
 import fajitaboy.gb.lcd.LCD;
+import fajitaboy.gb.lcd.WindowMap;
 import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.memory.CGB_AddressBus;
 /**
@@ -19,6 +21,8 @@ public class CGB_LCD extends LCD {
     
     private CGB_BackgroundMap bgm;
     
+    private CGB_WindowMap wnd;
+    
     /**
      * Creates a new ColorLCD with default values.
      * @param ram
@@ -30,6 +34,7 @@ public class CGB_LCD extends LCD {
         sat = new CGB_SpriteAttributeTable();
         screen = new CGB_Screen( ram.getBackgroundPaletteMemory(), ram.getSpritePaletteMemory());
         bgm = new CGB_BackgroundMap();
+        wnd = new CGB_WindowMap();
     }
     
     /**
@@ -71,14 +76,14 @@ public class CGB_LCD extends LCD {
             // Read and draw background if enabled.
             if (lcdc.bgDisplay) {
                 bgm.readBackgroundWholeLine(ly, ram, ram.getVram(), lcdc);
-                bgm.drawLine(screen, ram, ram.getVram(), ly);
+                bgm.drawLine(screen, false, ram, ram.getVram(), ly);
             }
 
             // Read and draw window if enabled.
             if (lcdc.windowDisplayEnable) {
                 // not color compatible yet.
-                wnd.readWindowLine(ly, ram, lcdc);
-                wnd.drawLine(screen, ram, ram.getVram(), ly);
+                wnd.readWindowLine(ly, ram, ram.getVram(), lcdc);
+                wnd.drawLine(screen, false, ram, ram.getVram(), ly);
             }
 
             // Read and draw sprites that are above bg & window, if sprites
@@ -86,6 +91,20 @@ public class CGB_LCD extends LCD {
             if (lcdc.objSpriteDisplay) {
                 sat.draw(screen, false, ram, lcdc, ram.getVram(), ly);
             }
+            
+            // Read and draw background tiles that overrides oam priority.
+            if (lcdc.bgDisplay) {
+                bgm.readBackgroundWholeLine(ly, ram, ram.getVram(), lcdc);
+                bgm.drawLine(screen, true, ram, ram.getVram(), ly);
+            }
+            
+            // Read and draw window tiles that overrides oam priority.
+            if (lcdc.windowDisplayEnable) {
+                // not color compatible yet.
+                wnd.readWindowLine(ly, ram, ram.getVram(), lcdc);
+                wnd.drawLine(screen, true, ram, ram.getVram(), ly);
+            }
+            
         }
         
     }
