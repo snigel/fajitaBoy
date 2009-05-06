@@ -37,10 +37,10 @@ public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
     }
 
     /**
-     * 1. LŠs 0-16KB till low rom 2. LŠs 16KB -> slutet frŒn cartridge 3. Gšr en
-     * metod fšr att returnera.
+     * 1. Read 0-16 KB to low rom
+     * 2. Read 16 kb and forard from cartridge 3
+     * 3. Make a method for returning
      */
-
     public ROM(final int start, final String romPath) {
         this.offset = start;
         setBank(1);
@@ -52,7 +52,7 @@ public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
     }
 
     public void forceWrite(int address, int data) {
-        // Nej det får du inte.
+        // No, you cant.
     }
 
     public int read(int address) {

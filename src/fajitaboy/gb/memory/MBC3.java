@@ -12,11 +12,13 @@ import fajitaboy.FileIOStreamHelper;
 import fajitaboy.gb.StateMachine;
 
 /**
- * Att göra:
- * 1. Ställa in rätt bank för minne.
- * 2. Att ställa in minnesläge
- * 3. Köra eram genom MBC?
- * Räkna antalet banker och se till att den inte anropar fler.
+ * Todo:
+ *
+ * 1. Setup correct bank for memory
+ * 2. Setup memory mode
+ * 3. Emulate Eram through MBC?
+ * Count number of banks, make sure that it doesn't call on more.
+ *
  * @author snigel
  *
  */

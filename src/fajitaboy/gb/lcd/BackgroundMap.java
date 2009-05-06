@@ -80,10 +80,6 @@ public class BackgroundMap {
 		scy = ram.read(ADDRESS_SCY);
 
 		firstTileX = scx/8;
-		
-		/*
-		 * krånglar när scy == 255 och mindre
-		 */
 		firstTileY = ((scy + ly) / 8) % 32;
 		
 		/*
