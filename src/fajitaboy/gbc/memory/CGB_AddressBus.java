@@ -79,77 +79,7 @@ public class CGB_AddressBus extends AddressBus {
         module[ADDRESS_PALETTE_BACKGROUND_INDEX] = backgroundPaletteMemory;
         module[ADDRESS_PALETTE_BACKGROUND_DATA] = backgroundPaletteMemory;
         module[ADDRESS_PALETTE_SPRITE_INDEX] = spritePaletteMemory;
-        module[ADDRESS_PALETTE_SPRITE_DATA] = spritePaletteMemory;
-        
-        
-        
-        // test VramCgb
-        write(0xFF4F, 0);
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            write(addr,(addr & 0xff));
-            //write(addr,0xac);
-        }
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            if( read(addr) != (addr & 0xff)) {
-                System.out.println("Fail addr: "+Integer.toHexString(addr)+" data: "+Integer.toHexString(read(addr)));
-            }
-            //write(addr,(addr & 0xff));
-        }
-        
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            if( vram.read(addr,0) != (addr & 0xff)) {
-                System.out.println("Fail addr: "+Integer.toHexString(addr)+" data: "+Integer.toHexString(vram.read(addr, 0)));
-            }
-            //write(addr,(addr & 0xff));
-        }
-        System.out.println("vram bank:"+vram.getBank());
-        write(0xFF4F, 1);
-        System.out.println("vram bank:"+vram.getBank());
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            if( read(addr) != 0) {
-                System.out.println("Fail bank1: "+Integer.toHexString(addr)+" data: "+Integer.toHexString(read(addr)));
-            }
-            //write(addr,(addr & 0xff));
-        }
-        
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            if( vram.read(addr, 1) != 0) {
-                System.out.println("Fail bank1: "+Integer.toHexString(addr)+" data: "+Integer.toHexString(vram.read(addr, 1)));
-            }
-            //write(addr,(addr & 0xff));
-        }
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            if( vram.read(addr,0) != (addr & 0xff)) {
-                System.out.println("Fail addr: "+Integer.toHexString(addr)+" data: "+Integer.toHexString(vram.read(addr, 0)));
-            }
-            //write(addr,(addr & 0xff));
-        }
-        
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            write(addr,((addr+8) & 0xff));
-        }
-        
-        for (int addr= 0x8000; addr < 0xA000; addr++) {
-            if( read(addr) != ((addr+8) & 0xff)) {
-                System.out.println("Fail addr: "+Integer.toHexString(addr)+" data: "+Integer.toHexString(read(addr)));
-            }
-            //write(addr,(addr & 0xff));
-        }
-
-        System.out.flush();
-        
-      /*  write(0x9000, 1);
-        read(0x9000);
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        */
-        
-        
+        module[ADDRESS_PALETTE_SPRITE_DATA] = spritePaletteMemory;   
     }
     
     
