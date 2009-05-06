@@ -62,7 +62,6 @@ public class CGB_WindowMap {
 		
 		// we should not need mod here
 		int firstTileY = ((ly - scy) / 8);
-		int firstTileX = (scx / 8);
 		
 		int addr_base = 0;
 		if (lcdc.windowTileMapSelect) {
@@ -72,7 +71,7 @@ public class CGB_WindowMap {
 		}
 		
         // only reads relevant tiles
-        for (int cx = scx, tx = firstTileX; cx < LCD_W; cx += 8, tx++) {
+        for (int cx = scx, tx = 0; cx < LCD_W; cx += 8, tx++) {
             int ty = firstTileY;
             // addr, where we read the tile pattern nr.
             int addr = addr_base + ty * LCD_MAP_W + tx; 
@@ -112,14 +111,13 @@ public class CGB_WindowMap {
 		scx -= 7;
 
         int firstTileY = ((ly - scy) / 8);  // y blir == 32 här, resultat -> knas 
-        int firstTileX = (scx / 8);
         
 		//	Draw tiles
-        
+ 
         int sy = firstTileY * 8 + scy; // ly - (ly - scy); 
        
         
-        for (int x = scx, tx = firstTileX; x < LCD_W; x += 8, tx++) {
+        for (int x = scx, tx = 0; x < LCD_W; x += 8, tx++) {
         	CGB_MapAttribute tileAttr = tileAttributes[firstTileY][tx];
         	if (tileAttr.aboveSprites == drawAboveSprite) {
 	            int tileId = tileAddresses[firstTileY][tx] + tileAttr.vramBank * GB_TILES;

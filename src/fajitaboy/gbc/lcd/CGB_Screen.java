@@ -134,7 +134,7 @@ public class CGB_Screen extends Screen {
                 int newidx = t.bits[ty][tx];
                 if (!windowBits[sy][sx]) {
                 	
-	                if (!windowTile && newidx == 0 && spriteBits[sy][sx] != 0) {
+	                if (newidx == 0 && spriteBits[sy][sx] != 0) {
 	            		bits[sy][sx] = spriteBits[sy][sx];
 	            	} else {
 	            		bits[sy][sx] = backgroundPaletteMemory.getPalette(palette)[newidx];
@@ -153,7 +153,7 @@ public class CGB_Screen extends Screen {
                 int newidx = t.bits[ty][tx];
                 if (!windowBits[sy][sx]) {
                 	
-	                if (!windowTile && newidx == 0 && spriteBits[sy][sx] != 0) {
+	                if (newidx == 0 && spriteBits[sy][sx] != 0) {
 	            		bits[sy][sx] = spriteBits[sy][sx];
 	            	} else {
 	            		bits[sy][sx] = backgroundPaletteMemory.getPalette(palette)[newidx];
