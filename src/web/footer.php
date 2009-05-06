@@ -1,7 +1,12 @@
 <?php
-class Footer {
-  function render() {
-    return "footer";
-  }
+
+function fbFooter() {
+?>
+
+  <div id="footer">
+    Copyright 2009, Fajita Boy-team
+  </div>
+
+<?php
 }
 ?>

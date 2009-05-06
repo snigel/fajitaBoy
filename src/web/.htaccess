@@ -61,5 +61,8 @@ RewriteRule (image|style|applet|script)\/ - [L]
 ###################################################
 
 
-RewriteRule ^(.*)?$ index.php?page=$1 [L]
+
+# RewriteRule ^(.+)/?$ index.php?page=$1 [L]
+RewriteRule ^([^/\.]+)/?$ index.php?page=$1 [L]
+# RewriteRule ^(.*?)$ index.php?page=$1 [L]
 

@@ -1,15 +1,13 @@
 <?php
 
-class Contact extends Page {
-  function render() {
-    echo "Contact";
-  }
-}
+function fbRenderPage() {
+  ?>
+<h2>Contact</h2>
+    <p>
+    Contact us ...
+    </p>
 
-/*
-array(path	=> 'page/contact.php',
-      descr => 'Contact us',
-      name	=> 'Contact'));
-*/
+    <?php
+}
 
 ?>

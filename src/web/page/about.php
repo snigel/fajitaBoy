@@ -1,15 +1,13 @@
 <?php
 
-class About extends Page {
-  function render() {
-    echo "about";
-  }
-}
+function fbRenderPage() {
+  ?>
+  <h2>About</h2>
+    <p>
+    About Fajita Boy ...
+    </p>
 
-/*
-array(path => 'page/about.php',
-      descr => 'About ' . $name,
-      name => "About");
-*/
+    <?php
+}
 
 ?>
