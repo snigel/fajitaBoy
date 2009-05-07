@@ -23,34 +23,34 @@ public class Cpu implements StateMachine {
     /**
      * Program counter/pointer 8bit register.
      */
-    private int pc;
+    protected int pc;
 
     /**
      * Flag Register. ZNHC0000. This register is the same as register F.
      * ZNHC0000
      */
-    private int cc;
+    protected int cc;
 
     /**
      * Stack Pointer 16bit register.
      */
-    private int sp;
+    protected int sp;
 
     /**
      * Interrupt Master Enable.
      */
-    private boolean ime;
+    protected boolean ime;
 
     // 8bit registers:
     /**Det g�r den faktiskt nu, grejen �r att det kommer �nd� att komma negativa v�rden till
      * The H register.
      */
-    private int h;
+    protected int h;
 
     /**
      * The L register.
      */
-    private int l;
+    protected int l;
 
     /**
      * The A register.
@@ -60,46 +60,46 @@ public class Cpu implements StateMachine {
     /**
      * The B register.
      */
-    private int b;
+    protected int b;
 
     /**
      * The C register.
      */
-    private int c;
+    protected int c;
 
     /**
      * The D register.
      */
-    private int d;
+    protected int d;
 
     /**
      * The E register.
      */
-    private int e;
+    protected int e;
 
     // Internal variables:
     /**
      * temp variables to use in runInstruction().
      */
-    private int temp;
+    protected int temp;
 
     /**
      * to know if an interrupt should be executed.
      */
-    private boolean executeInterrupt;
+    protected boolean executeInterrupt;
     
     /**
      * Address to jump to during interrupts.
      */
-    private int interruptJumpAddress;
+    protected int interruptJumpAddress;
 
     /**
      * Bit to turn off on interrupt execution
      */
-    private int interruptBit;
+    protected int interruptBit;
     
-    private int ieReg;
-    private int ifReg;
+    protected int ieReg;
+    protected int ifReg;
     
     /**
      * Creates a new CPU with default values.
@@ -110,7 +110,7 @@ public class Cpu implements StateMachine {
     /**
      * Halts the CPU until an interrupt occurs if active.
      */
-    private boolean stop;
+    protected boolean stop;
     
     public Cpu(final MemoryInterface addressbus) {
         ram = addressbus;
@@ -215,7 +215,7 @@ public class Cpu implements StateMachine {
     /**
      * Handle interrupts.
      */
-    private void handleInterrupts() {
+    protected void handleInterrupts() {
         if (executeInterrupt) {
             ifReg = ram.read(ADDRESS_IF);
             ram.write(ADDRESS_IF, ifReg & interruptBit); // clear interrupt bit
@@ -232,7 +232,7 @@ public class Cpu implements StateMachine {
      *            The opcode of the instruction to run.
      * @return Clockcycles for this instruction.
      */
-    private int runInstruction(final int instruction) {
+    protected int runInstruction(final int instruction) {
         int cycleTime = 0;
         switch (instruction) {
         case 0x00: // NOP
@@ -336,7 +336,6 @@ public class Cpu implements StateMachine {
             cycleTime += 4;
             break;
         case 0x10: // STOP
-            stopActions();
             stop = true;
             cycleTime += 4;
             pc++;           
@@ -1739,7 +1738,7 @@ public class Cpu implements StateMachine {
      *            8bit register value or memory space.
      * @return The new value of the register or memory space.
      */
-    private int prefixCB(int op, int r) {
+    protected int prefixCB(int op, int r) {
         if (op < 0x40) {
             switch (op >>> 3) {
             case 0: // RLC
@@ -1844,7 +1843,7 @@ public class Cpu implements StateMachine {
      * Reads the byte after pc.
      * @return the byte after pc.
      */
-    private int readn() {
+    protected int readn() {
         return ram.read(pc + 1);
     }
 
@@ -1852,7 +1851,7 @@ public class Cpu implements StateMachine {
      * Reads the two bytes after pc.
      * @return the two byte after pc as a 16bit value.
      */
-    private int readnn() {
+    protected int readnn() {
         return (ram.read(pc + 1) + ram.read(pc + 2) * 0x100);
     }
 
@@ -1860,7 +1859,7 @@ public class Cpu implements StateMachine {
      * Reads the 16bit value where sp is pointing.
      * @return A 16 bit value
      */
-    private int readSP() {
+    protected int readSP() {
         return (ram.read(sp) + ram.read(sp + 1) * 0x100);
     }
 
@@ -1870,7 +1869,7 @@ public class Cpu implements StateMachine {
      *            the register value to increment
      * @return new value of the register
      */
-    private int inc(final int i) {
+    protected int inc(final int i) {
         int t = (i + 1) & 0xFF;
         setZ(t == 0);
         setN(0);
@@ -1884,7 +1883,7 @@ public class Cpu implements StateMachine {
      *            register value to decrement
      * @return new value of the register
      */
-    private int dec(final int i) {
+    protected int dec(final int i) {
         int t = (i - 1) & 0xFF;
         setZ(t == 0);
         setN(1);
@@ -1897,7 +1896,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            The register value to add
      */
-    private void add(final int s) {
+    protected void add(final int s) {
         setN(0);
         calcH(a, s);
         a += s;
@@ -1916,7 +1915,7 @@ public class Cpu implements StateMachine {
      *            The register value to add
      */
     // TODO Optimize this function
-    private void adc(final int s) {
+    protected void adc(final int s) {
         int carry = getC();
         add(s);
         if ( carry != 0 ) {  // Carry performed as separate operation ONLY if c=1
@@ -1931,7 +1930,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            The register value to subtract
      */
-    private void sub(final int s) {
+    protected void sub(final int s) {
         setN(1);
         calcHsub(a, s);
         a -= s;
@@ -1950,7 +1949,7 @@ public class Cpu implements StateMachine {
      *            The register value to subtract
      */
     // TODO Optimize function
-    private void sbc(final int s) {
+    protected void sbc(final int s) {
         int carry = getC();
         sub(s);
         if ( carry != 0 ) { // Carry performed as separate operation ONLY if c=1
@@ -1965,7 +1964,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            The register value.
      */
-    private void and(final int s) {
+    protected void and(final int s) {
         setN(0);
         setH(1);
         setC(0);
@@ -1978,7 +1977,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            Register value.
      */
-    private void xor(final int s) {
+    protected void xor(final int s) {
         a = (a ^ s) & 0xFF;
         setZ(a == 0);
         setN(0);
@@ -1991,7 +1990,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            Register value.
      */
-    private void or(final int s) {
+    protected void or(final int s) {
         a = a | s;
         setZ(a == 0);
         setN(0);
@@ -2004,7 +2003,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            Register value.
      */
-    private void cp(final int s) {
+    protected void cp(final int s) {
         int t = a - s;
         setN(1);
         calcHsub(a, s);
@@ -2015,7 +2014,7 @@ public class Cpu implements StateMachine {
     /**
      * RET instruction. get (PC <- (SP), SP <- SP + 2)
      */
-    private void ret() {
+    protected void ret() {
         pc = readSP();
         sp += 2;
     }
@@ -2025,7 +2024,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            Value to push to the stack.
      */
-    private void push(final int s) {
+    protected void push(final int s) {
         sp -= 2;
         dblwrite(sp, s);
     }
@@ -2034,7 +2033,7 @@ public class Cpu implements StateMachine {
      * POP instruction.
      * @return Value popped from stack.
      */
-    private int pop() {
+    protected int pop() {
         int s = readSP();
         sp += 2;
         return s;
@@ -2043,7 +2042,7 @@ public class Cpu implements StateMachine {
     /**
      * CALL instruction.
      */
-    private void call() {
+    protected void call() {
         push(pc + 3);
         pc = readnn();
     }
@@ -2056,7 +2055,7 @@ public class Cpu implements StateMachine {
      * @param s
      *            register value
      */
-    private void bit(final int bit, final int s) {
+    protected void bit(final int bit, final int s) {
         setN(0);
         setH(1);
         if ( ((s >>> bit) & 0x01) == 0 ) {
@@ -2074,7 +2073,7 @@ public class Cpu implements StateMachine {
      *            register value
      * @return new value of s.
      */
-    private int res(final int bit, final int s) {
+    protected int res(final int bit, final int s) {
         return s & (~(1 << bit));
     }
 
@@ -2086,7 +2085,7 @@ public class Cpu implements StateMachine {
      *            register value
      * @return new value of s.
      */
-    private int set(final int bit, final int s) {
+    protected int set(final int bit, final int s) {
         return s | (1 << bit);
     }
 
@@ -2096,7 +2095,7 @@ public class Cpu implements StateMachine {
      * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setZ(final boolean value) {
+    protected void setZ(final boolean value) {
         if (value) {
             cc = cc | 0x80;
         } else {
@@ -2109,7 +2108,7 @@ public class Cpu implements StateMachine {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setZ(final int i) {
+    protected void setZ(final int i) {
         setZ(i != 0);
     }
 
@@ -2117,7 +2116,7 @@ public class Cpu implements StateMachine {
      * Get value of flag Z.
      * @return the value of Z.
      */
-    private int getZ() {
+    protected int getZ() {
         return (cc >>> 7) & 0x01;
     }
 
@@ -2127,7 +2126,7 @@ public class Cpu implements StateMachine {
      * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setN(final boolean value) {
+    protected void setN(final boolean value) {
         if (value) {
             cc = cc | 0x40;
         } else {
@@ -2140,7 +2139,7 @@ public class Cpu implements StateMachine {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setN(final int i) {
+    protected void setN(final int i) {
         setN(i != 0);
     }
 
@@ -2148,7 +2147,7 @@ public class Cpu implements StateMachine {
      * Get value of flag N.
      * @return the value of N.
      */
-    private int getN() {
+    protected int getN() {
         return (cc >>> 6) & 0x01;
     }
 
@@ -2158,7 +2157,7 @@ public class Cpu implements StateMachine {
      * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setH(final boolean value) {
+    protected void setH(final boolean value) {
         if (value) {
             cc = cc | 0x20;
         } else {
@@ -2171,7 +2170,7 @@ public class Cpu implements StateMachine {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setH(final int i) {
+    protected void setH(final int i) {
         setH(i != 0);
     }
 
@@ -2179,7 +2178,7 @@ public class Cpu implements StateMachine {
      * Get value of flag H.
      * @return the value of H.
      */
-    private int getH() {
+    protected int getH() {
         return (cc >>> 5) & 0x01;
     }
 
@@ -2190,7 +2189,7 @@ public class Cpu implements StateMachine {
      * @param v2
      *            another value
      */
-    private void calcH(final int v1, final int v2) {
+    protected void calcH(final int v1, final int v2) {
         setH(((v1 & 0x0F) + (v2 & 0x0F)) > 0x0F);
     }
 
@@ -2201,7 +2200,7 @@ public class Cpu implements StateMachine {
      * @param v2
      *            value to subtract
      */
-    private void calcHsub(final int v1, final int v2) {
+    protected void calcHsub(final int v1, final int v2) {
         setH(((v1 & 0x0F) - (v2 & 0x0F)) < 0x00);
     }
 
@@ -2211,7 +2210,7 @@ public class Cpu implements StateMachine {
      * @param value
      *            If true the flag is set to 1, else the flag is set to 0.
      */
-    private void setC(final boolean value) {
+    protected void setC(final boolean value) {
         if (value) {
             cc = cc | 0x10;
         } else {
@@ -2224,7 +2223,7 @@ public class Cpu implements StateMachine {
      * @param i
      *            If 0 the flag is set to 0, else the flag is set to 1.
      */
-    private void setC(final int i) {
+    protected void setC(final int i) {
         setC(i != 0);
     }
 
@@ -2232,7 +2231,7 @@ public class Cpu implements StateMachine {
      * Get value of flag C.
      * @return the value of C.
      */
-    private int getC() {
+    protected int getC() {
         return (cc >>> 4) & 0x01;
     }
 
@@ -2243,7 +2242,7 @@ public class Cpu implements StateMachine {
      * @param data16bit
      *            16bit value to be written.
      */
-    private void dblwrite(final int address, final int data16bit) {
+    protected void dblwrite(final int address, final int data16bit) {
         ram.write(address, data16bit & 0xFF);
         ram.write(address + 1, (data16bit >>> 8) & 0xFF);
     }
@@ -2256,7 +2255,7 @@ public class Cpu implements StateMachine {
      *            the right part of the double register.
      * @return the value of the double register.
      */
-    private int dblreg(final int rl, final int rr) {
+    protected int dblreg(final int rl, final int rr) {
         return rl * 0x100 + rr;
     }
 
@@ -2323,7 +2322,7 @@ public class Cpu implements StateMachine {
      * @param largeInt
      *            The new 16bit value of AF.
      */
-    private void setAF(final int largeInt) {
+    protected void setAF(final int largeInt) {
         a = (largeInt >> 8) & 0xFF;
         cc = largeInt & 0xFF;
     }
@@ -2333,7 +2332,7 @@ public class Cpu implements StateMachine {
      * register cc.
      * @return The value of the AF register.
      */
-    private int getAF() {
+    protected int getAF() {
         return dblreg(a, cc);
     }
 
@@ -2428,16 +2427,6 @@ public class Cpu implements StateMachine {
      */
     public boolean getExecuteInterrupt() {
         return executeInterrupt;
-    }
-    
-    /**
-     * Called each time the STOP instruction is executed.
-     * This version of stopActions() does nothing but it
-     * can be used by subclasses to fire actions on stop.
-     * eg. change speed.
-     */
-    protected void stopActions() {
-        // nothing..
     }
     
     /**

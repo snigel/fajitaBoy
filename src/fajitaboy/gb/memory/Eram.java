@@ -48,7 +48,7 @@ public class Eram extends MemoryComponent {
         this.banks = banks;
         offset = start; // set offset value for addressing
         reset();
-        System.out.println("ERAM size: " + ram.length + ", banks: " + banks);
+        //System.out.println("ERAM size: " + ram.length + ", banks: " + banks);
     }
     
     public void setBank(int bank) {

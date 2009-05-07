@@ -22,12 +22,18 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import fajitaboy.DrawsGameboyScreen;
+import fajitaboy.SpeedSwitch;
+import fajitaboy.applet.ColorGamePanel;
 import fajitaboy.applet.GamePanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.lcd.LCD;
+import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gb.memory.IO;
 import fajitaboy.gb.memory.RomWriteException;
+import fajitaboy.gbc.CGB_Cpu;
+import fajitaboy.gbc.CGB_Oscillator;
+import fajitaboy.gbc.memory.CGB_AddressBus;
 import static java.lang.Math.*;
 
 import static fajitaboy.constants.LCDConstants.*;
@@ -41,6 +47,8 @@ import static fajitaboy.constants.HardwareConstants.*;
  */
 public final class Debugger implements DrawsGameboyScreen {
 
+	private static final boolean GBCMode = true; 
+	
 	/**
 	 * Maximum value for a byte.
 	 */
@@ -94,10 +102,22 @@ public final class Debugger implements DrawsGameboyScreen {
 
 	private Debugger(final String path) {
 		pcLog = new LinkedList<Integer>();
-		addressBus = new DebuggerMemoryInterface(path);
 		breakPoints = new HashSet<Integer>();
-		cpu = new Cpu(addressBus);
-		osc = new Oscillator(cpu, addressBus, this, false);
+		if ( GBCMode ) {
+			ColorGamePanel gamePanel = new ColorGamePanel(2);
+            SpeedSwitch speedSwitch = new SpeedSwitch();
+            DebuggerAddressBusCGB addressBusCgb = new DebuggerAddressBusCGB(path);
+            addressBus = addressBusCgb;
+            cpu = new CGB_Cpu((CGB_AddressBus)addressBus, speedSwitch);
+            osc = new CGB_Oscillator(cpu, addressBusCgb,
+                    speedSwitch, gamePanel, true);
+		} else {
+			DebuggerAddressBus dab = new DebuggerAddressBus(path); 
+			addressBus = dab;
+			breakPoints = new HashSet<Integer>();
+			cpu = new Cpu((AddressBus)addressBus);
+			osc = new Oscillator(cpu, (AddressBus)addressBus, this, false);
+		}
 		prompt();
 	}
 
@@ -332,7 +352,7 @@ public final class Debugger implements DrawsGameboyScreen {
 		} else if (scLine.equals("mb")) {
 			if (in.hasNext()) {
 				String typeStr = in.next();
-				DebuggerMemoryInterface.ActionType type = DebuggerMemoryInterface.ActionType
+				DebuggerAddressBus.ActionType type = DebuggerAddressBus.ActionType
 				.fromTinyString(typeStr);
 
 				if (type != null) {
@@ -341,12 +361,12 @@ public final class Debugger implements DrawsGameboyScreen {
 						if (in.hasNextInt(argRadix)) {
 							int upper = in.nextInt(argRadix);
 							addressBus
-							.addBreakpoint(addressBus.new MemoryBreakpoint(
+							.addBreakpoint(new DebuggerMemoryInterface.MemoryBreakpoint(
 									lower, upper, type));
 
 						} else {
 							addressBus
-							.addBreakpoint(addressBus.new MemoryBreakpoint(
+							.addBreakpoint(new DebuggerMemoryInterface.MemoryBreakpoint(
 									lower, type));
 						}
 					}
@@ -355,10 +375,10 @@ public final class Debugger implements DrawsGameboyScreen {
 				}
 			} else {
 				System.out.println("Current memory breakpoints: ");
-				List<DebuggerMemoryInterface.MemoryBreakpoint> mbs = addressBus
+				List<DebuggerAddressBus.MemoryBreakpoint> mbs = addressBus
 				.getMBreakPoints();
 				for (int i = 0; i < mbs.size(); i++) {
-					DebuggerMemoryInterface.MemoryBreakpoint mb = mbs.get(i);
+					DebuggerAddressBus.MemoryBreakpoint mb = mbs.get(i);
 					System.out.println(i + ". " + mb);
 				}
 			}
@@ -935,7 +955,7 @@ public final class Debugger implements DrawsGameboyScreen {
 	 * Prints the list of dirty actions that the addressbus has accumulated.
 	 */
 	private void printDirtyActions() {
-		for (DebuggerMemoryInterface.MemoryAction ma : addressBus
+		for (DebuggerAddressBus.MemoryAction ma : addressBus
 				.getDirtyActions()) {
 			System.out.println(ma);
 		}

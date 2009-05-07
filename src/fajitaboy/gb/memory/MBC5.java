@@ -43,16 +43,17 @@ public class MBC5 implements MemoryBankController {
         	eramEnd = ADDRESS_ERAM_END;
         	break;
         default:
-        	ramBanks = 0;
-        	ramSize = 0;
-        	eramEnd = ADDRESS_ERAM_START;
+        	ramBanks = 16;
+        	ramSize = 0x20000;
+        	eramEnd = ADDRESS_ERAM_END;
         	break;
         }
         
         if ( ramSize > 0 ) {
         	eram = new Eram(ADDRESS_ERAM_START, eramEnd, ramBanks);
         }
-        System.out.println("This rom has "+romBanks+" banks");
+        System.out.println("ROM has "+romBanks+" banks. Size: " + (romBanks*16) + "KB");
+        System.out.println("RAM has "+ramBanks+" banks. Size: " + (ramBanks*8) + "KB");
     }
 
     public int forceRead(int address) {
@@ -66,7 +67,7 @@ public class MBC5 implements MemoryBankController {
     public int read(int address) {
     	if ( address >= 0x0000 && address < 0x8000 ) {
     		return rom.read(address);
-    	} else if (address >= ADDRESS_ERAM_START && address < eramEnd && ramEnable ) {
+    	} else if (address >= ADDRESS_ERAM_START && address < eramEnd ) {
     		return eram.read(address);
     	}
     	return 0;
@@ -75,7 +76,7 @@ public class MBC5 implements MemoryBankController {
     public void reset() {
         setRomBank(0);
         setRamBank(0);
-        ramEnable = false;
+        ramEnable = true;
     }
     
     private void setRomBank(int bank){
@@ -93,17 +94,15 @@ public class MBC5 implements MemoryBankController {
     	if (address >= 0x0000 && address < 0x2000) {
     		if ( (data & 0x0F) == 0x0A ) {
     			ramEnable = true;
-    		} else {
+    		} else if ( (data & 0x0F) == 0x00 ) {
     			ramEnable = false;
     		}
     	} else if (address >= 0x2000 && address < 0x3000) {
-    		System.out.println("Changed low bank to " + data);
    			setRomBank((romBank & 0x100 ) + data);
     	} else if (address >= 0x3000 && address < 0x4000) {
-    		System.out.println("Changed high bank to " + data);
     		setRomBank((romBank & 0xFF ) + ((data & 0x01) << 8));
         } else if (address >= 0x4000 && address < 0x6000) {
-            if ( data <= 0x03 ) {
+            if ( data <= 0x0F ) {
             	// Map RAM bank
             	setRamBank(data & 0x0F);
             }
