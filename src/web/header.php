@@ -22,7 +22,7 @@ function links($pages, $activePage) {
       $class = '';
     }
     ?>
-    <li><a <?=$class?> href="<?=$p['link']?>"><?=$p['name']?></a>
+    <li><a title=\"<?=$p['desc']?>\"<?=$class?> href="<?=$p['link']?>"><?=$p['name']?></a>
     <?php
   }
   echo '</ul>';

@@ -20,6 +20,7 @@ $pages = array(array('page_re' => "/(^$)|index|fajitaboy|index\.php/",
 		     'link' => 'contact')
 	       );
 
+
 if (isset($_GET['page'])) {
   $page = $_GET['page'];
 } else if (isset($argv[2]))  {

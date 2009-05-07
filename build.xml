@@ -3,55 +3,73 @@
         A simple build file for building FajitaBoy web-application.
     </description>
   <!-- set global properties for this build -->
-  <property name="applet-src" location="src/fajitaboy"/>
-  <property name="web-src" location="src/web"/>
-  <property name="build" location="build"/>
-  <property name="dist-web"  location="dist-web"/>
+  <property name="applet-src"	location="src/fajitaboy"/>
+  <property name="web-src"	location="src/web"/>
+  <property name="build"	location="build"/>
+  <property name="dist-web"	location="dist-web"/>
+  <property name="dist-jar"	location="dist-jar"/>
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
   </target>
 
   <target name="compile" depends="init"
-        description="compile the source " >
+          description="compile the source " >
+    <mkdir dir="${build}" />
+
     <!-- Compile the java code from ${src} into ${build} -->
     <!-- only compile the actual applet -->
-    <javac includes="FajitaBoy.java" 
-	   compiler="javac1.5" 
+    <javac compiler="javac1.5" 
 	   srcdir="${applet-src}" 
 	   destdir="${build}" />
-  </target>
 
-
-  <target name="dist" depends="compile"
-        description="generate the distribution" >
-    <!-- Create the distribution directory -->
-    <mkdir dir="${dist-web}"/>
-
-    <!-- Copy src/fajitaboy/images to build/fajitaboy/images -->
+    <!-- Copy resources for the applet -->
     <copy todir="${build}/fajitaboy/resources">
       <fileset dir="${applet-src}/resources" />
     </copy>
+  </target>
+
+  <target name="fbjar" depends="compile,init">
+    <mkdir dir="${dist-jar}" />
+
+    <copy todir="${build}/fajitaboy/resources">
+      <fileset dir="${applet-src}/resources" />
+    </copy>
+
+    <!-- <jar jarfile="${dist-web}/applet/FajitaBoy-${DSTAMP}.jar" basedir="${build}"/> -->
+    <jar jarfile="${dist-jar}/FajitaBoy.jar" basedir="${build}" />
+    <signjar jar="${dist-jar}/FajitaBoy.jar" alias="MyCert" keystore="cert/keystore" storepass="hahaha" />
+  </target>
+
+  <target name="dist" depends="compile,fbjar"
+        description="generate the distribution" >
+    <mkdir dir="${dist-web}"/>
+
+    <!-- Copy src/fajitaboy/images to build/fajitaboy/images -->
+    <copy todir="${dist-web}/applet/resources">
+      <fileset dir="${applet-src}/resources" />
+    </copy>
+    
+    <!-- Copy applet -->
+    <mkdir dir="${dist-web}/applet"/>
+    <move todir="${dist-web}/applet" >
+      <fileset dir="${dist-jar}/FajitaBoy.jar" />
+    </move>
 
     <!-- Copy src/www to dist-web -->
     <copy todir="${dist-web}">
       <fileset dir="${web-src}" />
     </copy>
 
-    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <mkdir dir="${dist-web}/applet"/>
-    <!-- <jar jarfile="${dist-web}/applet/FajitaBoy-${DSTAMP}.jar" basedir="${build}"/> -->
-    <jar jarfile="${dist-web}/applet/FajitaBoy.jar" basedir="${build}"/>
-    <signjar jar="${dist-web}/applet/FajitaBoy.jar" alias="MyCert" keystore="cert/keystore" storepass="hahaha" />
   </target>
 
   <target name="clean"
-        description="clean up" >
+          description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist-web}"/>
+    <delete dir="${dist-jar}"/>
   </target>
 </project>
