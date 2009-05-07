@@ -34,6 +34,7 @@
   <target name="fbjar" depends="compile,init">
     <mkdir dir="${dist-jar}" />
 
+    <!-- Copy src/fajitaboy/images to build/fajitaboy/images -->
     <copy todir="${build}/fajitaboy/resources">
       <fileset dir="${applet-src}/resources" />
     </copy>
@@ -46,18 +47,11 @@
   <target name="dist" depends="compile,fbjar"
         description="generate the distribution" >
     <mkdir dir="${dist-web}"/>
-
-    <!-- Copy src/fajitaboy/images to build/fajitaboy/images -->
-    <copy todir="${dist-web}/applet/resources">
-      <fileset dir="${applet-src}/resources" />
-    </copy>
-    
-    <!-- Copy applet -->
     <mkdir dir="${dist-web}/applet"/>
-    <move todir="${dist-web}/applet" >
-      <fileset dir="${dist-jar}/FajitaBoy.jar" />
-    </move>
-
+    
+    
+    <move file="${dist-jar}/FajitaBoy.jar" todir="${dist-web}/applet" />
+    <delete dir="${dist-jar}"/>
     <!-- Copy src/www to dist-web -->
     <copy todir="${dist-web}">
       <fileset dir="${web-src}" />
