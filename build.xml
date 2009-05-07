@@ -3,6 +3,7 @@
         A simple build file for building FajitaBoy web-application.
     </description>
   <!-- set global properties for this build -->
+  <property name="src"	location="src"/>
   <property name="applet-src"	location="src/fajitaboy"/>
   <property name="web-src"	location="src/web"/>
   <property name="build"	location="build"/>
@@ -21,9 +22,10 @@
 
     <!-- Compile the java code from ${src} into ${build} -->
     <!-- only compile the actual applet -->
-    <javac compiler="javac1.5" 
-	   srcdir="${applet-src}" 
-	   destdir="${build}" />
+    <javac compiler="javac1.5"
+	   srcdir="${src}"
+	   destdir="${build}"
+	   />
 
     <!-- Copy resources for the applet -->
     <copy todir="${build}/fajitaboy/resources">
@@ -31,7 +33,13 @@
     </copy>
   </target>
 
-  <target name="fbjar" depends="compile,init">
+  <target name="jar.check" depends="compile" >
+    <uptodate property="jarBuild.notRequired" targetfile="${dist-jar}/FajitaBoy.jar" >
+	<srcfiles dir="${build}" />
+    </uptodate>
+  </target>
+
+  <target name="fbjar" depends="compile,jar.check" unless="jarBuild.notRequired" >
     <mkdir dir="${dist-jar}" />
 
     <!-- Copy src/fajitaboy/images to build/fajitaboy/images -->
@@ -50,8 +58,9 @@
     <mkdir dir="${dist-web}/applet"/>
     
     
-    <move file="${dist-jar}/FajitaBoy.jar" todir="${dist-web}/applet" />
-    <delete dir="${dist-jar}"/>
+    <copy file="${dist-jar}/FajitaBoy.jar" todir="${dist-web}/applet" />
+    <!-- <delete dir="${dist-jar}"/> -->
+
     <!-- Copy src/www to dist-web -->
     <copy todir="${dist-web}">
       <fileset dir="${web-src}" />
