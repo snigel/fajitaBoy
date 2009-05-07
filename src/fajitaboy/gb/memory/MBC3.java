@@ -111,6 +111,7 @@ public class MBC3 implements MemoryBankController {
         setRamBank(0);
         romBankingMode = true;
         ramTimerEnable = false;
+        enableRTCReadWrite = false;
         RTCSecs = 0;
         RTCMins = 0;
         RTCHours = 0;
@@ -246,6 +247,7 @@ public class MBC3 implements MemoryBankController {
     	eramEnd = (int) FileIOStreamHelper.readData(fis, 4 );
     	
     	// Load Real Time Clock
+    	enableRTCReadWrite = FileIOStreamHelper.readBoolean(fis );
     	RTCSecs = (int) FileIOStreamHelper.readData(fis, 1 );
     	RTCMins = (int) FileIOStreamHelper.readData(fis, 1 );
     	RTCHours = (int) FileIOStreamHelper.readData(fis, 1 );
@@ -269,6 +271,7 @@ public class MBC3 implements MemoryBankController {
     	FileIOStreamHelper.writeData(fos, (long) eramEnd, 4 );
     	
     	// Save Real Time Clock
+    	FileIOStreamHelper.writeBoolean(fos, enableRTCReadWrite );
     	FileIOStreamHelper.writeData(fos, (long) RTCSecs, 1 );
     	FileIOStreamHelper.writeData(fos, (long) RTCMins, 1 );
     	FileIOStreamHelper.writeData(fos, (long) RTCHours, 1 );

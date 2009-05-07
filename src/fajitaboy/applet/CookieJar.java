@@ -1,9 +1,11 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import fajitaboy.FajitaBoy;
 
 /**
  * Class for managing cookies for the FajitaBoy. All but the get and put methods

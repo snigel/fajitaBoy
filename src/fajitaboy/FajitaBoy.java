@@ -28,6 +28,15 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import fajitaboy.applet.ColorGamePanel;
+import fajitaboy.applet.CookieJar;
+import fajitaboy.applet.FullScreenFrame;
+import fajitaboy.applet.GamePanel;
+import fajitaboy.applet.IngameMenuPanel;
+import fajitaboy.applet.KeyInputController;
+import fajitaboy.applet.LayeredGamePanel;
+import fajitaboy.applet.SingleplayerLoadPanel;
+import fajitaboy.applet.StartScreenPanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.StateMachine;

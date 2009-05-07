@@ -1,10 +1,12 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import static fajitaboy.constants.LCDConstants.*;
 import java.awt.*;
 import java.awt.image.*;
 
 import javax.swing.JPanel;
+
+import fajitaboy.DrawsGameboyScreen;
 
 /**
  * The panel in which the emulator screen will be shown.

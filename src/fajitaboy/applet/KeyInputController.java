@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -10,6 +10,7 @@ import javax.swing.InputMap;
 import javax.swing.JLayeredPane;
 import javax.swing.KeyStroke;
 
+import fajitaboy.FajitaBoy;
 import fajitaboy.FajitaBoy.GameState;
 import fajitaboy.gb.memory.IO.JoyPad;
 

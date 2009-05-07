@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
+import fajitaboy.FajitaBoy;
 import fajitaboy.FajitaBoy.GameState;
 
 /**

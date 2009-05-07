@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import static fajitaboy.constants.LCDConstants.*;
 

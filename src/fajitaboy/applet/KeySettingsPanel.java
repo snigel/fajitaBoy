@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,6 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
+
+import fajitaboy.FajitaBoy;
 
 import static fajitaboy.constants.PanelConstants.*;
 

@@ -1,10 +1,11 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.JTabbedPane;
 
+import fajitaboy.FajitaBoy;
 import fajitaboy.gb.Oscillator;
 
 /**

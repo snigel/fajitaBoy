@@ -1,6 +1,8 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.image.DirectColorModel;
+
+import fajitaboy.DrawsGameboyScreen;
 /**
  * GamePanel that support colors.
  */

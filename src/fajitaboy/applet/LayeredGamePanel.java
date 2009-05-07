@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.Dimension;
 

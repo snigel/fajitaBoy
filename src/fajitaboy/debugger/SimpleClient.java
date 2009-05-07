@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
-import fajitaboy.GamePanel;
+import fajitaboy.applet.GamePanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.memory.AddressBus;

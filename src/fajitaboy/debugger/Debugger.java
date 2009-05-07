@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import fajitaboy.DrawsGameboyScreen;
-import fajitaboy.GamePanel;
+import fajitaboy.applet.GamePanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.lcd.LCD;

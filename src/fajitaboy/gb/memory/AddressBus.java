@@ -141,12 +141,12 @@ public class AddressBus implements MemoryInterface, StateMachine {
         case CART_TYPE_MBC4: System.out.println("MBC: MBC4"); return null;
         case CART_TYPE_MBC4_RAM: System.out.println("MBC: MBC4+RAM"); return null;
         case CART_TYPE_MBC4_RAM_BATTERY: System.out.println("MBC: MBC4+RAM+BATTERY"); return null;
-        case CART_TYPE_MBC5: System.out.println("MBC: MBC5"); return null;
-        case CART_TYPE_MBC5_RAM: System.out.println("MBC: MBC5+RAM"); return null;
-        case CART_TYPE_MBC5_RAM_BATTERY: System.out.println("MBC: MBC5+RAM+BATTERY"); return null;
-        case CART_TYPE_MBC5_RUMBLE: System.out.println("MBC: MBC5+RUMBLE"); return null;
-        case CART_TYPE_MBC5_RUMBLE_RAM: System.out.println("MBC: MBC5+RUMBLE+RAM"); return null;
-        case CART_TYPE_MBC5_RUMBLE_RAM_BATTERY: System.out.println("MBC: MBC5+RUMBLE+RAM+BATTERY"); return null;
+        case CART_TYPE_MBC5: System.out.println("MBC: MBC5"); return new MBC5(rom);
+        case CART_TYPE_MBC5_RAM: System.out.println("MBC: MBC5+RAM"); return new MBC5(rom);
+        case CART_TYPE_MBC5_RAM_BATTERY: System.out.println("MBC: MBC5+RAM+BATTERY"); return new MBC5(rom);
+        case CART_TYPE_MBC5_RUMBLE: System.out.println("MBC: MBC5+RUMBLE"); return new MBC5(rom);
+        case CART_TYPE_MBC5_RUMBLE_RAM: System.out.println("MBC: MBC5+RUMBLE+RAM"); return new MBC5(rom);
+        case CART_TYPE_MBC5_RUMBLE_RAM_BATTERY: System.out.println("MBC: MBC5+RUMBLE+RAM+BATTERY"); return new MBC5(rom);
         case CART_TYPE_MMM01: System.out.println("MBC: MMM01"); return null;
         case CART_TYPE_MMM01_RAM: System.out.println("MBC: MMM01+RAM"); return null;
         case CART_TYPE_MMM01_RAM_BATTERY: System.out.println("MBC: MMM01+RAM+BATTERY"); return null;

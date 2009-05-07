@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import static fajitaboy.constants.PanelConstants.FB_INGAMEFONT;
 
@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import fajitaboy.FajitaBoy;
 import fajitaboy.FajitaBoy.GameState;
 
 /**

@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.applet;
 
 import java.awt.Dimension;
 import java.util.Hashtable;
@@ -9,6 +9,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fajitaboy.FajitaBoy;
 import fajitaboy.gb.Oscillator;
 
 import static fajitaboy.constants.AudioConstants.*;
