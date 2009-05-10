@@ -50,14 +50,14 @@ public class EmulatorCoreCGB implements EmulatorCore {
 		addressBus.getJoyPad().setKeys(keys);
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void reset() {
 		addressBus.reset();
 		cpu.reset();
 		oscillator.reset();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void setVideoReciever(VideoReciever videoReciever) {
 		// TODO Auto-generated method stub
 
@@ -75,39 +75,39 @@ public class EmulatorCoreCGB implements EmulatorCore {
 		addressBus.readState(is);
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void run(int cycles) {
 		// TODO Auto-generated method stub
 		oscillator.run(cycles);
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void stop() {
 		oscillator.stop();
 		
 	}
 	
-	@Override
+	/** {@inheritDoc} */
 	public void disableAudio() {
 		oscillator.disableAudio();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void enableAudio() {
 		oscillator.enableAudio();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public int getVolume() {
 		return oscillator.getVolume();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public boolean isAudioEnabled() {
 		return oscillator.isAudioEnabled();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void setVolume(int vol) {
 		oscillator.setVolume(vol);
 	}

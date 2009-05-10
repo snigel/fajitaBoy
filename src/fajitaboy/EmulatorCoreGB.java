@@ -50,7 +50,7 @@ public class EmulatorCoreGB implements EmulatorCore {
 		addressBus.getJoyPad().setKeys(keys);
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void reset() {
 		addressBus.reset();
 		cpu.reset();
@@ -58,7 +58,7 @@ public class EmulatorCoreGB implements EmulatorCore {
 		cycleStep = GB_CYCLES_PER_FRAME;
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void setVideoReciever(VideoReciever videoReciever) {
 		// TODO Auto-generated method stub
 
@@ -80,32 +80,32 @@ public class EmulatorCoreGB implements EmulatorCore {
 		oscillator.stop();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void run(int cycles) {
 		oscillator.run(cycles);
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void disableAudio() {
 		oscillator.disableAudio();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void enableAudio() {
 		oscillator.enableAudio();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public int getVolume() {
 		return oscillator.getVolume();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public boolean isAudioEnabled() {
 		return oscillator.isAudioEnabled();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void setVolume(int vol) {
 		oscillator.setVolume(vol);
 	}
