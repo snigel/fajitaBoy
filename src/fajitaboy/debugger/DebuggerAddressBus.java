@@ -29,8 +29,8 @@ public class DebuggerAddressBus extends AddressBus implements DebuggerMemoryInte
      * MemoryInterface.
      * @param wmi underlying memory interface.
      */
-    public DebuggerAddressBus(final String romPath) {
-        super(romPath);
+    public DebuggerAddressBus(final int[] cartridge) {
+        super(cartridge);
         
         mBreakPoints = new LinkedList<MemoryBreakpoint>();
         dirtyActions = new LinkedList<MemoryAction>();

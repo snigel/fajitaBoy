@@ -1,11 +1,8 @@
 package fajitaboy.gb.lcd;
 
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.HardwareConstants.GB_CYCLES_PER_LINE;
-import static fajitaboy.constants.HardwareConstants.GB_HBLANK_PERIOD;
-import static fajitaboy.constants.HardwareConstants.GB_LCD_OAMSEARCH_PERIOD;
-import static fajitaboy.constants.HardwareConstants.GB_LCD_TRANSFER_PERIOD;
-import static fajitaboy.constants.HardwareConstants.GB_VBLANK_LINE;
+import static fajitaboy.constants.HardwareConstants.*;
+import static fajitaboy.constants.LCDConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -69,6 +66,8 @@ public class LCD implements StateMachine {
      * Next cycle at which the LCD will change its mode.
      */
     private long nextModeChange;
+    
+    protected int[][] pixels;
 
     /*
      * (non-Javadoc)
@@ -92,6 +91,7 @@ public class LCD implements StateMachine {
     public void reset() {
         nextLineInc = GB_CYCLES_PER_LINE;
         nextModeChange = GB_CYCLES_PER_LINE;
+        pixels = new int[LCD_H][LCD_W];
     }
 
     /**
@@ -316,11 +316,26 @@ public class LCD implements StateMachine {
 
     /**
      * Returns the pixels that should be drawn onto the screen.
-     * @return Pixels in 8-bit palette form, 4 color.
+     * @return Pixels in 24bit color form
      */
-    public int[][] getScreen() {
+    public int[][] getPixels() {
+    	if ( newScreen = true ) {
+    		// Translate screen bits to displayable pixels if necessary
+    		int[] translationPalette = new int[4];
+    		int bit;
+    		translationPalette[0] = 0xFFFFFF;
+    		translationPalette[1] = 0xAAAAAA;
+    		translationPalette[2] = 0x555555;
+    		translationPalette[3] = 0x000000;
+    		for ( int x = 0; x < LCD_W; x++ ) {
+    			for ( int y = 0; y < LCD_H; y++ ) {
+    				bit = screen.bits[y][x];
+        			pixels[y][x] = translationPalette[bit];
+        		}
+    		}
+    	}
         newScreen = false;
-        return screen.getBits();
+        return pixels;
     }
 
     /**

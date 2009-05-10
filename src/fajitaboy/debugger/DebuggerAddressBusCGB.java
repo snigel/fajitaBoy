@@ -30,8 +30,8 @@ public class DebuggerAddressBusCGB extends CGB_AddressBus implements DebuggerMem
      * MemoryInterface.
      * @param wmi underlying memory interface.
      */
-    public DebuggerAddressBusCGB(final String romPath) {
-        super(romPath);
+    public DebuggerAddressBusCGB(final int[] cartridge) {
+        super(cartridge);
         
         mBreakPoints = new LinkedList<MemoryBreakpoint>();
         dirtyActions = new LinkedList<MemoryAction>();

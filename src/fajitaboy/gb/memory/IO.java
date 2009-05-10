@@ -114,9 +114,18 @@ public class IO extends MemoryComponent {
      */
     public class JoyPad implements StateMachine {
         /**
-         * Variables for all keys. True if pressed.
+         * Variable for all keys. Bit is 0 if pressed.
+         * Bit 7 - Start
+  		 * Bit 6 - Select
+  		 * Bit 5 - B
+  		 * Bit 4 - A
+  		 * Bit 3 - Down
+  		 * Bit 2 - Up
+  		 * Bit 1 - Left
+  		 * Bit 0 - Right
+
          */
-        private boolean up, down, left, right, a, b, start, select;
+        private int keys;
 
         /**
          * Starts the JoyPad and resets all variables to their default value.
@@ -129,14 +138,7 @@ public class IO extends MemoryComponent {
          * Resets all JoyPad variables to their default value.
          */
         public final void reset() {
-            up = false;
-            down = false;
-            left = false;
-            right = false;
-            a = false;
-            b = false;
-            start = false;
-            select = false;
+            keys = 0xFF;
             refresh();
         }
 
@@ -162,175 +164,36 @@ public class IO extends MemoryComponent {
                 // 1 == no button pressed
                 joyPad |= BITMASK_LOWER_NIBBLE_MASK;
             } else if (button) {
-                joyPad |= a ? 0x00 : 0x01;
-                joyPad |= b ? 0x00 : 0x02;
-                joyPad |= select ? 0x00 : 0x04;
-                joyPad |= start ? 0x00 : 0x08;
+                joyPad |= (keys & 0xF0) >> 4;
             } else if (direction) {
-                joyPad |= right ? 0x00 : 0x01;
-                joyPad |= left ? 0x00 : 0x02;
-                joyPad |= up ? 0x00 : 0x04;
-                joyPad |= down ? 0x00 : 0x08;
+                joyPad |= keys & 0x0F;
             }
 
             ram[ADDRESS_JOYPAD - offset] = joyPad;
         }
+        
+        public void setKeys ( int newKeys ) {
+        	if ( keys != newKeys ) {
+        		keyInterrupt();
+        	}
+        	keys = newKeys;
+        	refresh();
+        }
+        
         /**
          * Creates a interrupt from the keypad.
          */
         private void keyInterrupt() {
             ram[ADDRESS_IF - offset] |= 0x10;
         }
-
-        /**
-         * @return the a
-         */
-        public final boolean isA() {
-            return a;
-        }
-
-        /**
-         * @param input the value to set a with
-         */
-        public final void setA(final boolean input) {
-            a = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the b.
-         */
-        public final boolean isB() {
-            return b;
-        }
-
-        /**
-         * @param input the value to set b with
-         */
-        public final void setB(final boolean input) {
-            b = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the down
-         */
-        public final boolean isDown() {
-            return down;
-        }
-
-        /**
-         * @param input the value to set down with
-         */
-        public final void setDown(final boolean input) {
-            down = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the left
-         */
-        public final boolean isLeft() {
-            return left;
-        }
-
-        /**
-         * @param input sets left to the value of input
-         */
-        public final void setLeft(final boolean input) {
-            left = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the right
-         */
-        public final boolean isRight() {
-            return right;
-        }
-
-        /**
-         * @param input sets right to the value of input.
-         */
-        public final void setRight(final boolean input) {
-            right = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the select
-         */
-        public final boolean isSelect() {
-            return select;
-        }
-
-        /**
-         * @param input Sets select to the value of input.
-         */
-        public final void setSelect(final boolean input) {
-            select = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the start
-         */
-        public final boolean isStart() {
-            return start;
-        }
-
-        /**
-         * @param input sets start to the value of input.
-         */
-        public final void setStart(final boolean input) {
-            start = input;
-            refresh();
-            keyInterrupt();
-        }
-
-        /**
-         * @return the up
-         */
-        public final boolean isUp() {
-            return up;
-        }
-
-        /**
-         * @param input sets up to the value of input.
-         */
-        public final void setUp(final boolean input) {
-            up = input;
-            refresh();
-            keyInterrupt();
-        }
         
         public void readState( FileInputStream fis ) throws IOException {
-        	up = FileIOStreamHelper.readBoolean( fis );
-        	down = FileIOStreamHelper.readBoolean( fis );
-        	left = FileIOStreamHelper.readBoolean( fis );
-        	right = FileIOStreamHelper.readBoolean( fis );
-        	a = FileIOStreamHelper.readBoolean( fis );
-        	b = FileIOStreamHelper.readBoolean( fis );
-        	start = FileIOStreamHelper.readBoolean( fis );
-        	select = FileIOStreamHelper.readBoolean( fis );
+        	keys = (int) FileIOStreamHelper.readData( fis, 1 );
         	refresh(); // Update joypad register to correct value
         }
         
         public void saveState( FileOutputStream fos ) throws IOException {
-        	FileIOStreamHelper.writeBoolean( fos, up );
-        	FileIOStreamHelper.writeBoolean( fos, down );
-        	FileIOStreamHelper.writeBoolean( fos, left );
-        	FileIOStreamHelper.writeBoolean( fos, right );
-        	FileIOStreamHelper.writeBoolean( fos, a );
-        	FileIOStreamHelper.writeBoolean( fos, b );
-        	FileIOStreamHelper.writeBoolean( fos, start );
-        	FileIOStreamHelper.writeBoolean( fos, select );
+        	FileIOStreamHelper.writeData( fos, (long) keys, 1 );
         }
     }
     

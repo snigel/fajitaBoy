@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
@@ -28,7 +29,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import fajitaboy.applet.ColorGamePanel;
 import fajitaboy.applet.CookieJar;
 import fajitaboy.applet.FullScreenFrame;
 import fajitaboy.applet.GamePanel;
@@ -37,15 +37,8 @@ import fajitaboy.applet.KeyInputController;
 import fajitaboy.applet.LayeredGamePanel;
 import fajitaboy.applet.SingleplayerLoadPanel;
 import fajitaboy.applet.StartScreenPanel;
-import fajitaboy.gb.Cpu;
-import fajitaboy.gb.Oscillator;
-import fajitaboy.gb.StateMachine;
-import fajitaboy.gb.lcd.LCD;
-import fajitaboy.gb.memory.AddressBus;
-import fajitaboy.gbc.CGB_Cpu;
-import fajitaboy.gbc.CGB_Oscillator;
-import fajitaboy.gbc.memory.CGB_AddressBus;
 import static fajitaboy.constants.PanelConstants.*;
+import static fajitaboy.constants.AudioConstants.*;
 
 /**
  * An applet a day keeps the doctor away.
@@ -190,7 +183,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** {@inheritDoc} */
     public final void destroy() {
         if (emulator != null) {
-            emulator.oscillator.disableAudio();
+        	emulator.disableAudio();
         }
     }
 
@@ -245,7 +238,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
                 setContentPane(layeredGamePanel);
             }
             showStatus("Emulator Screen");
-            emulatorThread = new Thread(emulator.oscillator);
+            emulatorThread = new Thread(emulator);
             emulatorThread.start();
             break;
 
@@ -280,20 +273,19 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     public final void startGame(final String path) {
 
         showStatus("Loading...");
-        gamePanel = new GamePanel(2);
-        emulator = new Emulator(path);
-        ingameMenuPanel = new IngameMenuPanel(this);
-        layeredGamePanel = new LayeredGamePanel(gamePanel);
-        layeredGamePanel.updateSize(getWidth(), getHeight());
+		gamePanel = new GamePanel(2);
+		emulator = new Emulator(path, gamePanel);
+		ingameMenuPanel = new IngameMenuPanel(this);
+		layeredGamePanel = new LayeredGamePanel(gamePanel);
+		layeredGamePanel.updateSize(getWidth(), getHeight());
 
-        kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
-                emulator.addressBus.getJoyPad());
-        kic.importKeys();
+		kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel, emulator);
+		kic.importKeys();
 
-        ingameMenuPanel.refreshLabels();
-        ingameMenuPanel.setOscillator(emulator.oscillator);
+		ingameMenuPanel.refreshLabels();
+		ingameMenuPanel.setEmulator(emulator);
 
-        changeGameState(GameState.PLAYGAME);
+		changeGameState(GameState.PLAYGAME);
     }
 
     /**
@@ -338,9 +330,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
      * Resets the emulator.
      */
     public final void resetEmulator() {
-        emulator.addressBus.reset();
-        emulator.cpu.reset();
-        emulator.oscillator.reset();
+        emulator.reset();
     }
 
     /**
@@ -366,8 +356,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
      * 
      * @return oscillator
      */
-    public final Oscillator getOscillator() {
-        return emulator.oscillator;
+    public final Emulator getEmulator() {
+        return emulator;
     }
 
     /**
@@ -516,96 +506,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
     /** {@inheritDoc} */
     public void componentShown(final ComponentEvent e) {
-    }
-
-    // ------------------------------------------------------------------------
-    // -- Emulator.
-    // ------------------------------------------------------------------------
-
-    /**
-     * Encapsulates the emulator.
-     * 
-     * @author Marcus, Peter
-     */
-    private final class Emulator implements StateMachine {
-
-        /** Emulator addressbus. */
-        private AddressBus addressBus;
-
-        /** Emulator cpu. */
-        private Cpu cpu;
-
-        /** Emulator oscillator. */
-        private Oscillator oscillator;
-
-        /**
-         * Standard constructor.
-         * 
-         * @param path Rom path
-         */
-        Emulator(final String path) {
-            // Temporarily solution.
-            try {
-                DataInputStream dis;
-                dis = new DataInputStream(new FileInputStream(new File(path)));
-
-                dis.skipBytes(0x143);
-                int cgbFlag = dis.readUnsignedByte();
-                /*boolean forceGb = ((cgbFlag & 0x40) != 0)
-                        && ((cgbFlag & 0x06) != 0);*/
-                dis.close();
-                if ((cgbFlag & 0x80) != 0 /*&& !forceGb*/) {
-                    // Color!!
-                    gamePanel = new ColorGamePanel(2);
-                    SpeedSwitch speedSwitch = new SpeedSwitch();
-                    CGB_AddressBus addressBusCgb = new CGB_AddressBus(path);
-                    addressBus = addressBusCgb;
-                    cpu = new CGB_Cpu(addressBus, speedSwitch);
-                    oscillator = new CGB_Oscillator(cpu, addressBusCgb,
-                            speedSwitch, gamePanel, true);
-
-                } else {
-                    // not color :(
-                    addressBus = new AddressBus(path);
-                    cpu = new Cpu(addressBus);
-                    oscillator = new Oscillator(cpu, addressBus, gamePanel,
-                            true);
-                }
-
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        /**
-         * Pauses the emulator.
-         */
-        public void stop() {
-            oscillator.stop();
-        }
-
-        /**
-         * Returns the emulator screen.
-         * 
-         * @return LCD the screen.
-         */
-        public LCD getLCD() {
-            return oscillator.getLCD();
-        }
-
-        /** {@inheritDoc} */
-        public void saveState(FileOutputStream fos) throws IOException {
-            oscillator.saveState(fos);
-            addressBus.saveState(fos);
-        }
-
-        /** {@inheritDoc} */
-        public void readState(FileInputStream is) throws IOException {
-            oscillator.readState(is);
-            addressBus.readState(is);
-        }
-
     }
 
     // ------------------------------------------------------------------------

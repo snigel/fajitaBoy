@@ -143,6 +143,17 @@ public class SoundHandler implements StateMachine {
         au3 = new SoundChannel3(ab, sampleRate);
         au4 = new SoundChannel4(ab, sampleRate);
     }
+    
+    public void reset() {
+    	ch1Left = true;
+        ch2Left = true;
+        ch3Left = true;
+        ch4Left = true;
+        ch1Right = true;
+        ch2Right = true;
+        ch3Right = true;
+        ch4Right = true;
+    }
 
     /**
      * Generates and outputs a clip of sound.

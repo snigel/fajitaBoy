@@ -41,10 +41,10 @@ public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
      * 2. Read 16 kb and forard from cartridge 3
      * 3. Make a method for returning
      */
-    public ROM(final int start, final String romPath) {
+    public ROM(final int start, final int[] cartridge ) {
+    	ram = cartridge;
         this.offset = start;
         setBank(1);
-        readRom(romPath);
     }
 
     public int forceRead(int address) {
@@ -98,51 +98,6 @@ public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
             return 96;
         default:
             return 0;
-        }
-    }
-    
-    /**
-     * This function reads a rom from a file into the ram array.
-     * @param romPath
-     *            is a text string containing the path to a game boy rom,
-     *            located in file system.
-     */
-
-    private void readRom(final String romPath) {
-        try {
-            // Read ROM data from file
-
-            
-            DataInputStream dis;
-            FileInputStream fis = new FileInputStream(romPath);
-            ZipInputStream zis;
-         // if zipfile
-            // InputStream in=url.openStream ();
-            
-            if (romPath.substring(romPath.length() - 3, romPath.length())
-                    .equals("zip")) {
-                zis = new ZipInputStream(fis);
-                ZipEntry entry = zis.getNextEntry();
-                ram = new int[(int) entry.getSize()];
-                dis = new DataInputStream(zis);
-                for (int i = 0; i < ram.length; i++) {
-                    ram[i] = dis.readUnsignedByte();
-                }
-                zis.close();
-            } else {
-                File romFile = new File(romPath);
-                ram = new int[(int) romFile.length()];
-                System.out.println("romfile length " + romFile.length());
-              
-                dis = new DataInputStream(fis);
-                for (int i = 0; i < ram.length; i++) {
-                    ram[i] = dis.readUnsignedByte();
-                }
-                fis.close();
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
         }
     }
     

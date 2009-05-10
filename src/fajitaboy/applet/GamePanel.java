@@ -6,19 +6,18 @@ import java.awt.image.*;
 
 import javax.swing.JPanel;
 
-import fajitaboy.DrawsGameboyScreen;
+import fajitaboy.VideoReciever;
 
 /**
  * The panel in which the emulator screen will be shown.
  * 
  */
-public class GamePanel extends JPanel implements DrawsGameboyScreen {
+public class GamePanel extends JPanel implements VideoReciever {
     private int[] pixels;
     private int zoom;
     private Image image;
 
     protected ColorModel colorModel;
-    private byte[] palette;
 
     public GamePanel(int zoom) {
         setIgnoreRepaint(true);
@@ -26,13 +25,7 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
 
         pixels = new int[160 * 144];
         this.zoom = zoom;
-        // set pallette
-        palette = new byte[4];
-        palette[0] = (byte) 0xFF;
-        palette[1] = (byte) 0xAA;
-        palette[2] = (byte) 0x55;
-        palette[3] = (byte) 0x00;
-        colorModel = new IndexColorModel(2, 4, palette, palette, palette);
+        colorModel = new DirectColorModel(24, 0x0000FF, 0x00FF00, 0xFF0000);
     }
 
     /**
@@ -41,9 +34,9 @@ public class GamePanel extends JPanel implements DrawsGameboyScreen {
      * @param data
      *            The screen matrix to draw
      */
-    public final void drawGameboyScreen(final int[][] data) {
-
-        // refresh pixeldata
+    public final void transmitVideo(final int[][] data) {
+    	
+    	// refresh pixeldata
         int n = 0;
         for (int i = 0; i < 144; i++) {
             for (int j = 0; j < 160; j++) {

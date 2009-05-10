@@ -2,10 +2,9 @@ package fajitaboy.gbc.lcd;
 
 import static fajitaboy.constants.AddressConstants.ADDRESS_LY;
 import static fajitaboy.constants.AddressConstants.ADDRESS_PALETTE_BG_DATA;
-import fajitaboy.gb.lcd.BackgroundMap;
+import static fajitaboy.constants.LCDConstants.LCD_H;
+import static fajitaboy.constants.LCDConstants.LCD_W;
 import fajitaboy.gb.lcd.LCD;
-import fajitaboy.gb.lcd.WindowMap;
-import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.memory.CGB_AddressBus;
 /**
  * 
@@ -24,6 +23,22 @@ public class CGB_LCD extends LCD {
     private CGB_WindowMap wnd;
     
     /**
+     * Conversion table to convert CGB color indexes to RGB values that match what
+     * would be displayed on a CGB screen.
+     * 
+     * "When developing graphics on PCs, note that the RGB values will have different appearance on
+     * CGB displays as on VGA monitors:
+     * 
+	 * The highest intensity will produce Light Gray color rather than White. The intensities
+	 * are not linear; the values 10h-1Fh will all appear very bright, while medium and darker
+	 * colors are ranged at 00h-0Fh.
+	 * 
+	 * For example, a color setting of 03EFh (Blue=0, Green=1Fh, Red=0Fh) will appear as Neon Green
+	 * on VGA displays, but on the CGB it'll produce a decently washed out Yellow."
+     */
+    int[] conversionTable;
+    
+    /**
      * Creates a new ColorLCD with default values.
      * @param ram
      *            Pointer to an AddressBusCgb.
@@ -35,6 +50,25 @@ public class CGB_LCD extends LCD {
         screen = new CGB_Screen( ram.getBackgroundPaletteMemory(), ram.getSpritePaletteMemory());
         bgm = new CGB_BackgroundMap();
         wnd = new CGB_WindowMap();
+        
+        // Generate color conversion table, to match colors on CGB displays
+        conversionTable = new int[32];
+        int midColor = 210;
+        int endColor = 240;
+        
+        double c = 0;
+        double step = (double)midColor / 16.0;
+        for ( int i = 0; i < 16; i++) {
+        	conversionTable[i] = (int)c;
+        	c += step;
+        }
+        c = midColor;
+        step = (double)(endColor - midColor) / 16.0;
+        for ( int i = 16; i < 31; i++) {
+        	conversionTable[i] = (int)c;
+        	c += step;
+        }
+        conversionTable[31] = endColor;
     }
     
     /**
@@ -103,12 +137,22 @@ public class CGB_LCD extends LCD {
         
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    public int[][] getScreen() {
+    public int[][] getPixels() {
+    	if ( newScreen = true ) {
+    		// Translate screen bits to displayable pixels if necessary
+    		int data;
+    		for ( int x = 0; x < LCD_W; x++ ) {
+    			for ( int y = 0; y < LCD_H; y++ ) {
+    				data = screen.bits[y][x];
+    				int r = conversionTable[data & 0x001F];
+    				int g = conversionTable[(data & 0x03E0) >>> 5];
+    				int b = conversionTable[(data & 0x7C00) >>> 10];
+        			pixels[y][x] = r + (g << 8) + (b << 16);
+        		}
+    		}
+    	}
         newScreen = false;
-        return screen.getBits();
+        return pixels;
     }
 
 }

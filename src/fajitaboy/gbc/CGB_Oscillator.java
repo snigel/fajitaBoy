@@ -1,10 +1,15 @@
 package fajitaboy.gbc;
 
-import fajitaboy.DrawsGameboyScreen;
-import fajitaboy.SpeedSwitch;
+import static fajitaboy.constants.AudioConstants.AUDIO_SAMPLERATE;
+import static fajitaboy.constants.AudioConstants.AUDIO_SAMPLES;
+
+import javax.sound.sampled.LineUnavailableException;
+
+import fajitaboy.VideoReciever;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.Timer;
+import fajitaboy.gb.audio.SoundHandler;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.lcd.CGB_LCD;
@@ -15,61 +20,33 @@ import fajitaboy.gbc.memory.CGB_AddressBus;
  */
 public class CGB_Oscillator extends Oscillator {
     
-	/**
-     * To know if the speed is normal or double.
-     * The speed should always be normal here but is here to reduce duplicate
-     * code in OscillatorCgb.
-     */
-    protected SpeedSwitch speedSwitch;
-	
-	/**
-     * Creates a new OscillatorCgb object.
-     * @param cpu
-     *            Pointer to CPU instance.
-     * @param ram
-     *            Pointer to MemoryInterface instance.
-     * @param ss
-     *            Pointer to SpeedSwitch instance.
-     */
-    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, SpeedSwitch ss) {
-        this.cpu = cpu;
-        this.ram = ram;
-        this.lcd = new CGB_LCD(ram);
-        this.timer = new Timer();
-        reset();  
-        speedSwitch = ss;
-    }
-
-    /**
-     * Creates a new Oscillator with a screen rendering instance and possibility to enable audio.
-     * @param cpu
-     *            Pointer to CPU instance.
-     * @param ram
-     *            Pointer to MemoryInterface instance.
-     * @param ss
-     *            Pointer to SpeedSwitch instance.
-     * @param dgs
-     *            Pointer to DrawsGameboyScreen instance.
-     */
-    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, SpeedSwitch ss, DrawsGameboyScreen dgs,
-            boolean enableAudio) {
-        this.cpu = cpu;
-        this.ram = ram;
-        this.lcd = new CGB_LCD(ram);
-        this.timer = new Timer();
-        speedSwitch = ss;
-        reset();
-        this.dgs = dgs;
-        if ( enableAudio )
-            enableAudio();
+    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram) {
+    	this(cpu, ram, null);
     }
     
     /**
-     * {@inheritDoc}
+     * Creates a new Oscillator with default values.
+     * @param cpu
+     *            Pointer to CPU instance.
+     * @param ram
+     *            Pointer to MemoryInterface instance.
      */
-    public void reset() {
-    	super.reset();
-    	speedSwitch.reset();
+    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, VideoReciever videoReciever) {
+    	this.cpu = cpu;
+        this.ram = ram;
+        this.videoReciever = videoReciever;
+        
+        lcd = new CGB_LCD(ram);
+        timer = new Timer();
+        try {
+			soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES);
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+			soundHandler = null;
+			audioEnabled = false;
+		}
+        
+        reset();
     }
 
     /**
@@ -78,17 +55,19 @@ public class CGB_Oscillator extends Oscillator {
     public int step() {
         // Step CPU
         int cycleInc = cpu.step();
-        if ( speedSwitch.getSpeed() == 2)
-        	cycleInc >>= 1;
-        cycles += cycleInc;
-
-        timer.update(cycleInc, ram);
+        if ( ((CGB_Cpu)cpu).speedSwitch.getSpeed() == 2) {
+        	cycles += cycleInc >> 1;
+        	timer.update(cycleInc, ram);
+        	lcd.updateLCD(cycleInc >> 1);
+        } else {
+        	cycles += cycleInc;
+        	timer.update(cycleInc, ram);
+        	lcd.updateLCD(cycleInc);
+        }
 
         // Update LCD
-        // hack so that LCD never will have to care about speedSwitch (ugly or beautiful?).
-        lcd.updateLCD(cycleInc);
-        if ( dgs != null && lcd.newScreenAvailable() ) {
-            dgs.drawGameboyScreen(lcd.getScreen());
+        if ( videoReciever != null && lcd.newScreenAvailable() ) {
+            videoReciever.transmitVideo(lcd.getPixels());
         }
 
         return cycleInc;

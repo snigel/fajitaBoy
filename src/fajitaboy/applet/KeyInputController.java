@@ -10,9 +10,9 @@ import javax.swing.InputMap;
 import javax.swing.JLayeredPane;
 import javax.swing.KeyStroke;
 
+import fajitaboy.Emulator;
 import fajitaboy.FajitaBoy;
 import fajitaboy.FajitaBoy.GameState;
-import fajitaboy.gb.memory.IO.JoyPad;
 
 import static fajitaboy.constants.PanelConstants.*;
 
@@ -22,7 +22,7 @@ import static fajitaboy.constants.PanelConstants.*;
 public class KeyInputController {
 
     /** Joypad object. */
-    private JoyPad joypad;
+    private Emulator emulator;
 
     /** applet. */
     private FajitaBoy fajitaBoy;
@@ -62,9 +62,9 @@ public class KeyInputController {
      * @param jp the JoyPad object
      */
     public KeyInputController(final FajitaBoy fb, final LayeredGamePanel lgp,
-            final IngameMenuPanel ksp, final JoyPad jp) {
+            final IngameMenuPanel ksp, final Emulator emu) {
         fajitaBoy = fb;
-        joypad = jp;
+        emulator = emu;
         gamePanel = lgp;
         keySettingsPanel = ksp;
         cookieJar = fb.getCookieJar();
@@ -84,42 +84,42 @@ public class KeyInputController {
 
         pushLeft = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setLeft(true);
+                emulator.setKey( Emulator.Keys.LEFT, true, Emulator.Player.PLAYER1 );
             }
         };
         pushRight = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setRight(true);
+            	emulator.setKey( Emulator.Keys.RIGHT, true, Emulator.Player.PLAYER1 );
             }
         };
         pushUp = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setUp(true);
+            	emulator.setKey( Emulator.Keys.UP, true, Emulator.Player.PLAYER1 );
             }
         };
         pushDown = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setDown(true);
+            	emulator.setKey( Emulator.Keys.DOWN, true, Emulator.Player.PLAYER1 );
             }
         };
         pushA = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setA(true);
+            	emulator.setKey( Emulator.Keys.A, true, Emulator.Player.PLAYER1 );
             }
         };
         pushB = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setB(true);
+            	emulator.setKey( Emulator.Keys.B, true, Emulator.Player.PLAYER1 );
             }
         };
         pushStart = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setStart(true);
+            	emulator.setKey( Emulator.Keys.START, true, Emulator.Player.PLAYER1 );
             }
         };
         pushSelect = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setSelect(true);
+            	emulator.setKey( Emulator.Keys.SELECT, true, Emulator.Player.PLAYER1 );
             }
         };
 
@@ -127,42 +127,42 @@ public class KeyInputController {
 
         releaseLeft = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setLeft(false);
+            	emulator.setKey( Emulator.Keys.LEFT, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseRight = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setRight(false);
+            	emulator.setKey( Emulator.Keys.RIGHT, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseUp = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setUp(false);
+            	emulator.setKey( Emulator.Keys.UP, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseDown = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setDown(false);
+            	emulator.setKey( Emulator.Keys.DOWN, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseA = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setA(false);
+            	emulator.setKey( Emulator.Keys.A, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseB = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setB(false);
+            	emulator.setKey( Emulator.Keys.B, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseStart = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setStart(false);
+            	emulator.setKey( Emulator.Keys.START, false, Emulator.Player.PLAYER1 );
             }
         };
         releaseSelect = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                joypad.setSelect(false);
+            	emulator.setKey( Emulator.Keys.SELECT, false, Emulator.Player.PLAYER1 );
             }
         };
 
@@ -194,10 +194,10 @@ public class KeyInputController {
         };
         mute = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                if (fajitaBoy.getOscillator().isAudioEnabled()) {
-                    fajitaBoy.getOscillator().disableAudio();
+            	if (fajitaBoy.getEmulator().isAudioEnabled()) {
+                    fajitaBoy.getEmulator().disableAudio();
                 } else {
-                    fajitaBoy.getOscillator().enableAudio();
+                    fajitaBoy.getEmulator().enableAudio();
                 }
             }
         };

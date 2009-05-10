@@ -30,11 +30,11 @@ public class CGB_AddressBus extends AddressBus {
     private CGB_RamHigh ramh;
     private CGB_Vram vram;
     
-    public CGB_AddressBus(String romPath) {
-        super(romPath);
+    public CGB_AddressBus(final int[] cartridge) {
+        super(cartridge);
     }
     
-    protected void initializeModule(final String romPath) {
+    protected void initializeModule(final int[] cartridge) {
         
         // All modules must be initialized here
         debug = new DebugMemory();
@@ -58,7 +58,7 @@ public class CGB_AddressBus extends AddressBus {
         oam = new Oam(ADDRESS_OAM_START, ADDRESS_OAM_END, this);
         initialize(oam, ADDRESS_OAM_START, ADDRESS_OAM_END);
         
-        rom = new ROM(ADDRESS_CARTRIDGE_START, romPath);
+        rom = new ROM(ADDRESS_CARTRIDGE_START, cartridge);
         mbc = setMBC();
         initialize(mbc, ADDRESS_CARTRIDGE_START, ADDRESS_CARTRIDGE_END);
         initialize(mbc, ADDRESS_ERAM_START, ADDRESS_ERAM_END);
@@ -80,6 +80,22 @@ public class CGB_AddressBus extends AddressBus {
         module[ADDRESS_PALETTE_BACKGROUND_DATA] = backgroundPaletteMemory;
         module[ADDRESS_PALETTE_SPRITE_INDEX] = spritePaletteMemory;
         module[ADDRESS_PALETTE_SPRITE_DATA] = spritePaletteMemory;   
+    }
+    
+    /**
+     * Resets the memory to zero. The ROM is left untouched.
+     */
+    public void reset() {
+        interruptRegister.reset();
+        debug.reset();
+        raml.reset();
+        echo.reset();
+        ramh.reset();
+        rom.reset();
+        vram.reset();
+        oam.reset();
+        hram.reset();
+        io.reset();
     }
     
     

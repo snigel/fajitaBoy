@@ -9,7 +9,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.JFrame;
 
-import fajitaboy.DrawsGameboyScreen;
+import fajitaboy.ReadRom;
+import fajitaboy.VideoReciever;
 import fajitaboy.applet.GamePanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
@@ -19,7 +20,7 @@ import fajitaboy.gb.memory.AddressBus;
  * A debug class for testing the audio.
  * @author snigel
  */
-public class AudioMain implements DrawsGameboyScreen {
+public class AudioMain implements VideoReciever {
 
     private AddressBus ab;
     private SoundChannel1 au1;
@@ -55,14 +56,14 @@ public class AudioMain implements DrawsGameboyScreen {
         jfr.setVisible(true);
 
 
-        ab = new AddressBus("/bombjack.gb");
+        ab = new AddressBus(ReadRom.readRom("/bombjack.gb"));
         au1 = new SoundChannel1(ab, sampleRate);
         au2 = new SoundChannel2(ab, sampleRate);
         au3 = new SoundChannel3(ab, sampleRate);
         au4 = new SoundChannel4(ab, sampleRate);
 
         Cpu cpu = new Cpu(ab);
-        Oscillator oc = new Oscillator(cpu, ab, this, true);
+        Oscillator oc = new Oscillator(cpu, ab, this);
 
         for (int i = 0; i < INSTRUCTIONS; i++) {
             oc.step();
@@ -85,7 +86,7 @@ public class AudioMain implements DrawsGameboyScreen {
         new AudioMain();
     }
 
-    public void drawGameboyScreen(int[][] data) {
+    public void transmitVideo(int[][] data) {
         if(sdl.available()*2 < samples*2) {
             destBuff = new byte[sdl.available()*2];
             finalSamples = sdl.available();
@@ -95,7 +96,7 @@ public class AudioMain implements DrawsGameboyScreen {
             finalSamples = samples;
         }
         stereoSelect();
-        gp.drawGameboyScreen(data);
+        gp.transmitVideo(data);
         au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
         au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
         au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);

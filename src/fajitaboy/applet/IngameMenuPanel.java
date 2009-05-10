@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.JTabbedPane;
 
+import fajitaboy.Emulator;
 import fajitaboy.FajitaBoy;
 import fajitaboy.gb.Oscillator;
 
@@ -67,8 +68,8 @@ public class IngameMenuPanel extends JTabbedPane {
      * 
      * @param oscillator to fix sound
      */
-    public final void setOscillator(final Oscillator oscillator) {
-        sound.setOscillator(oscillator);
+    public final void setEmulator(final Emulator emulator) {
+        sound.setEmulator(emulator);
     }
 
 }

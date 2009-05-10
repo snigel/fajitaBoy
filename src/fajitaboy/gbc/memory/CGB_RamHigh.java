@@ -18,9 +18,14 @@ public class CGB_RamHigh extends RamHigh {
      */
     public CGB_RamHigh(final int start, final int end) {
         super(start, end);
-        ram = new int[7 * length];
+        ram = new int[8 * length];
         bank = 1;
     }
+    
+    public void reset() {
+    	ram = new int[8 * length];
+    }
+    
     /**
      * Changes the bank.
      */

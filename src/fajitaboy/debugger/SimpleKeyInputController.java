@@ -30,7 +30,8 @@ public class SimpleKeyInputController implements KeyListener {
      */
     public final void keyPressed(final KeyEvent e) {
         switch (e.getKeyCode()) {
-        case KeyEvent.VK_DOWN:
+        // TODO Fix!
+        /*case KeyEvent.VK_DOWN:
             jp.setDown(true);
             break;
         case KeyEvent.VK_UP:
@@ -53,7 +54,7 @@ public class SimpleKeyInputController implements KeyListener {
             break;
         case KeyEvent.VK_SHIFT:
             jp.setSelect(true);
-            break;
+            break;*/
 
         default: /* Nothing */
             break;
@@ -65,7 +66,8 @@ public class SimpleKeyInputController implements KeyListener {
      */
     public final void keyReleased(final KeyEvent e) {
         switch (e.getKeyCode()) {
-        case KeyEvent.VK_DOWN:
+        // TODO Fix!
+        /*case KeyEvent.VK_DOWN:
             jp.setDown(false);
             break;
         case KeyEvent.VK_UP:
@@ -88,7 +90,7 @@ public class SimpleKeyInputController implements KeyListener {
             break;
         case KeyEvent.VK_SHIFT:
             jp.setSelect(false);
-            break;
+            break; */
 
         default: /* Nothing */
             break;

@@ -1,9 +1,6 @@
 package fajitaboy.debugger;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,13 +14,9 @@ import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
 
-import fajitaboy.DrawsGameboyScreen;
-import fajitaboy.SpeedSwitch;
-import fajitaboy.applet.ColorGamePanel;
+import fajitaboy.ReadRom;
+import fajitaboy.VideoReciever;
 import fajitaboy.applet.GamePanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
@@ -45,7 +38,7 @@ import static fajitaboy.constants.HardwareConstants.*;
  * lets the user input debugging commands to the emulator.
  * @author Arvid Jakobsson, Marcus Johansson
  */
-public final class Debugger implements DrawsGameboyScreen {
+public final class Debugger implements VideoReciever {
 
 	private static final boolean GBCMode = true; 
 	
@@ -103,20 +96,19 @@ public final class Debugger implements DrawsGameboyScreen {
 	private Debugger(final String path) {
 		pcLog = new LinkedList<Integer>();
 		breakPoints = new HashSet<Integer>();
+		int[] rom = ReadRom.readRom(path);
 		if ( GBCMode ) {
-			ColorGamePanel gamePanel = new ColorGamePanel(2);
-            SpeedSwitch speedSwitch = new SpeedSwitch();
-            DebuggerAddressBusCGB addressBusCgb = new DebuggerAddressBusCGB(path);
+            DebuggerAddressBusCGB addressBusCgb = new DebuggerAddressBusCGB(rom);
             addressBus = addressBusCgb;
-            cpu = new CGB_Cpu((CGB_AddressBus)addressBus, speedSwitch);
-            osc = new CGB_Oscillator(cpu, addressBusCgb,
-                    speedSwitch, gamePanel, true);
+            CGB_Cpu cpuCgb = new CGB_Cpu((CGB_AddressBus)addressBus); 
+            cpu = cpuCgb;
+            osc = new CGB_Oscillator(cpuCgb, addressBusCgb, this);
 		} else {
-			DebuggerAddressBus dab = new DebuggerAddressBus(path); 
+			DebuggerAddressBus dab = new DebuggerAddressBus(rom); 
 			addressBus = dab;
 			breakPoints = new HashSet<Integer>();
 			cpu = new Cpu((AddressBus)addressBus);
-			osc = new Oscillator(cpu, (AddressBus)addressBus, this, false);
+			osc = new Oscillator(cpu, (AddressBus)addressBus, this);
 		}
 		prompt();
 	}
@@ -517,7 +509,8 @@ public final class Debugger implements DrawsGameboyScreen {
 
 	private void toggleKey(String key) {
 		IO.JoyPad jp = addressBus.getJoyPad();
-		if (key.equals("a")) {
+		// TODO Fix!
+		/*if (key.equals("a")) {
 			jp.setA(!jp.isA());
 		} else if (key.equals("b")) {
 			jp.setB(!jp.isB());
@@ -535,11 +528,11 @@ public final class Debugger implements DrawsGameboyScreen {
 			jp.setRight(!jp.isRight());
 		} else {
 			System.out.println("Unknown key " + key);
-		}
+		}*/
 	}
 
 	private void drawScreen() {
-		panelScreen.drawGameboyScreen(osc.getLCD().getScreen());
+		panelScreen.transmitVideo(osc.getLCD().getPixels());
 	}
 
 	/**
@@ -547,7 +540,7 @@ public final class Debugger implements DrawsGameboyScreen {
 	 */
 	private void dumpScreen() {
 		LCD lcd = osc.getLCD();
-		int[][] scr = lcd.getScreen();
+		int[][] scr = lcd.getPixels();
 		for (int i = 0; i < scr.length; i++) {
 			for (int j = 0; j < scr[i].length; j++) {
 				int pxl = scr[i][j];
@@ -945,9 +938,9 @@ public final class Debugger implements DrawsGameboyScreen {
 		}
 	}
 
-	public void drawGameboyScreen(int[][] data) {
+	public void transmitVideo(int[][] data) {
 		if (jfr != null && jfr.isVisible()) {
-			panelScreen.drawGameboyScreen(data);
+			panelScreen.transmitVideo(data);
 		}
 	}
 

@@ -1,5 +1,12 @@
 package fajitaboy;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import fajitaboy.ReadRom;
+
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.memory.AddressBus;
@@ -8,6 +15,7 @@ import fajitaboy.gb.memory.AddressBus;
  * A simple benchmark for instructions.
  * @author arvid
  */
+@Deprecated
 public final class SpeedTest {
 
     /**
@@ -25,14 +33,15 @@ public final class SpeedTest {
      * Runs INSTRUCTIONS, times it and prints the time it took,
      * and how many cycles were run per second.
      */
+    @Deprecated
     private void test() {
-        
-      AddressBus  a = new AddressBus("/1942.gb");
+      int[] rom = ReadRom.readRom("/1942.gb");
+      AddressBus  a = new AddressBus(rom);
       Cpu c = new Cpu(a);
-        Oscillator o = new Oscillator(c, a);
-        for (int i = 0; i < INSTRUCTIONS; i++) {
-            o.step();
-        }
+      Oscillator o = new Oscillator(c, a);
+      for (int i = 0; i < INSTRUCTIONS; i++) {
+          o.step();
+      }
     }
 
     /**

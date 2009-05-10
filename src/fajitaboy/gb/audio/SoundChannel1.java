@@ -111,7 +111,7 @@ public class SoundChannel1 implements StateMachine {
     /**
      * Holds the value of the percent of the volume output.
      */
-    private double volume;
+    double volume;
 
     /**
      * Constructor for SoundChannel 1.

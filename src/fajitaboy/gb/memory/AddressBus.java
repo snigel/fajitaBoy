@@ -82,11 +82,11 @@ public class AddressBus implements MemoryInterface, StateMachine {
      * @param romPath
      *            The ROM-file
      */
-    public AddressBus(final String romPath) {
-        initializeModule(romPath);
+    public AddressBus(final int[] cartridge) {
+        initializeModule(cartridge);
     }
     
-    protected void initializeModule(final String romPath) {
+    protected void initializeModule(final int[] cartridge) {
         // All modules must be initialized here
         debug = new DebugMemory();
         initialize(debug, ADDRESS_DEBUG_START, ADDRESS_DEBUG_END);
@@ -112,7 +112,7 @@ public class AddressBus implements MemoryInterface, StateMachine {
         oam = new Oam(ADDRESS_OAM_START, ADDRESS_OAM_END, this);
         initialize(oam, ADDRESS_OAM_START, ADDRESS_OAM_END);
         
-        rom = new ROM(ADDRESS_CARTRIDGE_START, romPath);
+        rom = new ROM(ADDRESS_CARTRIDGE_START, cartridge);
         mbc = setMBC();
         initialize(mbc, ADDRESS_CARTRIDGE_START, ADDRESS_CARTRIDGE_END);
         initialize(mbc, ADDRESS_ERAM_START, ADDRESS_ERAM_END);
@@ -219,7 +219,7 @@ public class AddressBus implements MemoryInterface, StateMachine {
     /**
      * Resets the memory to zero. The ROM is left untouched.
      */
-    public final void reset() {
+    public void reset() {
         interruptRegister.reset();
         debug.reset();
         raml.reset();

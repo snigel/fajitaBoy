@@ -1,4 +1,4 @@
-package fajitaboy;
+package fajitaboy.gbc;
 
 /**
  * The SpeedSwitch should be used to know if which speed mode that is being used.

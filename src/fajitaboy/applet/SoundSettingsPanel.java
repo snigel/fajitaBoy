@@ -9,6 +9,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fajitaboy.Emulator;
 import fajitaboy.FajitaBoy;
 import fajitaboy.gb.Oscillator;
 
@@ -22,7 +23,7 @@ import static fajitaboy.constants.PanelConstants.*;
 public class SoundSettingsPanel extends JPanel implements ChangeListener {
 
     /** Oscillator. */
-    private Oscillator oscillator;
+    private Emulator emulator;
 
     /** Cookies. */
     private CookieJar cookieJar;
@@ -37,7 +38,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      */
     public SoundSettingsPanel(final FajitaBoy fb) {
 
-        oscillator = null;
+    	emulator = null;
 
         volumeSlider = new JSlider(JSlider.VERTICAL, AUDIO_VOLUME_MIN,
                 AUDIO_VOLUME_MAX, AUDIO_VOLUME_MAX);
@@ -66,21 +67,21 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      * 
      * @param osc oscillator
      */
-    public final void setOscillator(final Oscillator osc) {
-        oscillator = osc;
+    public final void setEmulator(Emulator emulator) {
+        this.emulator = emulator;
         fetchCookie();
     }
 
     /** Refresh slider position. */
     public final void refreshSlider() {
-        if (oscillator == null) {
+        if (emulator == null) {
             return;
         }
 
-        if (!oscillator.isAudioEnabled()) {
+        if (!emulator.isAudioEnabled()) {
             volumeSlider.setValue(0);
         } else {
-            volumeSlider.setValue(oscillator.getVolume());
+            volumeSlider.setValue((int)emulator.getVolume());
         }
     }
 
@@ -88,7 +89,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      * Saves volume as cookie.
      */
     private void putCookie() {
-        String cookie = String.valueOf(oscillator.getVolume());
+        String cookie = String.valueOf((int)emulator.getVolume());
         cookieJar.put(COOKIE_SOUND, cookie);
     }
 
@@ -123,15 +124,15 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      * @param vol volume
      */
     private void setVolume(final int vol) {
-        if (oscillator == null) {
+        if (emulator == null) {
             return;
         }
         if (vol == 0) {
-            oscillator.disableAudio();
+        	emulator.disableAudio();
         } else {
-            oscillator.enableAudio();
+        	emulator.enableAudio();
         }
-        oscillator.setVolume(vol);
+        emulator.setVolume(vol);
     }
 
     /** {@inheritDoc} */
