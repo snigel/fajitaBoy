@@ -1,6 +1,8 @@
+
+
 var applet = {
  addLoadHook: function() {
-    console.log(this);
+    // console.log(this);
     var that = this;
     // gör om länken till en js-länk?
     $('#loadAppletLink').click(function () {
@@ -17,14 +19,14 @@ var applet = {
     var applet = document.fajitaBoy;
     $("#appletSizeControls").show();
     $("#enlargeApplet").click(function() {
-	console.log('larger');
+	// console.log('larger');
       });
     $("#reduceApplet").click(function() {
-	console.log('smaller');
+	// console.log('smaller');
       });
     $("#fullscreenApplet").click(function() {
 	applet.toggleFullScreen();
-	console.log('full');
+	// console.log('full');
       });
   }
 };
