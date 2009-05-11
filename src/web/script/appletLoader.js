@@ -1,9 +1,10 @@
 var applet = {
  addLoadHook: function() {
     console.log(this);
+    var that = this;
     // gör om länken till en js-länk?
     $('#loadAppletLink').click(function () {
-	$('#appletHolder').load('applet.php', '', function () { this.onAppletLoad.call(this); });
+	$('#appletHolder').load('applet.php', '', function () { that.onAppletLoad.call(that); });
 	return false; //make sure the links is not loaded
       });
   },
@@ -13,6 +14,7 @@ var applet = {
   },
 
  addSizeControls: function() {
+    var applet = document.fajitaBoy;
     $("#appletSizeControls").show();
     $("#enlargeApplet").click(function() {
 	console.log('larger');
@@ -21,6 +23,7 @@ var applet = {
 	console.log('smaller');
       });
     $("#fullscreenApplet").click(function() {
+	applet.toggleFullScreen();
 	console.log('full');
       });
   }
