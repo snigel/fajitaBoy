@@ -11,7 +11,6 @@ import javax.swing.event.ChangeListener;
 
 import fajitaboy.Emulator;
 import fajitaboy.FajitaBoy;
-import fajitaboy.gb.Oscillator;
 
 import static fajitaboy.constants.AudioConstants.*;
 import static fajitaboy.constants.PanelConstants.*;
@@ -31,6 +30,9 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
     /** Volume slider. */
     private JSlider volumeSlider;
 
+    /** Boooool. */
+    private boolean ignoreUpdate;
+
     /**
      * Constructor.
      * 
@@ -38,7 +40,8 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      */
     public SoundSettingsPanel(final FajitaBoy fb) {
 
-    	emulator = null;
+        emulator = null;
+        ignoreUpdate = false;
 
         volumeSlider = new JSlider(JSlider.VERTICAL, AUDIO_VOLUME_MIN,
                 AUDIO_VOLUME_MAX, AUDIO_VOLUME_MAX);
@@ -78,10 +81,11 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
             return;
         }
 
+        ignoreUpdate = true;
         if (!emulator.isAudioEnabled()) {
             volumeSlider.setValue(0);
         } else {
-            volumeSlider.setValue((int)emulator.getVolume());
+            volumeSlider.setValue((int) emulator.getVolume());
         }
     }
 
@@ -89,7 +93,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
      * Saves volume as cookie.
      */
     private void putCookie() {
-        String cookie = String.valueOf((int)emulator.getVolume());
+        String cookie = String.valueOf((int) emulator.getVolume());
         cookieJar.put(COOKIE_SOUND, cookie);
     }
 
@@ -128,16 +132,19 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
             return;
         }
         if (vol == 0) {
-        	emulator.disableAudio();
+            emulator.disableAudio();
         } else {
-        	emulator.enableAudio();
+            emulator.enableAudio();
         }
         emulator.setVolume(vol);
     }
 
     /** {@inheritDoc} */
     public final void stateChanged(final ChangeEvent e) {
-
+        if (ignoreUpdate) {
+            ignoreUpdate = false;
+            return;
+        }
         JSlider source = (JSlider) e.getSource();
         if (!source.getValueIsAdjusting()) {
             int volume = source.getValue();
