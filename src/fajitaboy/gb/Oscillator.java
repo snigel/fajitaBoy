@@ -7,6 +7,7 @@ import static fajitaboy.constants.AudioConstants.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
 
 import javax.sound.sampled.LineUnavailableException;
 
@@ -25,6 +26,12 @@ import fajitaboy.gb.memory.MemoryInterface;
 public class Oscillator implements StateMachine {
 
     private boolean running;
+    
+    
+    /**
+     * Semaphore to ask for permission to run oscillator.
+     */
+    Semaphore runningMutex = new Semaphore(1);
 
     /**
      * Next cycle to stop and wait if going too fast
@@ -182,6 +189,9 @@ public class Oscillator implements StateMachine {
      * make this method run in a separate thread.
      */
     public final void run(int runCycles) {
+    	try {
+			runningMutex.acquire();
+		} catch (InterruptedException e1) {}
         running = true;
         long sleepTime;
         long nextUpdate = System.nanoTime();
@@ -214,13 +224,24 @@ public class Oscillator implements StateMachine {
                 running = false;
             }
         }
+        runningMutex.release();
     }
 
     /**
      * Method to call to stop the run() loop.
+     * Lock until the run() loop has terminated.
      */
     public final void stop() {
         running = false;
+        
+        // lock until running loop has stopped.
+        try {
+ 	        runningMutex.acquire();
+	        runningMutex.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
     }
 
     /**
