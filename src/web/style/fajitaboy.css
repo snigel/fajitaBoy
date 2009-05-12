@@ -1,7 +1,100 @@
+
+@import url("http://yui.yahooapis.com/2.6.0/build/reset-fonts-grids/reset-fonts-grids.css");
+
+html {
+    font-size: 62.5%;
+}
+
+html, body {
+/*    height: 100%; */
+    width: 750px;
+    margin: 1em auto 0 auto;
+    background-color: black;
+    
+    font-size: 1em;
+}
+
+body {
+    background-color: black;
+    color: white;
+}
+
+.breaker {
+    clear: both;
+}
+
+#header, #content, #footer {
+    /* padding: 2em; */
+}
+
+#content {
+    clear: both;
+    background-color: #222;
+    min-height: 500px;
+    position: relative;
+
+    /* min-height: 500px; */
+}
+
+
+
+/*
+ * Header
+ */
+
+#header {
+/*    width: 100%; */
+    background-color: gray;
+    height: 100px;
+    padding: 0.5em;
+}
+
+#logo {
+    float: left;
+    font-size: 2em;
+}
+
+#nav {
+    float: right;
+}
+
+/*
+ * Navigation links
+ */
+#navlinks, #navlinks li {
+    display: inline;
+}
+
+#navlinks {
+    list-style-type: ;
+}
+
+#navlinks li {
+    margin-left: 1em;
+}
+
 .active {
     font-weight: bold;
 }
 
+
+
+/*
+ * Footer
+ */
+
+#footer {
+    background-color: #333;
+    height: 100px;
+    position: relative;
+}
+
+/*
+ * Applet controls
+ */
+
 .appletSizeControls {
     display: none;
 }
+
+
