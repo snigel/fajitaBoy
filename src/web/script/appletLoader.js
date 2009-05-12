@@ -1,36 +1,46 @@
 
+var appletWrapper = {
+	addLoadHook : function() {
+		var that = this;
 
-var applet = {
- addLoadHook: function() {
-    // console.log(this);
-    var that = this;
-    // gör om länken till en js-länk?
-    $('#loadAppletLink').click(function () {
-	$('#appletHolder').load('applet.php', '', function () { that.onAppletLoad.call(that); });
-	return false; //make sure the links is not loaded
-      });
-  },
+		// gör om länken till en js-länk?
+	$('#loadAppletLink').click( function() {
+		$('#appletHolder').load('applet.php', '', function() {
+			that.onAppletLoad.call(that);
+		});
+		return false; //make sure the links is not loaded
+		});
+},
 
- onAppletLoad: function() {
-    this.addSizeControls();
-  },
+onAppletLoad : function() {
+	this.addSizeControls();
 
- addSizeControls: function() {
-    var applet = document.fajitaBoy;
-    $("#appletSizeControls").show();
-    $("#enlargeApplet").click(function() {
-	// console.log('larger');
-      });
-    $("#reduceApplet").click(function() {
-	// console.log('smaller');
-      });
-    $("#fullscreenApplet").click(function() {
-	applet.toggleFullScreen();
-	// console.log('full');
-      });
-  }
+	var applet = document.fajitaBoy;
+	applet.setAttribute("height", "288");
+	applet.setAttribute("width", "320");
+},
+
+addSizeControls : function() {
+	var applet = document.fajitaBoy;
+	$("#appletSizeControls").show();
+	$("#resizeAppletX2Link").click( function() {
+		applet.setAttribute("width", "320");
+		applet.setAttribute("height", "288");
+	});
+	$("#resizeAppletX3Link").click( function() {
+		applet.setAttribute("width", "480");
+		applet.setAttribute("height", "432");
+	});
+	$("#resizeAppletX4Link").click( function() {
+		applet.setAttribute("width", "640");
+		applet.setAttribute("height", "576");
+	});
+	$("#fullscreenAppletLink").click( function() {
+		applet.toggleFullScreen();
+	});
+}
 };
 
-$(document).ready(function() {
-    applet.addLoadHook.call(applet);
-  });
+$(document).ready( function() {
+	appletWrapper.addLoadHook.call(appletWrapper);
+});
