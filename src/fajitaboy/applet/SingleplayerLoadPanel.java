@@ -15,6 +15,7 @@ import javax.swing.SpringLayout;
 
 import fajitaboy.FajitaBoy;
 import fajitaboy.FajitaBoy.GameState;
+import static fajitaboy.constants.PanelConstants.*;
 
 /**
  * Singleplayer panel where the user cna pick a rom and start a singleplayer
@@ -41,10 +42,8 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
     /**
      * Standard constructor.
      * 
-     * @param fb
-     *            Reference to the FajitaBoy
-     * @param jfc
-     *            Reference to the filechooser
+     * @param fb Reference to the FajitaBoy
+     * @param jfc Reference to the filechooser
      */
     public SingleplayerLoadPanel(final FajitaBoy fb, final JFileChooser jfc) {
 
@@ -69,8 +68,8 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
 
         JLabel title = new JLabel("Singleplayer Game");
         JLabel loadText = new JLabel("Select a ROM path");
-        
-        title.setFont(new Font("Verdana",Font.BOLD,20));
+
+        title.setFont(new Font("Verdana", Font.BOLD, 20));
 
         add(title);
         add(loadText);
@@ -122,6 +121,22 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
 
     }
 
+    /**
+     * Loads a the previously loaded path from a cookie.
+     */
+    public final void loadPath() {
+        String path = fajitaBoy.getCookieJar().get(COOKIE_PATH);
+
+        if (path == null) {
+            return; // No previous path found.
+        }
+        fileStringField.setText(path);
+        File file = new File(path);
+        if (FajitaBoy.checkFile(file)) {
+            fileChooser.setSelectedFile(file);
+        }
+    }
+
     /** {@inheritDoc} */
     public final void actionPerformed(final ActionEvent e) {
 
@@ -143,6 +158,8 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
             File path = new File(fileStringField.getText());
 
             if (FajitaBoy.checkFile(path)) {
+                fajitaBoy.getCookieJar().put(COOKIE_PATH,
+                        fileStringField.getText());
                 fajitaBoy.startGame(fileStringField.getText());
             }
         } else if (e.getSource() == backButton) {

@@ -68,10 +68,10 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
     /**
      * Set oscillator for sound control.
      * 
-     * @param osc oscillator
+     * @param emul emulator
      */
-    public final void setEmulator(Emulator emulator) {
-        this.emulator = emulator;
+    public final void setEmulator(final Emulator emul) {
+        emulator = emul;
         fetchCookie();
     }
 
@@ -80,7 +80,6 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
         if (emulator == null) {
             return;
         }
-
         ignoreUpdate = true;
         if (!emulator.isAudioEnabled()) {
             volumeSlider.setValue(0);
@@ -109,6 +108,7 @@ public class SoundSettingsPanel extends JPanel implements ChangeListener {
             int savedVolume = Integer.parseInt(cookie);
             if (savedVolume >= AUDIO_VOLUME_MIN
                     && savedVolume <= AUDIO_VOLUME_MAX) {
+                ignoreUpdate = true;
                 setVolume(savedVolume);
                 volumeSlider.setValue(savedVolume);
             }

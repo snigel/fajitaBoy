@@ -14,14 +14,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.MemoryImageSource;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import javax.sound.sampled.LineUnavailableException;
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
 import javax.swing.JFileChooser;
@@ -38,7 +38,6 @@ import fajitaboy.applet.LayeredGamePanel;
 import fajitaboy.applet.SingleplayerLoadPanel;
 import fajitaboy.applet.StartScreenPanel;
 import static fajitaboy.constants.PanelConstants.*;
-import static fajitaboy.constants.AudioConstants.*;
 
 /**
  * An applet a day keeps the doctor away.
@@ -123,13 +122,15 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** {@inheritDoc} */
     public final void init() {
         try {
-            // Set cross-platform Java L&F (also called "Metal")
-            UIManager
-                    .setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+            UIManager.setLookAndFeel(
+                    "com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
         } catch (Exception e) {
+            System.out.println("Look&Feel fail. Using default.");
         }
+
         addComponentListener(this);
         cookieJar = new CookieJar(this);
+        executeJS("disableLinks()");
 
         // Appletviewer resize
         resize(frameSize);
@@ -147,7 +148,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         fullScreenPlaceHolder = new JLabel("Click to exit fullscreen mode!");
 
         pauseText = new JLabel(" PAUSED ");
-        // pauseText.setBackground(Color.white);
         pauseText.setOpaque(true);
         pauseText.setFont(FB_INGAMEFONT);
         pauseText.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
@@ -183,7 +183,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** {@inheritDoc} */
     public final void destroy() {
         if (emulator != null) {
-        	emulator.disableAudio();
+            emulator.disableAudio();
         }
     }
 
@@ -218,13 +218,22 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         // Switch to new state
         switch (state) {
         case STARTSCREEN:
+            executeJS("disableLinks()");
             deactivateFullScreen();
+            if (emulator != null) {
+                emulator.disableAudio();
+            }
             setContentPane(startScreen);
             showStatus("Start Screen");
             break;
 
         case SINGLEPLAYER_LOADSCREEN:
+            executeJS("disableLinks()");
             deactivateFullScreen();
+            if (emulator != null) {
+                emulator.disableAudio();
+            }
+            singleplayerLoadscreen.loadPath();
             setContentPane(singleplayerLoadscreen);
             showStatus("Singleplayer Screen");
             break;
@@ -240,6 +249,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             showStatus("Emulator Screen");
             emulatorThread = new Thread(emulator);
             emulatorThread.start();
+            executeJS("enableLinks()");
             break;
 
         case INGAME_MENU:
@@ -273,19 +283,20 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     public final void startGame(final String path) {
 
         showStatus("Loading...");
-		gamePanel = new GamePanel(2);
-		emulator = new Emulator(path, gamePanel);
-		ingameMenuPanel = new IngameMenuPanel(this);
-		layeredGamePanel = new LayeredGamePanel(gamePanel);
-		layeredGamePanel.updateSize(getWidth(), getHeight());
+        gamePanel = new GamePanel(2);
+        emulator = new Emulator(path, gamePanel);
+        ingameMenuPanel = new IngameMenuPanel(this);
+        layeredGamePanel = new LayeredGamePanel(gamePanel);
+        layeredGamePanel.updateSize(getWidth(), getHeight());
 
-		kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel, emulator);
-		kic.importKeys();
+        kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
+                emulator);
+        kic.importKeys();
 
-		ingameMenuPanel.refreshLabels();
-		ingameMenuPanel.setEmulator(emulator);
+        ingameMenuPanel.refreshLabels();
+        ingameMenuPanel.setEmulator(emulator);
 
-		changeGameState(GameState.PLAYGAME);
+        changeGameState(GameState.PLAYGAME);
     }
 
     /**
@@ -319,18 +330,10 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         if (fullScreen != null) {
             layeredGamePanel.updateSize(getWidth(), getHeight());
             setContentPane(layeredGamePanel);
-            // gamePanel.grabFocus();
             gamePanel.requestFocus();
             fullScreen.dispose();
             fullScreen = null;
         }
-    }
-
-    /**
-     * Resets the emulator.
-     */
-    public final void resetEmulator() {
-        emulator.reset();
     }
 
     /**
@@ -441,7 +444,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
      * Checks if the file is readable etc.
      * 
      * @param file file to check
-     * @return true if everythings cool
+     * @return true if everything is cool
      */
     public static boolean checkFile(final File file) {
         if (!file.exists()) {
@@ -471,9 +474,24 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     }
 
     /**
+     * Runs some javascript on the fajita-page.
+     * 
+     * @param script JS-string to run
+     */
+    public final void executeJS(final String script) {
+        try {
+            getAppletContext().showDocument(new URL("javascript:" + script),
+                    "_self");
+
+        } catch (MalformedURLException e) {
+            System.out.println("Invalid JavaScript");
+            return; // Instead of blank to please mistress Checkstyle.
+        }
+    }
+
+    /**
      * Used by JS when reading from cookie.
      * 
-     * @param name owner
      * @param cookieData data
      */
     public final void _JS_setCookie(final String cookieData) {

@@ -113,6 +113,9 @@ public class Oscillator implements StateMachine {
         
         lcd = new LCD(ram);
         timer = new Timer();
+
+        audioEnabled = true;
+
         try {
 			soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES);
 		} catch (LineUnavailableException e) {
@@ -120,7 +123,6 @@ public class Oscillator implements StateMachine {
 			soundHandler = null;
 			audioEnabled = false;
 		}
-        
         reset();
     }
 
@@ -133,7 +135,7 @@ public class Oscillator implements StateMachine {
         running = false;
         timer.reset();
         resetAudio();
-        enableAudio();
+        setVolume(volume);
     }
 
     /**
@@ -176,7 +178,6 @@ public class Oscillator implements StateMachine {
         if ( videoReciever != null && lcd.newScreenAvailable() ) {
         	videoReciever.transmitVideo(lcd.getPixels());
         }
-
         return cycleInc;
     }
 

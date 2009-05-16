@@ -1,7 +1,5 @@
 package fajitaboy.applet;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -35,7 +33,7 @@ public class CookieJar {
         cookies = new HashMap<String, String>();
         fajitaBoy = fb;
 
-        executeJS("loadCookie()");
+        fajitaBoy.executeJS("loadCookie()");
     }
 
     /**
@@ -50,12 +48,12 @@ public class CookieJar {
         String[] rawCookies;
         int cStart, cEnd, cName;
 
-        if (!cookieData.startsWith(versionCheck, 0)) {
-            System.out.println("Cookie version missmatch!");
-            return;
+        cStart = cookieData.indexOf(versionCheck);
+        if (cStart == -1) {
+            return; // Cookie version missmatch!
         }
 
-        cStart = cookieData.indexOf("&") + 1;
+        cStart = cookieData.indexOf("&", cStart) + 1;
         cEnd = cookieData.indexOf(";");
 
         if (cStart == 0) {
@@ -103,7 +101,7 @@ public class CookieJar {
      */
     public final void put(final String name, final String value) {
         cookies.put(name, value);
-        executeJS("saveCookie()");
+        fajitaBoy.executeJS("saveCookie()");
     }
 
     /**
@@ -118,20 +116,5 @@ public class CookieJar {
         }
 
         return null;
-    }
-
-    /**
-     * Runs some javascript on the fajita-page.
-     * 
-     * @param script JS-string to run
-     */
-    private void executeJS(final String script) {
-        try {
-            fajitaBoy.getAppletContext().showDocument(
-                    new URL("javascript:" + script), "_self");
-
-        } catch (MalformedURLException e) {
-            System.out.println("Invalid Javascript.");
-        }
     }
 }

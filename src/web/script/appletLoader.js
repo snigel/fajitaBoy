@@ -14,29 +14,34 @@ var appletWrapper = {
 
 onAppletLoad : function() {
 	this.addSizeControls();
-
-	var applet = document.fajitaBoy;
-	applet.setAttribute("height", "288");
-	applet.setAttribute("width", "320");
+	disableLinks();
 },
 
 addSizeControls : function() {
 	var applet = document.fajitaBoy;
 	$("#appletSizeControls").show();
 	$("#resizeAppletX2Link").click( function() {
-		applet.setAttribute("width", "320");
-		applet.setAttribute("height", "288");
+		if (! $("#resizeAppletX2Link").hasClass("disabledLink")) {
+			applet.setAttribute("width", "320");
+			applet.setAttribute("height", "288");
+		}
 	});
 	$("#resizeAppletX3Link").click( function() {
-		applet.setAttribute("width", "480");
-		applet.setAttribute("height", "432");
+		if (! $("#resizeAppletX3Link").hasClass("disabledLink")) {
+			applet.setAttribute("width", "480");
+			applet.setAttribute("height", "432");
+		}
 	});
 	$("#resizeAppletX4Link").click( function() {
-		applet.setAttribute("width", "640");
-		applet.setAttribute("height", "576");
+		if (! $("#resizeAppletX4Link").hasClass("disabledLink")) {
+			applet.setAttribute("width", "640");
+			applet.setAttribute("height", "576");
+		}	
 	});
 	$("#fullscreenAppletLink").click( function() {
-		applet.toggleFullScreen();
+		if (! $("#fullscreenAppletLink").hasClass("disabledLink")) {
+			applet.toggleFullScreen();
+		}
 	});
 }
 };
@@ -44,3 +49,14 @@ addSizeControls : function() {
 $(document).ready( function() {
 	appletWrapper.addLoadHook.call(appletWrapper);
 });
+
+function enableLinks() {
+	$($("#appletSizeControls a")).removeClass("disabledLink");
+}
+
+function disableLinks() {
+	var applet = document.fajitaBoy;
+	applet.setAttribute("height", "288");
+	applet.setAttribute("width", "320");
+	$($("#appletSizeControls a")).addClass("disabledLink");
+}
