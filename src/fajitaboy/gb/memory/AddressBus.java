@@ -72,7 +72,7 @@ public class AddressBus implements MemoryInterface, StateMachine {
     /**
      * All the input/output addresses.
      */
-    protected IO io;
+    private IO io;
     
     protected MemoryBankController mbc;
 
@@ -240,7 +240,15 @@ public class AddressBus implements MemoryInterface, StateMachine {
     	return io.getJoyPad();
     }
 
-    /**
+    public void setIO(IO io) {
+		this.io = io;
+	}
+
+	public IO getIO() {
+		return io;
+	}
+
+	/**
      * {@inheritDoc}
      */
     public void readState( FileInputStream fis ) throws IOException {

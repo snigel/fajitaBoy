@@ -1,5 +1,9 @@
 package fajitaboy.gb.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 
 /**
  * This class is for debugging purposes only. So that the memory returns zero
@@ -43,5 +47,17 @@ public class DebugMemory implements MemoryInterface {
         // Do nothing since we don't have any data structures
 
     }
+
+	@Override
+	public void readState(FileInputStream is) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void saveState(FileOutputStream os) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

@@ -1,8 +1,9 @@
 package fajitaboy.gb;
 
-import static fajitaboy.constants.HardwareConstants.*;
-import static fajitaboy.constants.EmulationConstants.*;
 import static fajitaboy.constants.AudioConstants.*;
+import static fajitaboy.constants.EmulationConstants.*;
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,12 +12,12 @@ import java.util.concurrent.Semaphore;
 
 import javax.sound.sampled.LineUnavailableException;
 
-import fajitaboy.VideoReciever;
+import fajitaboy.AudioReciever;
 import fajitaboy.FileIOStreamHelper;
+import fajitaboy.VideoReciever;
 import fajitaboy.gb.audio.SoundHandler;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
-import fajitaboy.gb.memory.MemoryInterface;
 
 /**
  * Oscillator emulates the clock frequency of the Game Boy and tells different
@@ -34,9 +35,14 @@ public class Oscillator implements StateMachine {
     Semaphore runningMutex = new Semaphore(1);
 
     /**
-     * Next cycle to stop and wait if going too fast
+     * Next cycle to stop running core
      */
     private long nextHaltCycle;
+    
+    /**
+     * Next cycle to update video and audio
+     */
+    private long nextUpdateCycle;
 
     /**
      * Cycles since Oscillator initialization.
@@ -51,7 +57,7 @@ public class Oscillator implements StateMachine {
     /**
      * Pointer to MemoryInterface instance.
      */
-    protected MemoryInterface ram;
+    protected AddressBus ram;
 
     /**
      * Pointer to LCD instance.
@@ -96,7 +102,7 @@ public class Oscillator implements StateMachine {
     protected Oscillator() {}
 
     public Oscillator(Cpu cpu, AddressBus ram) {
-    	this(cpu, ram, null);
+    	this(cpu, ram, null, null);
     }
     
     /**
@@ -106,7 +112,7 @@ public class Oscillator implements StateMachine {
      * @param ram
      *            Pointer to MemoryInterface instance.
      */
-    public Oscillator(Cpu cpu, AddressBus ram, VideoReciever videoReciever) {
+    public Oscillator(Cpu cpu, AddressBus ram, VideoReciever videoReciever, AudioReciever audioReciever) {
     	this.cpu = cpu;
         this.ram = ram;
         this.videoReciever = videoReciever;
@@ -115,14 +121,8 @@ public class Oscillator implements StateMachine {
         timer = new Timer();
 
         audioEnabled = true;
-
-        try {
-			soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES);
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-			soundHandler = null;
-			audioEnabled = false;
-		}
+		soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES, audioReciever);
+			
         reset();
     }
 
@@ -132,22 +132,13 @@ public class Oscillator implements StateMachine {
     public void reset() {
         cycles = 0;
         nextHaltCycle = GB_CYCLES_PER_FRAME;
+        nextUpdateCycle = 0;
         running = false;
         timer.reset();
-        resetAudio();
-        setVolume(volume);
-    }
-
-    /**
-     * Initializes the Audio module.
-     */
-    public void resetAudio() {
-        try {
-            soundHandler = new SoundHandler( (AddressBus)ram, sampleRate, samples );
-        } catch ( LineUnavailableException e ) {
-            System.out.println("Error when initializing audio: " + e);
-            audioEnabled = false;
-        }
+        
+        cpu.reset();
+        ram.reset();
+        soundHandler.reset();
     }
 
     /**
@@ -190,21 +181,21 @@ public class Oscillator implements StateMachine {
      * make this method run in a separate thread.
      */
     public final void run(int runCycles) {
-    	try {
-			runningMutex.acquire();
-		} catch (InterruptedException e1) {}
+    	//try {
+		//	runningMutex.acquire();
+		//} catch (InterruptedException e1) {}
         running = true;
-        long sleepTime;
-        long nextUpdate = System.nanoTime();
-        int frameSkipCount = 0;
+        //long sleepTime;
+        //long nextUpdate = System.nanoTime();
+        //int frameSkipCount = 0;
         nextHaltCycle += runCycles;
         
         while (running) {
             step();
 
-            if (cycles > nextHaltCycle) {
+            if (cycles > nextUpdateCycle) {
                 generateAudio();
-                nextUpdate += GB_NANOS_PER_FRAME;
+                /*nextUpdate += GB_NANOS_PER_FRAME;
                 sleepTime = nextUpdate - System.nanoTime();
 
                 // Sleep if running too fast
@@ -221,11 +212,15 @@ public class Oscillator implements StateMachine {
                 } else {
                     lcd.enableFrameSkip();
                     frameSkipCount++;
-                }
-                running = false;
+                } */
+                nextUpdateCycle += GB_CYCLES_PER_FRAME;
+            }
+            
+            if ( cycles > nextHaltCycle ) {
+            	running = false;
             }
         }
-        runningMutex.release();
+        //runningMutex.release();
     }
 
     /**
@@ -252,41 +247,6 @@ public class Oscillator implements StateMachine {
     public final boolean isRunning() {
         return running;
     }
-    
-    public void enableAudio() {
-        if ( audioEnabled == false ) {
-            audioEnabled = true;
-            resetAudio();
-            setVolume(volume);
-        }
-    }
-
-    public void disableAudio() {
-        if ( audioEnabled ) {
-            soundHandler.close();
-        }
-        audioEnabled = false;
-    }
-
-    /**
-     * Sets emulator volume.
-     *
-     * @param volume
-     */
-    public final void setVolume(int vol) {
-        volume = Math.max(0, vol);
-        volume = Math.min(100, volume);
-        soundHandler.setVolume(volume);
-    }
-
-    /**
-     * Returns emulator volume.
-     * @return int
-     */
-    public final int getVolume() {
-        return volume;
-    }
-    
 
     public void setSoundHandler(SoundHandler soundHandler) {
 		this.soundHandler = soundHandler;
@@ -295,6 +255,41 @@ public class Oscillator implements StateMachine {
 	public SoundHandler getSoundHandler() {
 		return soundHandler;
 	}
+	
+	public void setKeys(int keys) {
+		ram.getJoyPad().setKeys(keys);
+	}
+	
+	public void setGameLinkCable(GameLinkCable glc) {
+		ram.getIO().setGameLinkCable(glc);
+	}
+	
+	public int readSerial() {
+		return ram.read(ADDRESS_SB);
+	}
+
+	public void writeSerial(int data) {
+		ram.write(ADDRESS_SB, data);
+		
+		// Disable Transfer Start Flag in Serial Control
+		int sc = ram.read(ADDRESS_SC) & 0x7F;
+		ram.write(ADDRESS_SC, sc);
+		
+		// Trigger Serial interrupt
+		ram.write(ADDRESS_IF, ram.read(ADDRESS_IF) | 0x08);
+	}
+	
+	public void setSerialHost(boolean host) {
+		if ( host ) {
+			// Disable Shift Clock Flag in Serial Control
+			int sc = ram.read(ADDRESS_SC) | 0x01;
+			ram.write(ADDRESS_SC, sc);
+		} else {
+			// Disable Shift Clock Flag in Serial Control
+			int sc = ram.read(ADDRESS_SC) & 0xFE;
+			ram.write(ADDRESS_SC, sc);
+		}
+	}
 
 	/**
      * {@inheritDoc}
@@ -302,7 +297,12 @@ public class Oscillator implements StateMachine {
     public void saveState( FileOutputStream os ) throws IOException {
         FileIOStreamHelper.writeData(os, cycles, 8);
         FileIOStreamHelper.writeData(os, nextHaltCycle, 8);
+        FileIOStreamHelper.writeData(os, nextUpdateCycle, 8);
+        FileIOStreamHelper.writeBoolean(os, audioEnabled);
+        FileIOStreamHelper.writeData(os, sampleRate, 4);
+        FileIOStreamHelper.writeData(os, samples, 4);
 
+        ram.saveState(os);
         timer.saveState(os);
         cpu.saveState(os);
         lcd.saveState(os);
@@ -315,22 +315,15 @@ public class Oscillator implements StateMachine {
     public void readState( FileInputStream is ) throws IOException {
         cycles = FileIOStreamHelper.readData(is, 8);
         nextHaltCycle = FileIOStreamHelper.readData(is, 8);
+        nextUpdateCycle = FileIOStreamHelper.readData(is, 8);
         audioEnabled = FileIOStreamHelper.readBoolean(is);
         sampleRate = (int) FileIOStreamHelper.readData(is, 4);
         samples = (int) FileIOStreamHelper.readData(is, 4);
 
+        ram.readState(is);
         timer.readState(is);
         cpu.readState(is);
         lcd.readState(is);
         soundHandler.readState(is);
-    }
-
-    /**
-     * Getter for audioEnable, ie if the sound is enabled or not.
-     *
-     * @return the audioEnabled
-     */
-    public final boolean isAudioEnabled() {
-        return audioEnabled;
     }
 }

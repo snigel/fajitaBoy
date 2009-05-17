@@ -4,16 +4,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import fajitaboy.gb.GameLinkCable;
 import fajitaboy.gb.StateMachine;
+import fajitaboy.gb.audio.SoundReciever;
 
 import static fajitaboy.constants.HardwareConstants.*;
+import static fajitaboy.constants.AudioConstants.*;
 
 /**
  * Encapsulates the emulator.
  * 
  * @author Marcus, Peter, Tobias
  */
-public class Emulator implements Runnable, StateMachine{
+public class Emulator implements Runnable, StateMachine {
 
 	// Handles keys for Player 1 and Player 2
 	public enum Player {PLAYER1, PLAYER2};
@@ -21,30 +24,59 @@ public class Emulator implements Runnable, StateMachine{
 	int p1keys;
 	int p2keys;
 	
-	/**
-	 * Pointer to a class that renders video.
-	 */
-	VideoReciever videoReciever;
+	/** Pointer to a class that renders video for Player 1. */
+	VideoReciever videoReciever1;
 	
+	/** Pointer to a class that renders video for Player 2. */
+	VideoReciever videoReciever2;
 	
+	/** Pointer to a class that renders sound. */
+	SoundReciever soundReciever;
+	
+	/** Points to a GameLinkCable class if multiplayer is enabled. */
+	GameLinkCable gameLinkCable;
+	
+	/** True if the emulator is currently running the emulator cores. */
 	boolean running;
 	
-	/**
-	 * Array containing emulator cores
-	 */
-	EmulatorCore[] cores;
+	/** True if the emulator is a multiplayer emulator */
+	boolean multiplayer;
 	
+	/** Player 1 emulator core */
+	EmulatorCore core1;
+	
+	/** Player 2 emulator core */
+	EmulatorCore core2;
+	
+	/** Cycles to run per step */
+	int cycleRate;
+	
+	/**
+	 * Standard constructor
+	 * @param path ROM path
+	 */
 	Emulator(final String path) {
 		this(path, null);
 	}
 	
 	/**
-	 * Standard constructor.
-	 * 
-	 * @param path Rom path
+	 * Initializes a single player emulator.
+	 * @param path ROM path
 	 */
-	Emulator(final String path, VideoReciever videoReciever) {
-		this.videoReciever = videoReciever;
+	Emulator(final String path, VideoReciever vr ) {
+		multiplayer = false;
+		videoReciever1 = vr;
+		loadRom(path);
+	}
+	
+	/**
+	 * Initialises a multiplayer emulator.
+	 * @param path ROM path
+	 */
+	Emulator(final String path, VideoReciever vr1, VideoReciever vr2 ) {
+		multiplayer = true;
+		videoReciever1 = vr1;
+		videoReciever2 = vr2;
 		loadRom(path);
 	}
 	
@@ -53,15 +85,40 @@ public class Emulator implements Runnable, StateMachine{
 			final int rom[] = ReadRom.readRom(path);
 			int cgbFlag = rom[0x143];
 			
-			if ((cgbFlag & 0x80) != 0) {
-				// Game Boy Color
-				cores = new EmulatorCore[1];
-				cores[0] = new EmulatorCoreCGB(rom, videoReciever);
-
+			soundReciever = new SoundReciever(AUDIO_SAMPLERATE);
+			
+			if ( multiplayer == false ) {
+			
+				cycleRate = GB_CYCLES_PER_FRAME;
+				
+				if ((cgbFlag & 0x80) != 0) {
+					// Game Boy Color
+					core1 = new EmulatorCoreCGB(rom, videoReciever1, soundReciever);
+				} else {
+					// Game Boy
+					core1 = new EmulatorCoreGB(rom, videoReciever1, soundReciever);
+				}
+			
 			} else {
-				// Game Boy
-				cores = new EmulatorCore[1];
-				cores[0] = new EmulatorCoreGB(rom, videoReciever);
+				
+				if ((cgbFlag & 0x80) != 0) {
+					// Game Boy Color
+					EmulatorCoreCGB c1 = new EmulatorCoreCGB(rom, videoReciever1, soundReciever);
+					EmulatorCoreCGB c2 = new EmulatorCoreCGB(rom.clone(), videoReciever2, null);
+					gameLinkCable = new GameLinkCable(c1, c2);
+					core1 = c1;
+					core2 = c2;
+					cycleRate = GLC_CYCLES_PER_TRANSFER_FAST;
+	
+				} else {
+					// Game Boy
+					EmulatorCoreGB c1 = new EmulatorCoreGB(rom, videoReciever1, soundReciever);
+					EmulatorCoreGB c2 = new EmulatorCoreGB(rom.clone(), videoReciever2, null);
+					gameLinkCable = new GameLinkCable(c1, c2);
+					core1 = c1;
+					core2 = c2;
+					cycleRate = GLC_CYCLES_PER_TRANSFER;
+				}
 			}
 			
 			reset();
@@ -74,19 +131,25 @@ public class Emulator implements Runnable, StateMachine{
 	
 	public void reset() {
 		running = false;
-		for ( int i = 0; i < cores.length; i++ ) {
-			cores[i].reset();
-		}
+		if ( core1 != null )
+			core1.reset();
+		if ( core2 != null )
+			core2.reset();
 		p1keys = 0xFF;
 		p2keys = 0xFF;
 	}
 	
 	public void run() {
 		running = true;
-		while ( running ) {
-			for ( int i = 0; i < cores.length; i++ ) {
-				cores[i].playerInput(p1keys);
-				cores[i].run( GB_CYCLES_PER_FRAME );
+		if ( multiplayer == false ) {
+			while ( running ) {
+				core1.run(cycleRate);
+			}
+		} else {
+			while ( running ) {
+				core1.run(cycleRate);
+				core2.run(cycleRate);
+				gameLinkCable.performTransfer();
 			}
 		}
 	}
@@ -96,23 +159,26 @@ public class Emulator implements Runnable, StateMachine{
 	 */
 	public void stop() {
 		running = false;
-		for ( int i = 0; i < cores.length; i++ ) {
-			cores[i].stop();
-		}
+		if ( core1 != null )
+			core1.stop();
+		if ( core2 != null )
+			core2.stop();
 	}
 
 	/** {@inheritDoc} */
 	public void saveState(FileOutputStream fos) throws IOException {
-		for ( int i = 0; i < cores.length; i++ ) {
-			cores[i].saveState(fos);
-		}
+		if ( core1 != null )
+			core1.saveState(fos);
+		if ( core2 != null )
+			core2.saveState(fos);
 	}
 
 	/** {@inheritDoc} */
 	public void readState(FileInputStream fis) throws IOException {
-		for ( int i = 0; i < cores.length; i++ ) {
-			cores[i].readState(fis);
-		}
+		if ( core1 != null )
+			core1.readState(fis);
+		if ( core2 != null )
+			core2.readState(fis);
 	}
 	
 	public void setKey(Keys key, boolean pressed, Player player) {
@@ -137,6 +203,7 @@ public class Emulator implements Runnable, StateMachine{
 			} else {
 				p1keys &= 0xFF - bitmask;
 			}
+			core1.playerInput(p1keys);
 			break;
 		case PLAYER2:
 			if ( !pressed ) {
@@ -144,29 +211,29 @@ public class Emulator implements Runnable, StateMachine{
 			} else {
 				p2keys &= 0xFF - bitmask;
 			}
+			if ( core2 != null )
+				core2.playerInput(p2keys);
 			break;
 		}
-		
-		cores[0].playerInput(p1keys);
 	}
 
 	public void disableAudio() {
-		cores[0].disableAudio();
+		soundReciever.disableAudio();
 	}
 
 	public boolean isAudioEnabled() {
-		return cores[0].isAudioEnabled();
+		return soundReciever.isAudioEnabled();
 	}
 
 	public void enableAudio() {
-		cores[0].enableAudio();
+		soundReciever.enableAudio();
 	}
 
 	public int getVolume() {
-		return cores[0].getVolume();
+		return soundReciever.getVolume();
 	}
 
 	public void setVolume(int vol) {
-		cores[0].setVolume(vol);
+		soundReciever.setVolume(vol);
 	}
 }

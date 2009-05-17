@@ -157,19 +157,7 @@ public class Cpu implements StateMachine {
 
         // Handle interrupts
         handleInterrupts();
-        
-        // Validate CPU registers
-        assert ( a >= 0 && a < 0x100 ) : "CPU register A is out of range: " + a;
-        assert ( b >= 0 && b < 0x100 ) : "CPU register B is out of range: " + b;
-        assert ( c >= 0 && c < 0x100 ) : "CPU register C is out of range: " + c;
-        assert ( d >= 0 && d < 0x100 ) : "CPU register D is out of range: " + d;
-        assert ( e >= 0 && e < 0x100 ) : "CPU register E is out of range: " + e;
-        assert ( h >= 0 && h < 0x100 ) : "CPU register H is out of range: " + h;
-        assert ( l >= 0 && l < 0x100 ) : "CPU register L is out of range: " + l;
-        assert ( cc >= 0 && cc < 0x100 ) : "CPU register CC is out of range: " + cc;
-        assert ( sp >= 0 && sp < 0x10000 ) : "CPU stack pointer SP is out of range: " + sp;
-        assert ( pc >= 0 && pc < 0x10000 ) : "CPU program counter PC is out of range: " + pc;
-        
+
         return cycleTime;
     }
     
@@ -181,27 +169,28 @@ public class Cpu implements StateMachine {
         // Look for interrupts
         ieReg = ram.read(ADDRESS_IE);
         ifReg = ram.read(ADDRESS_IF);
-
-        if ((ieReg & 0x01) != 0 && (ifReg & 0x01) != 0) {
-            // V-Blank interrupt
-            interruptJumpAddress = ADDRESS_INT_VBLANK;
-            interruptBit = 0xFE;
-        } else if ((ieReg & 0x02) != 0 && (ifReg & 0x02) != 0) {
-            // LCD Status interrupt
-            interruptJumpAddress = ADDRESS_INT_LCDSTAT;
-            interruptBit = 0xFD;
-        } else if ((ieReg & 0x04) != 0 && (ifReg & 0x04) != 0) {
-            // Timer interrupt
-            interruptJumpAddress = ADDRESS_INT_TIMER;
-            interruptBit = 0xFB;
-        } else if ((ieReg & 0x08) != 0 && (ifReg & 0x08) != 0) {
-            // Serial interrupt
-            interruptJumpAddress = ADDRESS_INT_SERIAL;
-            interruptBit = 0xF7;
-        } else if ((ieReg & 0x10) != 0 && (ifReg & 0x10) != 0) {
-            // Joypad interrupt
-            interruptJumpAddress = ADDRESS_INT_JOYPAD;
-            interruptBit = 0xEF;
+        if ( ifReg != 0 && ieReg != 0) {
+            if ((ieReg & 0x01) != 0 && (ifReg & 0x01) != 0) {
+                // V-Blank interrupt
+                interruptJumpAddress = ADDRESS_INT_VBLANK;
+                interruptBit = 0xFE;
+            } else if ((ieReg & 0x02) != 0 && (ifReg & 0x02) != 0) {
+                // LCD Status interrupt
+                interruptJumpAddress = ADDRESS_INT_LCDSTAT;
+                interruptBit = 0xFD;
+            } else if ((ieReg & 0x04) != 0 && (ifReg & 0x04) != 0) {
+                // Timer interrupt
+                interruptJumpAddress = ADDRESS_INT_TIMER;
+                interruptBit = 0xFB;
+            } else if ((ieReg & 0x08) != 0 && (ifReg & 0x08) != 0) {
+                // Serial interrupt
+                interruptJumpAddress = ADDRESS_INT_SERIAL;
+                interruptBit = 0xF7;
+            } else if ((ieReg & 0x10) != 0 && (ifReg & 0x10) != 0) {
+                // Joypad interrupt
+                interruptJumpAddress = ADDRESS_INT_JOYPAD;
+                interruptBit = 0xEF;
+            }
         }
 
         if ( interruptJumpAddress != 0x000 ) {

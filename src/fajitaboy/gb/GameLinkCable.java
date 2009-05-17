@@ -1,0 +1,73 @@
+package fajitaboy.gb;
+
+import fajitaboy.EmulatorCoreGB;
+
+public class GameLinkCable {
+	
+	EmulatorCoreGB core1;
+	EmulatorCoreGB core2;
+	
+	boolean transfer = false;
+	int host;
+	
+public GameLinkCable() {
+	}
+	
+	public GameLinkCable( EmulatorCoreGB c1, EmulatorCoreGB c2 ) {
+		core1 = c1;
+		core2 = c2;
+		c1.setGameLinkCable( new EntryPoint(1, this) );
+		c2.setGameLinkCable( new EntryPoint(2, this) );
+		host = 1;
+		core1.setSerialHost(true);
+		core1.setSerialHost(false);
+	}
+	
+	public void setSerialHost() {
+		// Dummy class.....
+		// Ugly implementation but... yeah. Can come up with a better solution once this works.
+	}
+	
+	public void setSerialHost(int id) {
+		if ( id == 1 ) {
+			core2.setSerialHost(false);
+		} else {
+			core1.setSerialHost(false);
+		}
+	}
+	
+	public void enableTransfer() {
+		transfer = true;
+	}
+	
+	public void performTransfer() {
+		if (transfer == false) {
+			return;
+		}
+		
+		int d1 = core1.readSerial();
+		int d2 = core2.readSerial();
+		core1.writeSerial(d2);
+		core2.writeSerial(d1);
+		
+		transfer = false;
+	}
+	
+	class EntryPoint extends GameLinkCable {
+		int id;
+		GameLinkCable glc;
+		
+		public EntryPoint(int id, GameLinkCable glc) {
+			this.id = id;
+			this.glc = glc;
+		}
+		
+		public void setSerialHost() {
+			glc.setSerialHost(id);
+		}
+		
+		public void enableTransfer() {
+			glc.enableTransfer();
+		}
+	}
+}

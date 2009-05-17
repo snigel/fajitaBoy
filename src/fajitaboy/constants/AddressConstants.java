@@ -140,5 +140,8 @@ public final class AddressConstants {
     public static final int ADDRESS_SOUND3_WAVEPATTERN_END= 0xFF3F;
 
     public static final int ADDRESS_SPRITE_ATTRIBUTE_TABLE = 0xFE00;
+    
+    public static final int ADDRESS_SB = 0xFF01;
+    public static final int ADDRESS_SC = 0xFF02;
 
 }

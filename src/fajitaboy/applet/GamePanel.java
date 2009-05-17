@@ -19,6 +19,9 @@ public class GamePanel extends JPanel implements VideoReciever {
 
     protected ColorModel colorModel;
 
+    public GamePanel() {
+    }
+    
     public GamePanel(int zoom) {
         setIgnoreRepaint(true);
         setPreferredSize(new Dimension(LCD_W * zoom, LCD_H * zoom));

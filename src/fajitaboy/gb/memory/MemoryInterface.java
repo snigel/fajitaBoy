@@ -1,11 +1,13 @@
 package fajitaboy.gb.memory;
 
+import fajitaboy.gb.StateMachine;
+
 /**
  * @author Adam Hulin, Johan Gustafsson This interface handles read and write
  *         commands and are supposed to work for all memory like implementations
  *         used.
  */
-public interface MemoryInterface {
+public interface MemoryInterface extends StateMachine {
 
     /**
      * @param address

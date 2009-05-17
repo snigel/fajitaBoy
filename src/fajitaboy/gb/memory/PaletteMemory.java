@@ -1,5 +1,9 @@
 package fajitaboy.gb.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import fajitaboy.gb.memory.MemoryInterface;
 
 public class PaletteMemory implements MemoryInterface {
@@ -124,5 +128,17 @@ public class PaletteMemory implements MemoryInterface {
     public void forceWrite(int address, int data) {
         write(address, data); 
     }
+
+	@Override
+	public void readState(FileInputStream is) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void saveState(FileOutputStream os) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
     
 }

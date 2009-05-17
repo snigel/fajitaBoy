@@ -3,15 +3,12 @@ package fajitaboy.gbc;
 import static fajitaboy.constants.AudioConstants.AUDIO_SAMPLERATE;
 import static fajitaboy.constants.AudioConstants.AUDIO_SAMPLES;
 
-import javax.sound.sampled.LineUnavailableException;
-
+import fajitaboy.AudioReciever;
 import fajitaboy.VideoReciever;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.Timer;
 import fajitaboy.gb.audio.SoundHandler;
-import fajitaboy.gb.lcd.LCD;
-import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.lcd.CGB_LCD;
 import fajitaboy.gbc.memory.CGB_AddressBus;
 
@@ -21,7 +18,7 @@ import fajitaboy.gbc.memory.CGB_AddressBus;
 public class CGB_Oscillator extends Oscillator {
     
     public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram) {
-    	this(cpu, ram, null);
+    	this(cpu, ram, null, null);
     }
     
     /**
@@ -31,20 +28,14 @@ public class CGB_Oscillator extends Oscillator {
      * @param ram
      *            Pointer to MemoryInterface instance.
      */
-    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, VideoReciever videoReciever) {
+    public CGB_Oscillator(Cpu cpu, CGB_AddressBus ram, VideoReciever videoReciever, AudioReciever audioReciever) {
     	this.cpu = cpu;
         this.ram = ram;
         this.videoReciever = videoReciever;
         
         lcd = new CGB_LCD(ram);
         timer = new Timer();
-        try {
-			soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES);
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-			soundHandler = null;
-			audioEnabled = false;
-		}
+		soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES, audioReciever);
         
         reset();
     }

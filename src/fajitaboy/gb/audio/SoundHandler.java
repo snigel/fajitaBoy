@@ -12,6 +12,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import fajitaboy.AudioReciever;
 import fajitaboy.FileIOStreamHelper;
 import fajitaboy.gb.StateMachine;
 import fajitaboy.gb.memory.AddressBus;
@@ -105,16 +106,8 @@ public class SoundHandler implements StateMachine {
      * The array that holds the generated sound.
      */
     private byte[] destBuff;
-
-    /**
-     * The audio format that is used with SourceDataLine.
-     */
-    private AudioFormat af;
-
-    /**
-     * The line to the sound card.
-     */
-    private SourceDataLine sdl;
+    
+    private AudioReciever audioReciever;
 
     /**
      * Sets up the line to the sound card and creates the fours sound channels.
@@ -128,13 +121,7 @@ public class SoundHandler implements StateMachine {
      * @throws LineUnavailableException
      */
     public SoundHandler(final AddressBus ab, final float sampleRate,
-            final int samples) throws LineUnavailableException {
-
-        af = new AudioFormat(sampleRate, 8, 2, true, false);
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
-        sdl = (SourceDataLine) AudioSystem.getLine(info);
-        sdl.open(af);
-        sdl.start();
+            final int samples, AudioReciever audioReciever) {
 
         this.ab = ab;
         this.samples = samples;
@@ -142,6 +129,7 @@ public class SoundHandler implements StateMachine {
         au2 = new SoundChannel2(ab, sampleRate);
         au3 = new SoundChannel3(ab, sampleRate);
         au4 = new SoundChannel4(ab, sampleRate);
+        this.audioReciever = audioReciever;
     }
     
     public void reset() {
@@ -161,20 +149,21 @@ public class SoundHandler implements StateMachine {
     public final void generateTone() {
         // Check if the available space in the buffer is less then
         // the number of samples.
-        if (sdl.available() < samples) {
-            destBuff = new byte[sdl.available() * 2];
-            finalSamples = sdl.available();
-        } else {
+        //if (sdl.available() < samples) {
+        //    destBuff = new byte[sdl.available() * 2];
+        //    finalSamples = sdl.available();
+        //} else {
             destBuff = new byte[samples * 2];
             finalSamples = samples;
-        }
+        //}
         stereoSelect();
         au1.generateTone(destBuff, ch1Left, ch1Right, finalSamples);
         au2.generateTone(destBuff, ch2Left, ch2Right, finalSamples);
         au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
         au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
 
-        sdl.write(destBuff, 0, destBuff.length);
+     	if ( audioReciever != null)
+     		audioReciever.transmitAudio(destBuff);
     }
 
     /**
@@ -190,13 +179,6 @@ public class SoundHandler implements StateMachine {
         ch2Right = ((nr51 & 0x20) > 0);
         ch3Right = ((nr51 & 0x40) > 0);
         ch4Right = ((nr51 & 0x80) > 0);
-    }
-
-    /**
-     * Closes the line to the sound card.
-     */
-    public final void close() {
-        sdl.close();
     }
 
     public final void setVolume(int volume) {

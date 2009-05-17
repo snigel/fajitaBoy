@@ -56,8 +56,6 @@ public class StartScreenPanel extends JPanel implements ActionListener {
         add(singleplayerButton);
         add(multiplayerButton);
 
-        multiplayerButton.setEnabled(false);
-
         URL myurl = fajitaBoy.getClass().getResource("resources/fajitaboi.gif");
 
         ImageIcon icon = new ImageIcon(myurl);
@@ -107,6 +105,8 @@ public class StartScreenPanel extends JPanel implements ActionListener {
 
         if (e.getSource() == singleplayerButton) {
             fajitaBoy.changeGameState(GameState.SINGLEPLAYER_LOADSCREEN);
+        } else if (e.getSource() == multiplayerButton) {
+            fajitaBoy.changeGameState(GameState.MULTIPLAYER_LOADSCREEN);
         } else if (e.getSource() == multiplayerButton) {
             System.out.println("Not implemented! :<");
         }

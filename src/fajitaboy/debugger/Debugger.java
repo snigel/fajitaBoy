@@ -40,7 +40,7 @@ import static fajitaboy.constants.HardwareConstants.*;
  */
 public final class Debugger implements VideoReciever {
 
-	private static final boolean GBCMode = true; 
+	private static final boolean GBCMode = false; 
 	
 	/**
 	 * Maximum value for a byte.
@@ -102,13 +102,13 @@ public final class Debugger implements VideoReciever {
             addressBus = addressBusCgb;
             CGB_Cpu cpuCgb = new CGB_Cpu((CGB_AddressBus)addressBus); 
             cpu = cpuCgb;
-            osc = new CGB_Oscillator(cpuCgb, addressBusCgb, this);
+            osc = new CGB_Oscillator(cpuCgb, addressBusCgb, this, null);
 		} else {
 			DebuggerAddressBus dab = new DebuggerAddressBus(rom); 
 			addressBus = dab;
 			breakPoints = new HashSet<Integer>();
 			cpu = new Cpu((AddressBus)addressBus);
-			osc = new Oscillator(cpu, (AddressBus)addressBus, this);
+			osc = new Oscillator(cpu, (AddressBus)addressBus, this, null);
 		}
 		prompt();
 	}

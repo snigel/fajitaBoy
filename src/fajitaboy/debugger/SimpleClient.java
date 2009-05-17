@@ -34,7 +34,7 @@ public class SimpleClient {
 			
 			AddressBus  a = new AddressBus(ReadRom.readRom(path));
 			Cpu c = new Cpu(a);
-			o = new Oscillator(c, a, panelScreen);
+			o = new Oscillator(c, a, panelScreen, null);
 			KeyListener kc = new SimpleKeyInputController(a.getJoyPad());
 			panelScreen.addKeyListener(kc);
 			jfr.addKeyListener(kc);

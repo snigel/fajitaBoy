@@ -34,6 +34,17 @@ public interface EmulatorCore extends StateMachine {
 	public void playerInput(int keys);
 	
 	/**
+	 * Reads data in serial port.
+	 */
+	public int readSerial();
+	
+	/**
+	 * Writes data to serial port.
+	 * @param data In data.
+	 */
+	public void writeSerial(int data);
+	
+	/**
 	 * Reset core.
 	 */
 	public void reset();
@@ -44,10 +55,4 @@ public interface EmulatorCore extends StateMachine {
 	 * @param videoReciever VideoReceiver class
 	 */
 	public void setVideoReciever(VideoReciever videoReciever);
-	
-	public void disableAudio();
-	public boolean isAudioEnabled();
-	public void enableAudio();
-	public int getVolume();
-	public void setVolume(int vol);
 }

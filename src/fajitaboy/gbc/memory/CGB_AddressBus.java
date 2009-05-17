@@ -63,8 +63,8 @@ public class CGB_AddressBus extends AddressBus {
         initialize(mbc, ADDRESS_CARTRIDGE_START, ADDRESS_CARTRIDGE_END);
         initialize(mbc, ADDRESS_ERAM_START, ADDRESS_ERAM_END);
         
-        io = new CGB_IO(ADDRESS_IO_START, ADDRESS_IO_END, ramh, vram);
-        initialize(io, ADDRESS_IO_START, ADDRESS_IO_END);
+        setIO(new CGB_IO(ADDRESS_IO_START, ADDRESS_IO_END, ramh, vram));
+        initialize(getIO(), ADDRESS_IO_START, ADDRESS_IO_END);
         
         interruptRegister = new InterruptRegister();
         module[ADDRESS_INTERRUPT] = interruptRegister;
@@ -95,7 +95,7 @@ public class CGB_AddressBus extends AddressBus {
         vram.reset();
         oam.reset();
         hram.reset();
-        io.reset();
+        getIO().reset();
     }
     
     

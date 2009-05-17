@@ -1,6 +1,7 @@
 package fajitaboy.gb.audio;
 
 import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.AudioConstants.*;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -9,8 +10,11 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.JFrame;
 
+import fajitaboy.AudioReciever;
+import fajitaboy.EmulatorCore;
 import fajitaboy.ReadRom;
 import fajitaboy.VideoReciever;
+import fajitaboy.gb.audio.SoundReciever;
 import fajitaboy.applet.GamePanel;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
@@ -63,7 +67,7 @@ public class AudioMain implements VideoReciever {
         au4 = new SoundChannel4(ab, sampleRate);
 
         Cpu cpu = new Cpu(ab);
-        Oscillator oc = new Oscillator(cpu, ab, this);
+        Oscillator oc = new Oscillator(cpu, ab, this, (AudioReciever)(new SoundReciever(AUDIO_SAMPLERATE)));
 
         for (int i = 0; i < INSTRUCTIONS; i++) {
             oc.step();

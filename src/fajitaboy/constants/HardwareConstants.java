@@ -24,5 +24,8 @@ public final class HardwareConstants {
 	public static final int GB_TILE_W = 8;
 	public static final int GB_TILE_H = 8;
 	public static final int CGB_TILES = 384;
-	
+	public static final int GLC_BYTERATE = 1024;
+	public static final int GLC_BYTERATE_FAST = 65536;
+	public static final int GLC_CYCLES_PER_TRANSFER = GB_CLOCK_FREQUENCY / GLC_BYTERATE;
+	public static final int GLC_CYCLES_PER_TRANSFER_FAST = GB_CLOCK_FREQUENCY / GLC_BYTERATE_FAST;
 }
