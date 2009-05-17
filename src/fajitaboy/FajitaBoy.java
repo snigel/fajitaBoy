@@ -5,6 +5,7 @@ import java.applet.AudioClip;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 
 import java.awt.Toolkit;
@@ -30,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import fajitaboy.applet.CookieJar;
+import fajitaboy.applet.FairDispatcher;
 import fajitaboy.applet.FullScreenFrame;
 import fajitaboy.applet.GamePanel;
 import fajitaboy.applet.GamePanelMultiplayer;
@@ -137,7 +139,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         } catch (Exception e) {
             System.out.println("Look&Feel fail. Using default.");
         }
-
+        
         addComponentListener(this);
         cookieJar = new CookieJar(this);
         executeJS("disableLinks()");
@@ -174,6 +176,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         // addKeyListener(this);
 
         addMouseListener(new MouseController());
+        
+        // Better working keys
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new FairDispatcher());
 
         // create the 'hidden' cursor
         hiddenCursor = Toolkit.getDefaultToolkit().createCustomCursor(
