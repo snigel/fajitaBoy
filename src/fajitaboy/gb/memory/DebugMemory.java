@@ -48,13 +48,13 @@ public class DebugMemory implements MemoryInterface {
 
     }
 
-	@Override
+    /** {@inheritDoc} */
 	public void readState(FileInputStream is) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void saveState(FileOutputStream os) throws IOException {
 		// TODO Auto-generated method stub
 		

@@ -72,12 +72,12 @@ public class EmulatorCoreGB implements EmulatorCore {
 		oscillator.run(cycles);
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public int readSerial() {
 		return oscillator.readSerial();
 	}
 
-	@Override
+	/** {@inheritDoc} */
 	public void writeSerial(int data) {
 		oscillator.writeSerial(data);
 	}
