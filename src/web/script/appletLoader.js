@@ -60,3 +60,8 @@ function disableLinks() {
 	applet.setAttribute("width", "320");
 	$($("#appletSizeControls a")).addClass("disabledLink");
 }
+function multiplayerSize() {
+	var applet = document.fajitaBoy;
+	applet.setAttribute("height", "288");
+	applet.setAttribute("width", "640");
+}

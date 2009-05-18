@@ -55,7 +55,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     // ------------------------------------------------------------------------
     // -- Global variables.
     // ------------------------------------------------------------------------
-	
+
     // - Emulator stuff
     /** Emulator containing emulation components. */
     private Emulator emulator;
@@ -101,7 +101,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
     /** Singleplayer menu. Select ROM and play. */
     private SingleplayerLoadPanel singleplayerLoadscreen;
-    
+
     /** Multiplayer menu. Select ROM and play. */
     private MultiplayerLoadPanel multiplayerLoadscreen;
 
@@ -123,7 +123,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
     /** "Pause". */
     private JLabel pauseText;
-    
+
     /** Multiplayer mode enabled */
     boolean multiplayer;
 
@@ -134,8 +134,8 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** {@inheritDoc} */
     public final void init() {
         try {
-            UIManager.setLookAndFeel(
-                    "com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+            UIManager
+                    .setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
         } catch (Exception e) {
             System.out.println("Look&Feel fail. Using default.");
         }
@@ -218,10 +218,10 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         switch (gameState) {
         case PLAYGAME:
             emulator.stop();
-            if ( multiplayer == false )
-            	gamePanel.setIgnoreRepaint(false);
+            if (multiplayer == false)
+                gamePanel.setIgnoreRepaint(false);
             else
-            	gamePanelMultiplayer.setIgnoreRepaint(false);
+                gamePanelMultiplayer.setIgnoreRepaint(false);
             layeredGamePanel.setCursor(Cursor.getDefaultCursor());
             break;
         case INGAME_MENU:
@@ -256,9 +256,9 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             setContentPane(singleplayerLoadscreen);
             showStatus("Singleplayer Screen");
             break;
-            
+
         case MULTIPLAYER_LOADSCREEN:
-        	executeJS("disableLinks()");
+            executeJS("disableLinks()");
             deactivateFullScreen();
             if (emulator != null) {
                 emulator.disableAudio();
@@ -270,10 +270,11 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         case PLAYGAME:
             layeredGamePanel.setCursor(hiddenCursor);
-            if ( multiplayer == false ) {
-            	gamePanel.setIgnoreRepaint(true);
+            if (!multiplayer) {
+                gamePanel.setIgnoreRepaint(true);
             } else {
-            	gamePanelMultiplayer.setIgnoreRepaint(true);
+                gamePanelMultiplayer.setIgnoreRepaint(true);
+                executeJS("multiplayerSize()");
             }
             if (fullScreen != null) {
                 fullScreen.setContentPane(layeredGamePanel);
@@ -317,12 +318,12 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     public final void startGame(final String path) {
 
         multiplayer = false;
-    	
-    	showStatus("Loading...");
+
+        showStatus("Loading...");
         gamePanel = new GamePanel(2);
         emulator = new Emulator(path, gamePanel);
         ingameMenuPanel = new IngameMenuPanel(this);
-        layeredGamePanel = new LayeredGamePanel(gamePanel, LCD_W, LCD_H );
+        layeredGamePanel = new LayeredGamePanel(gamePanel, LCD_W, LCD_H);
         layeredGamePanel.updateSize(getWidth(), getHeight());
 
         kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
@@ -334,17 +335,19 @@ public class FajitaBoy extends JApplet implements ComponentListener {
 
         changeGameState(GameState.PLAYGAME);
     }
-    
+
     public final void startGameMultiplayer(final String path) {
 
-    	multiplayer = true;
-    	
-    	setPreferredSize(new Dimension(640, 288));
-    	showStatus("Loading...");
+        multiplayer = true;
+
+        setPreferredSize(new Dimension(640, 288));
+        showStatus("Loading...");
         gamePanelMultiplayer = new GamePanelMultiplayer(2);
-        emulator = new Emulator(path, gamePanelMultiplayer.vr1, gamePanelMultiplayer.vr2);
+        emulator = new Emulator(path, gamePanelMultiplayer.vr1,
+                gamePanelMultiplayer.vr2);
         ingameMenuPanel = new IngameMenuPanel(this);
-        layeredGamePanel = new LayeredGamePanel(gamePanelMultiplayer, LCD_W*2, LCD_H);
+        layeredGamePanel = new LayeredGamePanel(gamePanelMultiplayer,
+                LCD_W * 2, LCD_H);
         layeredGamePanel.updateSize(getWidth(), getHeight());
 
         kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
@@ -601,11 +604,11 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             if (gameState == GameState.PLAYGAME
                     || gameState == GameState.INGAME_MENU
                     || gameState == GameState.PAUSE) {
-            	if ( multiplayer == false ) {
-            		gamePanel.requestFocus();
-            	} else {
-            		gamePanelMultiplayer.requestFocus();
-            	}
+                if (multiplayer == false) {
+                    gamePanel.requestFocus();
+                } else {
+                    gamePanelMultiplayer.requestFocus();
+                }
             }
 
             if (fullScreen != null) {
