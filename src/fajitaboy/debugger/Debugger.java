@@ -1000,4 +1000,10 @@ public final class Debugger implements VideoReciever {
 					+ "java Debugger.java /path/to/tetris.gb");
 		}
 	}
+
+	@Override
+	public void enableVideo(boolean enable) {
+		// TODO Auto-generated method stub
+		
+	}
 }

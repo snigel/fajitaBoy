@@ -16,6 +16,7 @@ public class GamePanel extends JPanel implements VideoReciever {
     private int[] pixels;
     private int zoom;
     private Image image;
+    protected boolean enabled;
 
     protected ColorModel colorModel;
 
@@ -29,6 +30,7 @@ public class GamePanel extends JPanel implements VideoReciever {
         pixels = new int[160 * 144];
         this.zoom = zoom;
         colorModel = new DirectColorModel(24, 0x0000FF, 0x00FF00, 0xFF0000);
+        enabled = true;
     }
 
     /**
@@ -39,6 +41,9 @@ public class GamePanel extends JPanel implements VideoReciever {
      */
     public final void transmitVideo(final int[][] data) {
     	
+    	if ( enabled == false )
+    		return;
+    		
     	// refresh pixeldata
         int n = 0;
         for (int i = 0; i < 144; i++) {
@@ -68,5 +73,9 @@ public class GamePanel extends JPanel implements VideoReciever {
      */
     public void setZoom(int zoom) {
         this.zoom = zoom;
+    }
+    
+    public void enableVideo(boolean enable) {
+    	enabled = enable;
     }
 }

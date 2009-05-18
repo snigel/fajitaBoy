@@ -10,17 +10,17 @@ import fajitaboy.AudioReciever;
 
 public class SoundReciever implements AudioReciever {
 
-	/**
-	 * The audio format that is used with SourceDataLine.
-	 */
+	/** The audio format that is used with SourceDataLine. */
 	private AudioFormat af;
 
-	/**
-	 * The line to the sound card.
-	 */
+	/** The data line to the sound card. */
 	private SourceDataLine sdl;
 	
+	/** Audio volume */
 	double volume;
+	
+	/** Enable/disable audio output */
+	boolean enabled;
 
 	/**
 	 * Sets up the line to the sound card and creates the fours sound channels.
@@ -39,10 +39,10 @@ public class SoundReciever implements AudioReciever {
 
 	/**
 	 * Generates and outputs a clip of sound.
-	 */
+	 * */
 	public final void transmitAudio(byte[] data) {
 		
-		if ( volume <= 0 || sdl == null )
+		if ( enabled == false || volume <= 0 || sdl == null )
 			return;
 		
 		// Check if the available space in data is less then
@@ -80,9 +80,11 @@ public class SoundReciever implements AudioReciever {
     			sdl = (SourceDataLine) AudioSystem.getLine(info);
 				sdl.open(af);
 	    		sdl.start();
+	    		enabled = true;
 			} catch (LineUnavailableException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				enabled = false;
 			}
         }
     }
@@ -93,10 +95,11 @@ public class SoundReciever implements AudioReciever {
         	sdl.stop();
         	sdl.close();
         }
+        enabled = false;
     }
     
     public boolean isAudioEnabled() {
-    	return (sdl != null);
+    	return enabled;
     }
 
     /**
@@ -117,5 +120,12 @@ public class SoundReciever implements AudioReciever {
     public final int getVolume() {
         return (int)(volume * 100);
     }
+
+	public void enableAudio(boolean enable) {
+		if ( enable )
+			enableAudio();
+		else
+			disableAudio();
+	}
     
 }

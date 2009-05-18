@@ -3,6 +3,7 @@ package fajitaboy;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
 
 import fajitaboy.gb.GameLinkCable;
 import fajitaboy.gb.StateMachine;
@@ -10,6 +11,7 @@ import fajitaboy.gb.audio.SoundReciever;
 
 import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.AudioConstants.*;
+import static fajitaboy.constants.EmulationConstants.*;
 
 /**
  * Encapsulates the emulator.
@@ -50,6 +52,9 @@ public class Emulator implements Runnable, StateMachine {
 	
 	/** Cycles to run per step */
 	int cycleRate;
+	
+	/** Semaphore to ask for permission to run oscillator. */
+    Semaphore runningMutex = new Semaphore(1);
 	
 	/**
 	 * Standard constructor
@@ -137,21 +142,91 @@ public class Emulator implements Runnable, StateMachine {
 			core2.reset();
 		p1keys = 0xFF;
 		p2keys = 0xFF;
+		enableRendering(true);
 	}
 	
+	/** Time to sleep before next frame */
+    long sleepTime;
+    
+    /** Time to begin next frame */
+    long nextUpdate;
+    
+    /** Amount of frames to skip */
+    int frameSkipCount;
+    
+    /** Amount of cycles ran */
+    int cycles;
+	
 	public void run() {
-		running = true;
-		if ( multiplayer == false ) {
+		try {
+			runningMutex.acquire();
+			running = true;
+			
+			cycles = 0;
+			nextUpdate = System.nanoTime();
+			int frameSkipCount = 0;
+			
 			while ( running ) {
-				core1.run(cycleRate);
+				
+				while ( cycles < GB_CYCLES_PER_FRAME ) {
+					core1.run(cycleRate);
+					if ( multiplayer ) {
+						core2.run(cycleRate);
+						gameLinkCable.performTransfer();
+					}
+					cycles += cycleRate;
+				}
+				
+				nextUpdate += GB_NANOS_PER_FRAME;
+	            sleepTime = nextUpdate - System.nanoTime();
+
+	            
+	            if ( sleepTime >= 0 ) {
+	            	// Sleep if running too fast AND rendering enabled
+	                enableRendering(true);
+	                frameSkipCount = 0;
+	                
+	                try {
+	                    Thread.sleep(sleepTime / 1000000);
+	                } catch (InterruptedException e) {}
+	                
+	            } else if ( sleepTime < -GB_NANOS_PER_FRAME * EMU_MAX_FRAMESKIP
+	            		|| frameSkipCount >= EMU_MAX_FRAMESKIP ) {
+	            	// Several frames behind, reset frameskip...
+	            	enableRendering(true);
+	            	frameSkipCount = 0;
+	            	nextUpdate = System.nanoTime();
+	            	
+	            } else if ( sleepTime < -GB_NANOS_PER_FRAME ) {
+	            	// More than a frame behind, skip a frame
+	            	enableRendering(false);
+	            	frameSkipCount += 1;
+	            } else {
+	            	// Else: run as normal
+	            	enableRendering(true);
+	            	frameSkipCount = 0;
+	            }
+				
+	            cycles -= GB_CYCLES_PER_FRAME;
 			}
-		} else {
-			while ( running ) {
-				core1.run(cycleRate);
-				core2.run(cycleRate);
-				gameLinkCable.performTransfer();
-			}
+			
+			runningMutex.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+	}
+	
+	/** True if rendering is enabled */
+	boolean renderingEnabled;
+	
+	public void enableRendering(boolean enable) {
+		renderingEnabled = enable;
+		if ( videoReciever1 != null )
+			videoReciever1.enableVideo(enable);
+		if ( videoReciever2 != null )
+			videoReciever2.enableVideo(enable);
+		//if ( soundReciever != null )
+		//	soundReciever.enableAudio(enable);
 	}
 
 	/**
@@ -163,6 +238,13 @@ public class Emulator implements Runnable, StateMachine {
 			core1.stop();
 		if ( core2 != null )
 			core2.stop();
+		// lock until running loop has stopped.
+        try {
+ 	        runningMutex.acquire();
+	        runningMutex.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** {@inheritDoc} */

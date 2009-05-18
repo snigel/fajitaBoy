@@ -22,42 +22,33 @@ public class GamePanelMultiplayer extends GamePanel {
 
     protected ColorModel colorModel;
     
-    public VideoReciever1 vr1;
-    public VideoReciever2 vr2;
+    public GPVideoReciever vr1;
+    public GPVideoReciever vr2;
     
     boolean vr1updated;
     boolean vr2updated;
     
-    class VideoReciever1 implements VideoReciever {
+    class GPVideoReciever implements VideoReciever {
     	
     	GamePanelMultiplayer gpm;
+    	int id;
     	
-    	public VideoReciever1(GamePanelMultiplayer gpm) {
+    	public GPVideoReciever(GamePanelMultiplayer gpm, int id) {
     		this.gpm = gpm;
+    		this.id = id;
     	}
     	
 		public void transmitVideo(int[][] data) {
-			gpm.transmitVideo(data, 1);
+			gpm.transmitVideo(data, id);
 		}
-    }
-    
-    
-    class VideoReciever2 implements VideoReciever {
-    	
-    	GamePanelMultiplayer gpm;
-    	
-    	public VideoReciever2(GamePanelMultiplayer gpm) {
-    		this.gpm = gpm;
-    	}
-    	
-		public void transmitVideo(int[][] data) {
-			gpm.transmitVideo(data, 2);
+
+		public void enableVideo(boolean enable) {			
 		}
     }
 
     public GamePanelMultiplayer(int zoom) {
-    	vr1 = new VideoReciever1(this);
-    	vr2 = new VideoReciever2(this);
+    	vr1 = new GPVideoReciever(this,1);
+    	vr2 = new GPVideoReciever(this,2);
     	vr1updated = false;
     	vr2updated = false;
     	
@@ -77,7 +68,10 @@ public class GamePanelMultiplayer extends GamePanel {
      */
     public final void transmitVideo(final int[][] data, int player) {
     	
-    	// refresh pixeldata
+    	if (!enabled)
+    		return;
+    		
+    	// refresh pixel data
     	if ( player == 1 ) {
     		int n = 0;
     		for (int i = 0; i < 144; i++) {

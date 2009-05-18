@@ -27,12 +27,6 @@ import fajitaboy.gb.memory.AddressBus;
 public class Oscillator implements StateMachine {
 
     private boolean running;
-    
-    
-    /**
-     * Semaphore to ask for permission to run oscillator.
-     */
-    Semaphore runningMutex = new Semaphore(1);
 
     /**
      * Next cycle to stop running core
@@ -181,13 +175,7 @@ public class Oscillator implements StateMachine {
      * make this method run in a separate thread.
      */
     public final void run(int runCycles) {
-    	//try {
-		//	runningMutex.acquire();
-		//} catch (InterruptedException e1) {}
         running = true;
-        //long sleepTime;
-        //long nextUpdate = System.nanoTime();
-        //int frameSkipCount = 0;
         nextHaltCycle += runCycles;
         
         while (running) {
@@ -195,24 +183,7 @@ public class Oscillator implements StateMachine {
 
             if (cycles > nextUpdateCycle) {
                 generateAudio();
-                /*nextUpdate += GB_NANOS_PER_FRAME;
-                sleepTime = nextUpdate - System.nanoTime();
-
-                // Sleep if running too fast
-                if (sleepTime >= 0) {
-                    lcd.disableFrameSkip();
-                    frameSkipCount = 0;
-                    try {
-                        Thread.sleep(sleepTime / 1000000);
-                    } catch (InterruptedException e) {}
-                } else if (frameSkipCount >= EMU_MAX_FRAMESKIP) {
-                    lcd.disableFrameSkip();
-                    frameSkipCount = 0;
-                    nextUpdate = System.nanoTime();
-                } else {
-                    lcd.enableFrameSkip();
-                    frameSkipCount++;
-                } */
+                
                 nextUpdateCycle += GB_CYCLES_PER_FRAME;
             }
             
@@ -220,7 +191,6 @@ public class Oscillator implements StateMachine {
             	running = false;
             }
         }
-        //runningMutex.release();
     }
 
     /**
@@ -230,13 +200,7 @@ public class Oscillator implements StateMachine {
     public final void stop() {
         running = false;
         
-        // lock until running loop has stopped.
-        try {
- 	        runningMutex.acquire();
-	        runningMutex.release();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+        
 
     }
 

@@ -55,7 +55,7 @@ public class SpriteAttribute implements Comparable {
     public int compareTo(Object other) {
         if (other != null) {
             SpriteAttribute so = (SpriteAttribute)other;
-            return new Integer(this.x).compareTo(new Integer(so.x));
+            return new Integer(-this.x).compareTo(new Integer(-so.x));
         } else {
             throw new NullPointerException();
         }
