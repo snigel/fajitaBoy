@@ -3,7 +3,6 @@ package fajitaboy.debugger;
 import java.awt.Dimension;
 import java.awt.event.KeyListener;
 
-import javax.sound.sampled.LineUnavailableException;
 import javax.swing.JFrame;
 
 import fajitaboy.ReadRom;
@@ -12,7 +11,6 @@ import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.memory.AddressBus;
 import static fajitaboy.constants.LCDConstants.*;
-import static fajitaboy.constants.AudioConstants.*;
 
 public class SimpleClient {
     public static void main(String[] args) {

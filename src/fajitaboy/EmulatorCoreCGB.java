@@ -1,15 +1,5 @@
 package fajitaboy;
 
-import static fajitaboy.constants.HardwareConstants.GB_CYCLES_PER_FRAME;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import fajitaboy.gb.Cpu;
-import fajitaboy.gb.GameLinkCable;
-import fajitaboy.gb.Oscillator;
-import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.CGB_Cpu;
 import fajitaboy.gbc.CGB_Oscillator;
 import fajitaboy.gbc.memory.CGB_AddressBus;

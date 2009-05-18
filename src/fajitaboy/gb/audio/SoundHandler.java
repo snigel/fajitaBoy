@@ -118,11 +118,10 @@ public class SoundHandler implements StateMachine {
      *            The sample rate that the sound should be sampled.
      * @param samples
      *            The number of samples per v-blank.
-     * @throws LineUnavailableException
      */
     public SoundHandler(final AddressBus ab, final float sampleRate,
             final int samples, AudioReciever audioReciever) {
-
+    	
         this.ab = ab;
         this.samples = samples;
         au1 = new SoundChannel1(ab, sampleRate);
@@ -162,8 +161,9 @@ public class SoundHandler implements StateMachine {
         au3.generateTone(destBuff, ch3Left, ch3Right, finalSamples);
         au4.generateTone(destBuff, ch4Left, ch4Right, finalSamples);
 
-     	if ( audioReciever != null)
+     	if ( audioReciever != null) {
      		audioReciever.transmitAudio(destBuff);
+     	}
     }
 
     /**

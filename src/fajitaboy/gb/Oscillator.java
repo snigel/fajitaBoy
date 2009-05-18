@@ -1,16 +1,12 @@
 package fajitaboy.gb;
 
 import static fajitaboy.constants.AudioConstants.*;
-import static fajitaboy.constants.EmulationConstants.*;
 import static fajitaboy.constants.AddressConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.Semaphore;
-
-import javax.sound.sampled.LineUnavailableException;
 
 import fajitaboy.AudioReciever;
 import fajitaboy.FileIOStreamHelper;
@@ -74,11 +70,6 @@ public class Oscillator implements StateMachine {
     protected SoundHandler soundHandler;
 
     /**
-     * Audio is disabled by default.
-     */
-    protected boolean audioEnabled;
-
-    /**
      * Sample rate for audio, default = 44100.
      */
     private int sampleRate = 44100;
@@ -87,11 +78,6 @@ public class Oscillator implements StateMachine {
      * Sound samples per frame... or something?
      */
     private int samples = 735;
-
-    /**
-     * Sound volume.
-     */
-    private int volume = 100;
 
     protected Oscillator() {}
 
@@ -113,8 +99,6 @@ public class Oscillator implements StateMachine {
         
         lcd = new LCD(ram);
         timer = new Timer();
-
-        audioEnabled = true;
 		soundHandler = new SoundHandler(ram, AUDIO_SAMPLERATE, AUDIO_SAMPLES, audioReciever);
 			
         reset();
@@ -139,9 +123,6 @@ public class Oscillator implements StateMachine {
      * Generates one frame of Audio.
      */
     private void generateAudio() {
-        if ( !audioEnabled )
-            return;
-
         soundHandler.generateTone();
     }
 
@@ -183,7 +164,6 @@ public class Oscillator implements StateMachine {
 
             if (cycles > nextUpdateCycle) {
                 generateAudio();
-                
                 nextUpdateCycle += GB_CYCLES_PER_FRAME;
             }
             
@@ -262,7 +242,6 @@ public class Oscillator implements StateMachine {
         FileIOStreamHelper.writeData(os, cycles, 8);
         FileIOStreamHelper.writeData(os, nextHaltCycle, 8);
         FileIOStreamHelper.writeData(os, nextUpdateCycle, 8);
-        FileIOStreamHelper.writeBoolean(os, audioEnabled);
         FileIOStreamHelper.writeData(os, sampleRate, 4);
         FileIOStreamHelper.writeData(os, samples, 4);
 
@@ -280,7 +259,6 @@ public class Oscillator implements StateMachine {
         cycles = FileIOStreamHelper.readData(is, 8);
         nextHaltCycle = FileIOStreamHelper.readData(is, 8);
         nextUpdateCycle = FileIOStreamHelper.readData(is, 8);
-        audioEnabled = FileIOStreamHelper.readBoolean(is);
         sampleRate = (int) FileIOStreamHelper.readData(is, 4);
         samples = (int) FileIOStreamHelper.readData(is, 4);
 

@@ -4,8 +4,6 @@ import static fajitaboy.constants.LCDConstants.*;
 import java.awt.*;
 import java.awt.image.*;
 
-import javax.swing.JPanel;
-
 import fajitaboy.EmulatorCore;
 import fajitaboy.VideoReciever;
 
@@ -58,6 +56,7 @@ public class GamePanelMultiplayer extends GamePanel {
         pixels = new int[160 * 144 * 2];
         this.zoom = zoom;
         colorModel = new DirectColorModel(24, 0x0000FF, 0x00FF00, 0xFF0000);
+        enabled = true;
     }
 
     /**
@@ -68,6 +67,7 @@ public class GamePanelMultiplayer extends GamePanel {
      */
     public final void transmitVideo(final int[][] data, int player) {
     	
+    	System.out.println("Got data " + player);
     	if (!enabled)
     		return;
     		
@@ -96,6 +96,7 @@ public class GamePanelMultiplayer extends GamePanel {
 
     	if ( vr1updated && vr2updated ) {
     		// create image with new pixels
+    		System.out.println("Rendered.");
     		image = Toolkit.getDefaultToolkit().createImage(
     				new MemoryImageSource(160*2, 144, colorModel, pixels, 0, 160*2));
     		// draw the image

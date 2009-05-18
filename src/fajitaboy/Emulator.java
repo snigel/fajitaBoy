@@ -11,7 +11,6 @@ import fajitaboy.gb.audio.SoundReciever;
 
 import static fajitaboy.constants.HardwareConstants.*;
 import static fajitaboy.constants.AudioConstants.*;
-import static fajitaboy.constants.EmulationConstants.*;
 
 /**
  * Encapsulates the emulator.
@@ -190,14 +189,18 @@ public class Emulator implements Runnable, StateMachine {
 	                    Thread.sleep(sleepTime / 1000000);
 	                } catch (InterruptedException e) {}
 	                
-	            } else if ( sleepTime < -GB_NANOS_PER_FRAME * EMU_MAX_FRAMESKIP
+	            } /*else if ( sleepTime < -GB_NANOS_PER_FRAME/2 ) {
+	            	// More than half a frame behind reset nextUpdate, skip a frame
+	            	enableRendering(true);
+	            	nextUpdate = System.nanoTime();
+	            }*//*else if ( sleepTime < -GB_NANOS_PER_FRAME * EMU_MAX_FRAMESKIP
 	            		|| frameSkipCount >= EMU_MAX_FRAMESKIP ) {
 	            	// Several frames behind, reset frameskip...
 	            	enableRendering(true);
 	            	frameSkipCount = 0;
 	            	nextUpdate = System.nanoTime();
 	            	
-	            } else if ( sleepTime < -GB_NANOS_PER_FRAME ) {
+	            } else if ( sleepTime < -GB_NANOS_PER_FRAME/10 ) {
 	            	// More than a frame behind, skip a frame
 	            	enableRendering(false);
 	            	frameSkipCount += 1;
@@ -205,7 +208,7 @@ public class Emulator implements Runnable, StateMachine {
 	            	// Else: run as normal
 	            	enableRendering(true);
 	            	frameSkipCount = 0;
-	            }
+	            } */
 				
 	            cycles -= GB_CYCLES_PER_FRAME;
 			}
