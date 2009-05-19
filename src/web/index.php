@@ -103,7 +103,6 @@ function renderHolder($pages, $activePage) {
   </div>
      
   <?php fbFooter($pages, $activePage); ?>
-  <script type="text/javascript" src="script/ga.js"></script>     
   <?php include "include/ga.html"; ?>
      </body>
      </html>
