@@ -21,20 +21,19 @@ public class LayeredGamePanel extends JLayeredPane {
 
     /** Panel height. */
     private int height;
-    
+
     int lcdW;
-    
+
     int lcdH;
 
     /**
      * Constructor.
      * 
-     * @param gp
-     *            game panel
+     * @param gp game panel
      */
-    public LayeredGamePanel(final GamePanel gp, int lcdW, int lcdH ) {
-    	this.lcdW = lcdW;
-    	this.lcdH = lcdH;
+    public LayeredGamePanel(final GamePanel gp, int lcdW, int lcdH) {
+        this.lcdW = lcdW;
+        this.lcdH = lcdH;
         gamePanel = gp;
         Dimension gamePanelDimension = gamePanel.getPreferredSize();
         width = gamePanelDimension.width;
@@ -47,8 +46,7 @@ public class LayeredGamePanel extends JLayeredPane {
     /**
      * Sets a component to be ontop of the game, ie the menu.
      * 
-     * @param jc
-     *            component
+     * @param jc component
      */
     public final void setOverlapingPane(final JComponent jc) {
         if (overlapingPane != null) {
@@ -78,10 +76,8 @@ public class LayeredGamePanel extends JLayeredPane {
      * Updates the size, and updates the zoom and position of the overlapping
      * panel.
      * 
-     * @param width
-     *            the width
-     * @param height
-     *            the height
+     * @param width the width
+     * @param height the height
      */
     public final void updateSize(int width, int height) {
         this.width = width;

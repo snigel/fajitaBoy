@@ -22,42 +22,46 @@ import static fajitaboy.constants.PanelConstants.*;
 public class KeyInputController {
 
     /** Joypad object. */
-	protected Emulator emulator;
+    private Emulator emulator;
 
     /** applet. */
-    protected FajitaBoy fajitaBoy;
+    private FajitaBoy fajitaBoy;
     /** gamepanel. */
-    protected LayeredGamePanel gamePanel;
-
-    /** keysettings. */
-    protected IngameMenuPanel keySettingsPanel;
+    private LayeredGamePanel gamePanel;
 
     /** cookies. */
-    protected CookieJar cookieJar;
+    private CookieJar cookieJar;
 
     /**
      * Enum for controller buttons.
      */
     public enum ControllerButton {
-        P1LEFT, P1RIGHT, P1UP, P1DOWN, P1A, P1B, P1START, P1SELECT,
-        P2LEFT, P2RIGHT, P2UP, P2DOWN, P2A, P2B, P2START, P2SELECT
+        P1LEFT, P1RIGHT, P1UP, P1DOWN, P1A, P1B, P1START, P1SELECT, P2LEFT, P2RIGHT, P2UP, P2DOWN, P2A, P2B, P2START, P2SELECT
     }
 
     // -- Button pushing actions
-    protected Action pushLeftPlayer1, pushRightPlayer1, pushUpPlayer1, pushDownPlayer1;
-    protected Action pushAPlayer1, pushBPlayer1, pushSelectPlayer1, pushStartPlayer1;
-    protected Action pushLeftPlayer2, pushRightPlayer2, pushUpPlayer2, pushDownPlayer2;
-    protected Action pushAPlayer2, pushBPlayer2, pushSelectPlayer2, pushStartPlayer2;
+    private Action pushLeftPlayer1, pushRightPlayer1, pushUpPlayer1,
+            pushDownPlayer1;
+    private Action pushAPlayer1, pushBPlayer1, pushSelectPlayer1,
+            pushStartPlayer1;
+    private Action pushLeftPlayer2, pushRightPlayer2, pushUpPlayer2,
+            pushDownPlayer2;
+    private Action pushAPlayer2, pushBPlayer2, pushSelectPlayer2,
+            pushStartPlayer2;
 
     // -- Button releasing actions
-    protected Action releaseLeftPlayer1, releaseRightPlayer1, releaseUpPlayer1, releaseDownPlayer1;
-    protected Action releaseAPlayer1, releaseBPlayer1, releaseSelectPlayer1, releaseStartPlayer1;
-    protected Action releaseLeftPlayer2, releaseRightPlayer2, releaseUpPlayer2, releaseDownPlayer2;
-    protected Action releaseAPlayer2, releaseBPlayer2, releaseSelectPlayer2, releaseStartPlayer2;
+    private Action releaseLeftPlayer1, releaseRightPlayer1, releaseUpPlayer1,
+            releaseDownPlayer1;
+    private Action releaseAPlayer1, releaseBPlayer1, releaseSelectPlayer1,
+            releaseStartPlayer1;
+    private Action releaseLeftPlayer2, releaseRightPlayer2, releaseUpPlayer2,
+            releaseDownPlayer2;
+    private Action releaseAPlayer2, releaseBPlayer2, releaseSelectPlayer2,
+            releaseStartPlayer2;
 
     // -- Applet actions
-    protected Action pause, menu, fullscreen, mute;
-    
+    private Action pause, menu, fullscreen, mute;
+
     public KeyInputController() {
     }
 
@@ -66,15 +70,13 @@ public class KeyInputController {
      * 
      * @param fb mainframe
      * @param lgp layeredgameframe
-     * @param ksp keysettingspanel
-     * @param jp the JoyPad object
+     * @param emu emulator
      */
     public KeyInputController(final FajitaBoy fb, final LayeredGamePanel lgp,
-            final IngameMenuPanel ksp, final Emulator emu) {
+            final Emulator emu) {
         fajitaBoy = fb;
         emulator = emu;
         gamePanel = lgp;
-        keySettingsPanel = ksp;
         cookieJar = fb.getCookieJar();
 
         initActions();
@@ -92,169 +94,196 @@ public class KeyInputController {
 
         pushLeftPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-                emulator.setKey( Emulator.Keys.LEFT, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.LEFT, true,
+                        Emulator.Player.PLAYER1);
             }
         };
         pushRightPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.RIGHT, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.RIGHT, true,
+                        Emulator.Player.PLAYER1);
             }
         };
         pushUpPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.UP, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.UP, true, Emulator.Player.PLAYER1);
             }
         };
         pushDownPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.DOWN, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.DOWN, true,
+                        Emulator.Player.PLAYER1);
             }
         };
         pushAPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.A, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.A, true, Emulator.Player.PLAYER1);
             }
         };
         pushBPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.B, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.B, true, Emulator.Player.PLAYER1);
             }
         };
         pushStartPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.START, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.START, true,
+                        Emulator.Player.PLAYER1);
             }
         };
         pushSelectPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.SELECT, true, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.SELECT, true,
+                        Emulator.Player.PLAYER1);
             }
         };
-        
+
         pushLeftPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.LEFT, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushRightPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.RIGHT, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushUpPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.UP, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushDownPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.DOWN, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushAPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.A, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushBPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.B, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushStartPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.START, true, Emulator.Player.PLAYER2 );
-			}
-		};
-		pushSelectPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.SELECT, true, Emulator.Player.PLAYER2 );
-			}
-		};
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.LEFT, true,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        pushRightPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.RIGHT, true,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        pushUpPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator
+                        .setKey(Emulator.Keys.UP, true, Emulator.Player.PLAYER2);
+            }
+        };
+        pushDownPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.DOWN, true,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        pushAPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.A, true, Emulator.Player.PLAYER2);
+            }
+        };
+        pushBPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.B, true, Emulator.Player.PLAYER2);
+            }
+        };
+        pushStartPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.START, true,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        pushSelectPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.SELECT, true,
+                        Emulator.Player.PLAYER2);
+            }
+        };
 
         // -- Button releasing actions ----------------------------------------
 
         releaseLeftPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.LEFT, false, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.LEFT, false,
+                        Emulator.Player.PLAYER1);
             }
         };
         releaseRightPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.RIGHT, false, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.RIGHT, false,
+                        Emulator.Player.PLAYER1);
             }
         };
         releaseUpPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.UP, false, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.UP, false,
+                        Emulator.Player.PLAYER1);
             }
         };
         releaseDownPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.DOWN, false, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.DOWN, false,
+                        Emulator.Player.PLAYER1);
             }
         };
         releaseAPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.A, false, Emulator.Player.PLAYER1 );
+                emulator
+                        .setKey(Emulator.Keys.A, false, Emulator.Player.PLAYER1);
             }
         };
         releaseBPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.B, false, Emulator.Player.PLAYER1 );
+                emulator
+                        .setKey(Emulator.Keys.B, false, Emulator.Player.PLAYER1);
             }
         };
         releaseStartPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.START, false, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.START, false,
+                        Emulator.Player.PLAYER1);
             }
         };
         releaseSelectPlayer1 = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	emulator.setKey( Emulator.Keys.SELECT, false, Emulator.Player.PLAYER1 );
+                emulator.setKey(Emulator.Keys.SELECT, false,
+                        Emulator.Player.PLAYER1);
             }
         };
-        
+
         releaseLeftPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.LEFT, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseRightPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.RIGHT, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseUpPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.UP, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseDownPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.DOWN, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseAPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.A, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseBPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.B, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseStartPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.START, false, Emulator.Player.PLAYER2 );
-			}
-		};
-		releaseSelectPlayer2 = new AbstractAction() {
-			public void actionPerformed(final ActionEvent e) {
-				emulator.setKey( Emulator.Keys.SELECT, false, Emulator.Player.PLAYER2 );
-			}
-		};
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.LEFT, false,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        releaseRightPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.RIGHT, false,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        releaseUpPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.UP, false,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        releaseDownPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.DOWN, false,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        releaseAPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator
+                        .setKey(Emulator.Keys.A, false, Emulator.Player.PLAYER2);
+            }
+        };
+        releaseBPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator
+                        .setKey(Emulator.Keys.B, false, Emulator.Player.PLAYER2);
+            }
+        };
+        releaseStartPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.START, false,
+                        Emulator.Player.PLAYER2);
+            }
+        };
+        releaseSelectPlayer2 = new AbstractAction() {
+            public void actionPerformed(final ActionEvent e) {
+                emulator.setKey(Emulator.Keys.SELECT, false,
+                        Emulator.Player.PLAYER2);
+            }
+        };
 
         // -- Applet actions --------------------------------------------------
 
@@ -284,7 +313,7 @@ public class KeyInputController {
         };
         mute = new AbstractAction() {
             public void actionPerformed(final ActionEvent e) {
-            	if (fajitaBoy.getEmulator().isAudioEnabled()) {
+                if (fajitaBoy.getEmulator().isAudioEnabled()) {
                     fajitaBoy.getEmulator().disableAudio();
                 } else {
                     fajitaBoy.getEmulator().enableAudio();
@@ -297,7 +326,7 @@ public class KeyInputController {
     /**
      * Initiates action map. Binds the input key strings to actions
      */
-    protected void initActionMap() {
+    private void initActionMap() {
 
         ActionMap am = gamePanel.getActionMap();
 
@@ -320,7 +349,7 @@ public class KeyInputController {
         am.put("releaseBP1", releaseBPlayer1);
         am.put("releaseStartP1", releaseStartPlayer1);
         am.put("releaseSelectP1", releaseSelectPlayer1);
-        
+
         // Pushers Player 1
         am.put("pushLeftP2", pushLeftPlayer2);
         am.put("pushRightP2", pushRightPlayer2);
@@ -355,24 +384,23 @@ public class KeyInputController {
 
         // -- Pushers ----------------------------------------------------------
 
-        setKey(KeyEvent.VK_LEFT, "LeftP1");
-        setKey(KeyEvent.VK_RIGHT, "RightP1");
-        setKey(KeyEvent.VK_UP, "UpP1");
-        setKey(KeyEvent.VK_DOWN, "DownP1");
-        setKey(KeyEvent.VK_X, "AP1");
-        setKey(KeyEvent.VK_Z, "BP1");
-        setKey(KeyEvent.VK_ENTER, "StartP1");
-        setKey(KeyEvent.VK_SHIFT, "SelectP1");
-        
-        setKey(KeyEvent.VK_NUMPAD4, "LeftP2");
-		setKey(KeyEvent.VK_NUMPAD6, "RightP2");
-		setKey(KeyEvent.VK_NUMPAD8, "UpP2");
-		setKey(KeyEvent.VK_NUMPAD5, "DownP2");
-		setKey(KeyEvent.VK_NUMPAD9, "AP2");
-		setKey(KeyEvent.VK_NUMPAD7, "BP2");
-		setKey(KeyEvent.VK_NUMPAD2, "StartP2");
-		setKey(KeyEvent.VK_NUMPAD1, "SelectP2");
+        setKey(KeyEvent.VK_A, "LeftP1");
+        setKey(KeyEvent.VK_D, "RightP1");
+        setKey(KeyEvent.VK_W, "UpP1");
+        setKey(KeyEvent.VK_S, "DownP1");
+        setKey(KeyEvent.VK_E, "AP1");
+        setKey(KeyEvent.VK_Q, "BP1");
+        setKey(KeyEvent.VK_X, "StartP1");
+        setKey(KeyEvent.VK_Z, "SelectP1");
 
+        setKey(KeyEvent.VK_LEFT, "LeftP2");
+        setKey(KeyEvent.VK_RIGHT, "RightP2");
+        setKey(KeyEvent.VK_UP, "UpP2");
+        setKey(KeyEvent.VK_DOWN, "DownP2");
+        setKey(KeyEvent.VK_L, "AP2");
+        setKey(KeyEvent.VK_K, "BP2");
+        setKey(KeyEvent.VK_I, "StartP2");
+        setKey(KeyEvent.VK_O, "SelectP2");
 
         // -- Appletors --------------------------------------------------------
 
@@ -391,7 +419,7 @@ public class KeyInputController {
      * @param key Key pressed, taken from KeyEvent
      * @param actionMapKey The string for a certain action
      */
-    public void setKey(final int key, final String actionMapKey) {
+    public final void setKey(final int key, final String actionMapKey) {
         setKey(KeyStroke.getKeyStroke(key, 0, true), "release" + actionMapKey);
         setKey(KeyStroke.getKeyStroke(key, 0, false), "push" + actionMapKey);
     }
@@ -405,7 +433,7 @@ public class KeyInputController {
      * @param key Key pressed, taken from KeyEvent
      * @param actionMapKey The string for a certain action
      */
-    public void setKey(final KeyStroke key, final String actionMapKey) {
+    public final void setKey(final KeyStroke key, final String actionMapKey) {
         InputMap ip = gamePanel
                 .getInputMap(JLayeredPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -427,7 +455,7 @@ public class KeyInputController {
      * @param key ie A
      * @param actionMapKey ie Left
      */
-    public void setKey(final String key, final String actionMapKey) {
+    public final void setKey(final String key, final String actionMapKey) {
         setKey(KeyStroke.getKeyStroke("pressed " + key), "push" + actionMapKey);
         setKey(KeyStroke.getKeyStroke("released " + key), "release"
                 + actionMapKey);
@@ -439,7 +467,7 @@ public class KeyInputController {
      * @param mapValue string value of fajitabutton
      * @return keyboard key as string
      */
-    public String getKey(final String mapValue) {
+    public final String getKey(final String mapValue) {
         InputMap ip = gamePanel
                 .getInputMap(JLayeredPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -457,7 +485,7 @@ public class KeyInputController {
     /**
      * Attempts to read keybindings from browser cookie.
      */
-    public void importKeys() {
+    public final void importKeys() {
         String cookie;
 
         cookie = cookieJar.get(COOKIE_KEYBIND);
@@ -468,7 +496,7 @@ public class KeyInputController {
 
         String[] keys = cookie.split(":");
 
-        if (keys.length != 16) {
+        if (keys.length != 18) {
             return;
         }
 
@@ -494,8 +522,11 @@ public class KeyInputController {
         setKey(keys[13], "BP2");
         setKey(keys[14], "StartP2");
         setKey(keys[15], "SelectP2");
+        setKey(keys[16], "Pause");
+        setKey(KeyStroke.getKeyStroke("pressed " + keys[16]), "pushPause");
+        setKey(KeyStroke.getKeyStroke("pressed " + keys[17]), "pushMute");
 
-        keySettingsPanel.refreshLabels();
+        fajitaBoy.refreshLabels();
     }
 
     /**
@@ -520,7 +551,9 @@ public class KeyInputController {
         bindings += ":" + getKey("BP2");
         bindings += ":" + getKey("StartP2");
         bindings += ":" + getKey("SelectP2");
-        
+        bindings += ":" + getKey("Pause");
+        bindings += ":" + getKey("Mute");
+
         cookieJar.put(COOKIE_KEYBIND, bindings);
 
     }

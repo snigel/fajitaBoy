@@ -254,9 +254,16 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             if (emulator != null) {
                 emulator.disableAudio();
             }
-            singleplayerLoadscreen.loadPath();
-            setContentPane(singleplayerLoadscreen);
-            showStatus("Singleplayer Screen");
+            if (!multiplayer) {
+                singleplayerLoadscreen.loadPath();
+                setContentPane(singleplayerLoadscreen);
+                showStatus("Singleplayer Screen");
+            } else {
+                multiplayerLoadscreen.loadPath();
+                setContentPane(multiplayerLoadscreen);
+                showStatus("Multiplayer Screen");
+            }
+
             break;
 
         case MULTIPLAYER_LOADSCREEN:
@@ -328,12 +335,10 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         layeredGamePanel = new LayeredGamePanel(gamePanel, LCD_W, LCD_H);
         layeredGamePanel.updateSize(getWidth(), getHeight());
 
-        kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
-                emulator);
+        kic = new KeyInputController(this, layeredGamePanel, emulator);
         kic.importKeys();
-
-        ingameMenuPanel.refreshLabels();
         ingameMenuPanel.setEmulator(emulator);
+        ingameMenuPanel.refreshLabels();
 
         changeGameState(GameState.PLAYGAME);
     }
@@ -352,8 +357,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
                 LCD_W * 2, LCD_H);
         layeredGamePanel.updateSize(getWidth(), getHeight());
 
-        kic = new KeyInputController(this, layeredGamePanel, ingameMenuPanel,
-                emulator);
+        kic = new KeyInputController(this, layeredGamePanel, emulator);
         kic.importKeys();
 
         ingameMenuPanel.refreshLabels();
@@ -402,6 +406,13 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             fullScreen.dispose();
             fullScreen = null;
         }
+    }
+
+    /**
+     * Refresh keybindings labels.
+     */
+    public void refreshLabels() {
+        ingameMenuPanel.refreshLabels();
     }
 
     /**
