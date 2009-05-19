@@ -78,7 +78,7 @@ function renderHolder($pages, $activePage) {
   include $activePage['path'];
 
 
-  include "doctype.php"
+  include "doctype.php";
   ?>
   
   <html>
@@ -104,6 +104,7 @@ function renderHolder($pages, $activePage) {
      
   <?php fbFooter($pages, $activePage); ?>
   <script type="text/javascript" src="script/ga.js"></script>     
+  <?php include "include/ga.html"; ?>
      </body>
      </html>
 	
