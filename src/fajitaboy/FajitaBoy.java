@@ -139,7 +139,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         } catch (Exception e) {
             System.out.println("Look&Feel fail. Using default.");
         }
-        
+
         addComponentListener(this);
         cookieJar = new CookieJar(this);
         executeJS("disableLinks()");
@@ -176,9 +176,10 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         // addKeyListener(this);
 
         addMouseListener(new MouseController());
-        
+
         // Better working keys
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new FairDispatcher());
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addKeyEventDispatcher(new FairDispatcher());
 
         // create the 'hidden' cursor
         hiddenCursor = Toolkit.getDefaultToolkit().createCustomCursor(
@@ -218,10 +219,11 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         switch (gameState) {
         case PLAYGAME:
             emulator.stop();
-            if (multiplayer == false)
+            if (!multiplayer) {
                 gamePanel.setIgnoreRepaint(false);
-            else
+            } else {
                 gamePanelMultiplayer.setIgnoreRepaint(false);
+            }
             layeredGamePanel.setCursor(Cursor.getDefaultCursor());
             break;
         case INGAME_MENU:
@@ -378,7 +380,12 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     public final void activateFullScreen() {
         if (fullScreen == null) {
             fullScreen = new FullScreenFrame(layeredGamePanel);
-            gamePanel.grabFocus();
+            if (!multiplayer) {
+                gamePanel.grabFocus();
+            } else {
+                gamePanelMultiplayer.grabFocus();
+            }
+
             setContentPane(fullScreenPlaceHolder);
             validate();
         }

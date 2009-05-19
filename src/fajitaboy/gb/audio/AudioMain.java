@@ -121,7 +121,7 @@ public class AudioMain implements VideoReciever {
         ch4Right = ((nr51 & 0x80) > 0);
     }
 
-	@Override
+    /** {@inheritDoc} */
 	public void enableVideo(boolean enable) {
 		// TODO Auto-generated method stub
 		
