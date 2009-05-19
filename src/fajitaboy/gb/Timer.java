@@ -23,12 +23,12 @@ public class Timer implements StateMachine {
     /**
      * Previous cycle at which the Timer was incremented.
      */
-    private long prevTimerInc;
+    private long timerCycles;
 
     /**
      * Next cycle at which the Divider will be incremented.
      */
-    private long nextDividerInc;
+    private long dividerCycles;
     
     /**
      * Default constructor.
@@ -38,8 +38,8 @@ public class Timer implements StateMachine {
     }
     
     public void reset() {
-    	prevTimerInc = 0;
-        nextDividerInc = GB_DIV_CLOCK;
+    	timerCycles = 0;
+        dividerCycles = 0;
     }
     
     /**
@@ -48,8 +48,8 @@ public class Timer implements StateMachine {
      * @param ram Pointer to memory
      */
     public void update( int cycleInc, MemoryInterface ram ) {
-    	prevTimerInc -= cycleInc;
-        nextDividerInc -= cycleInc;
+    	timerCycles += cycleInc;
+        dividerCycles += cycleInc;
     	
     	// Update timer
     	int tac = ram.read(ADDRESS_TAC);
@@ -69,7 +69,7 @@ public class Timer implements StateMachine {
             break;
         }
         
-        if ( prevTimerInc < -timerFreq ) {
+        if ( timerCycles >= timerFreq ) {
             if ((tac & 0x04) != 0) {
                 int tima = ram.read(ADDRESS_TIMA);
                 if (tima == 0xFF) {
@@ -80,15 +80,13 @@ public class Timer implements StateMachine {
                 }
             }
             
-            while ( prevTimerInc < 0 )  // TODO Not the best way to do it...
-            	prevTimerInc += timerFreq;   /* Could maybe use prevTimerInc &= (timerFreq-1)
-            								    but will that remove the sign? */ 
+            timerCycles %= timerFreq;
         }
         
         // Update Div
-        if ( nextDividerInc < 0 ) {
+        if ( dividerCycles >= GB_DIV_CLOCK ) {
     		ram.forceWrite( ADDRESS_DIV, (ram.read(ADDRESS_DIV) + 1) & 0xFF );
-    		nextDividerInc += GB_DIV_CLOCK;
+    		dividerCycles %= GB_DIV_CLOCK;
     	}
     }
     
@@ -96,15 +94,15 @@ public class Timer implements StateMachine {
      * {@inheritDoc}
      */
     public void saveState( FileOutputStream os ) throws IOException {
-    	FileIOStreamHelper.writeData(os, nextDividerInc, 8);
-    	FileIOStreamHelper.writeData(os, prevTimerInc, 8);
+    	FileIOStreamHelper.writeData(os, dividerCycles, 8);
+    	FileIOStreamHelper.writeData(os, timerCycles, 8);
     }
     
     /**
      * {@inheritDoc}
      */
     public void readState( FileInputStream is ) throws IOException {
-    	nextDividerInc = FileIOStreamHelper.readData(is, 8);
-    	prevTimerInc = FileIOStreamHelper.readData(is, 8);
+    	dividerCycles = FileIOStreamHelper.readData(is, 8);
+    	timerCycles = FileIOStreamHelper.readData(is, 8);
     }
 }
