@@ -13,7 +13,7 @@ public class SimpleKeyInputController implements KeyListener {
     /**
      * joypad object.
      */
-    private JoyPad jp;
+    //private JoyPad jp;
 
     /**
      * Creates a new KeyInputController object that handles key input.
@@ -22,7 +22,7 @@ public class SimpleKeyInputController implements KeyListener {
      *            the JoyPad object
      */
     public SimpleKeyInputController(final JoyPad joypad) {
-        jp = joypad;
+        //jp = joypad;
     }
 
     /**

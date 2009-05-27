@@ -1,22 +1,14 @@
 package fajitaboy.applet;
 
-import static fajitaboy.constants.LCDConstants.*;
-
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+@SuppressWarnings("serial")
 public class FullScreenFrame extends JFrame {
 
     public FullScreenFrame(LayeredGamePanel layeredGamePanel) {

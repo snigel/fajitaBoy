@@ -4,17 +4,15 @@ import static fajitaboy.constants.LCDConstants.*;
 import java.awt.*;
 import java.awt.image.*;
 
-import fajitaboy.EmulatorCore;
 import fajitaboy.VideoReciever;
 
 /**
  * The panel in which the emulator screen will be shown.
  * 
  */
+@SuppressWarnings("serial")
 public class GamePanelMultiplayer extends GamePanel {
     private int[] pixels;
-    private EmulatorCore core1;
-    private EmulatorCore core2;
     private int zoom;
     private Image image;
 
@@ -67,7 +65,6 @@ public class GamePanelMultiplayer extends GamePanel {
      */
     public final void transmitVideo(final int[][] data, int player) {
     	
-    	System.out.println("Got data " + player);
     	if (!enabled)
     		return;
     		
@@ -96,7 +93,6 @@ public class GamePanelMultiplayer extends GamePanel {
 
     	if ( vr1updated && vr2updated ) {
     		// create image with new pixels
-    		System.out.println("Rendered.");
     		image = Toolkit.getDefaultToolkit().createImage(
     				new MemoryImageSource(160*2, 144, colorModel, pixels, 0, 160*2));
     		// draw the image

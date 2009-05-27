@@ -163,7 +163,6 @@ public class Emulator implements Runnable, StateMachine {
 			
 			cycles = 0;
 			nextUpdate = System.nanoTime();
-			int frameSkipCount = 0;
 			
 			while ( running ) {
 				

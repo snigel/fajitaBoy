@@ -11,7 +11,6 @@ import javax.sound.sampled.SourceDataLine;
 import javax.swing.JFrame;
 
 import fajitaboy.AudioReciever;
-import fajitaboy.EmulatorCore;
 import fajitaboy.ReadRom;
 import fajitaboy.VideoReciever;
 import fajitaboy.gb.audio.SoundReciever;

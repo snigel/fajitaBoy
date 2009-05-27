@@ -1,10 +1,5 @@
 package fajitaboy;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import fajitaboy.ReadRom;
 
 import fajitaboy.gb.Cpu;

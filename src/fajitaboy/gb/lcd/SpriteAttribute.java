@@ -1,63 +1,77 @@
 package fajitaboy.gb.lcd;
 
-import fajitaboy.gb.memory.MemoryInterface;
 import static fajitaboy.constants.AddressConstants.*;
 
-public class SpriteAttribute implements Comparable {
+public class SpriteAttribute implements Comparable<SpriteAttribute> {
 	
 	/**
 	 * Sprite X coordinate + 8
 	 */
-    int x;
+    public int x;
     
     /**
      * Sprite Y coordinate + 16
      */
-    int y;
+    public int y;
     
     /**
      * Tile ID for this sprite.
      */
-    int patternNr;
+    public int patternNr;
     
     /**
      * True if sprite should be drawn behind Background.
      */
-    boolean behindBG;
+    public boolean behindBG;
     
     /**
      * When true, sprite is flipped horizontally.
      */
-    boolean flipX;
+    public boolean flipX;
     
     /**
      * When true, sprite is flipped vertically.
      */
-    boolean flipY;
+    public boolean flipY;
+    
+    public int flags;
     
     /**
      * Address to sprite palette.
      */
-    int paletteAddr;
+    public int paletteAddr;
     
-    public void read(MemoryInterface ram, int addr) {
-        y = ram.read(addr);
-        x = ram.read(addr + 1);
-        patternNr = ram.read(addr + 2);
-        
-        int flags = ram.read(addr + 3);
+    public SpriteAttribute() {
+    	x = 0;
+    	y = 0;
+    	patternNr = 0;
+    	behindBG = false;
+    	flipX = false;
+    	flipY = false;
+    	paletteAddr = ADDRESS_PALETTE_SPRITE0_DATA;
+    }
+    
+    public void setX( int x ) {
+    	this.x = x;
+    }
+    
+    public void setY( int y ) {
+    	this.y = y;
+    }
+    
+    public void setPattern( int p ) {
+    	patternNr = p;
+    }
+    
+    public void setFlags( int flags ) {
+    	this.flags = flags;
         behindBG = (flags & 0x80) > 0;
         flipY = (flags & 0x40) > 0;
         flipX = (flags & 0x20) > 0; 
         paletteAddr = (flags & 0x10) > 0 ? ADDRESS_PALETTE_SPRITE1_DATA : ADDRESS_PALETTE_SPRITE0_DATA;
     }
     
-    public int compareTo(Object other) {
-        if (other != null) {
-            SpriteAttribute so = (SpriteAttribute)other;
-            return new Integer(-this.x).compareTo(new Integer(-so.x));
-        } else {
-            throw new NullPointerException();
-        }
+    public int compareTo(SpriteAttribute other) {
+    	return other.x - this.x;
     }
 }

@@ -77,12 +77,6 @@ public final class InstructionSet {
      * @author arvid
      */
     static public final class Instruction {
-        /** Name. */
-        private String instructionName;
-
-        /** Operation code. */
-        private int opCode;
-
         /** Pretty output name. */
         private String prettyName;
 
@@ -100,9 +94,7 @@ public final class InstructionSet {
          */
         private Instruction(final int opCodez, final String name,
                 final String pretty) {
-            this.instructionName = name;
             this.prettyName = pretty;
-            // this.arguments = args;
         }
 
         /**

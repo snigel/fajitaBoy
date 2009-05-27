@@ -4,10 +4,8 @@ import static fajitaboy.constants.AddressConstants.*;
 import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gb.memory.DebugMemory;
 import fajitaboy.gb.memory.Echo;
-import fajitaboy.gb.memory.Eram;
 import fajitaboy.gb.memory.Hram;
 import fajitaboy.gb.memory.InterruptRegister;
-import fajitaboy.gb.memory.Oam;
 import fajitaboy.gb.memory.PaletteMemory;
 import fajitaboy.gb.memory.ROM;
 import fajitaboy.gb.memory.RamLow;
@@ -55,7 +53,7 @@ public class CGB_AddressBus extends AddressBus {
         hram = new Hram(ADDRESS_HRAM_START, ADDRESS_HRAM_END);
         initialize(hram, ADDRESS_HRAM_START, ADDRESS_HRAM_END);
 
-        oam = new Oam(ADDRESS_OAM_START, ADDRESS_OAM_END, this);
+        oam = new CGB_Oam(ADDRESS_OAM_START, ADDRESS_OAM_END, this);
         initialize(oam, ADDRESS_OAM_START, ADDRESS_OAM_END);
         
         rom = new ROM(ADDRESS_CARTRIDGE_START, cartridge);
@@ -69,7 +67,7 @@ public class CGB_AddressBus extends AddressBus {
         interruptRegister = new InterruptRegister();
         module[ADDRESS_INTERRUPT] = interruptRegister;
 
-        module[ADDRESS_DMA] = oam;        
+        module[ADDRESS_DMA] = getOam();        
         module[ADDRESS_VRAM_DMA_START] = vram;
         
         backgroundPaletteMemory = new PaletteMemory(ADDRESS_PALETTE_BACKGROUND_INDEX, 
@@ -93,7 +91,7 @@ public class CGB_AddressBus extends AddressBus {
         ramh.reset();
         rom.reset();
         vram.reset();
-        oam.reset();
+        getOam().reset();
         hram.reset();
         getIO().reset();
     }

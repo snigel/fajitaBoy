@@ -1,57 +1,76 @@
 package fajitaboy.gbc.lcd;
 
-import fajitaboy.gb.memory.MemoryInterface;
-
 /**
  * Sprite Attribute in CGB mode.
  */
-public class CGB_SpriteAttribute {
+public class CGB_SpriteAttribute implements Comparable<CGB_SpriteAttribute> {
     /**
      * Sprite X coordinate + 8
      */
-    int x;
+    public int x;
     
     /**
      * Sprite Y coordinate + 16
      */
-    int y;
+    public int y;
     
     /**
      * Tile ID for this sprite.
      */
-    int patternNr;
+    public int patternNr;
     
     /**
      * True if sprite should be drawn behind Background.
      */
-    boolean behindBG;
+    public boolean behindBG;
     
     /**
      * When true, sprite is flipped horizontally.
      */
-    boolean flipX;
+    public boolean flipX;
     
     /**
      * When true, sprite is flipped vertically.
      */
-    boolean flipY;
+    public boolean flipY;
     
     /**
      * Tile VRAM-Bank (0=Bank 0, 1=Bank 1).
      */
-    int vramBank;
+    public int vramBank;
     
     /**
      * Color palette number.
      */
-    int paletteNumber;
+    public int paletteNumber;
     
-    public void read(MemoryInterface ram, int addr) {
-        y = ram.read(addr);
-        x = ram.read(addr + 1);
-        patternNr = ram.read(addr + 2);
-        
-        int flags = ram.read(addr + 3);
+    public int flags;
+    
+    public CGB_SpriteAttribute() {
+    	x = 0;
+    	y = 0;
+    	patternNr = 0;
+    	behindBG = false;
+    	flipX = false;
+    	flipY = false;
+    	paletteNumber = 0;
+    	vramBank = 0;
+    }
+    
+    public void setX( int x ) {
+    	this.x = x;
+    }
+    
+    public void setY( int y ) {
+    	this.y = y;
+    }
+    
+    public void setPattern( int p ) {
+    	patternNr = p;
+    }
+    
+    public void setFlags( int flags ) {
+        this.flags = flags;
         behindBG = (flags & 0x80) > 0;
         flipY = (flags & 0x40) > 0;
         flipX = (flags & 0x20) > 0;
@@ -59,5 +78,9 @@ public class CGB_SpriteAttribute {
         vramBank = (flags & 0x08) >> 3;
         paletteNumber = (flags & 0x07);
 
+    }
+    
+    public int compareTo(CGB_SpriteAttribute other) {
+        return other.x - this.x;
     }
 }

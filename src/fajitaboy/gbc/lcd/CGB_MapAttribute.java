@@ -1,7 +1,5 @@
 package fajitaboy.gbc.lcd;
 
-import fajitaboy.gb.memory.MemoryInterface;
-
 public class CGB_MapAttribute {
 
     /**

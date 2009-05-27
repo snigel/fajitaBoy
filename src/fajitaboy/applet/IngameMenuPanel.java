@@ -7,7 +7,6 @@ import javax.swing.JTabbedPane;
 
 import fajitaboy.Emulator;
 import fajitaboy.FajitaBoy;
-import fajitaboy.gb.Oscillator;
 
 /**
  * A tabbed ingame menu.

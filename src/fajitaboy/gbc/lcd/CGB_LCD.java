@@ -6,15 +6,15 @@ import static fajitaboy.constants.LCDConstants.LCD_H;
 import static fajitaboy.constants.LCDConstants.LCD_W;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gbc.memory.CGB_AddressBus;
+import fajitaboy.gbc.memory.CGB_Oam;
 /**
  * 
  */
 public class CGB_LCD extends LCD {
     
-
-    private CGB_SpriteAttributeTable sat;
-
-    private CGB_AddressBus ram;
+	private CGB_AddressBus ram;
+    
+	private CGB_SpriteAttributeTable sat;
     
     private CGB_Screen screen;
     
@@ -44,12 +44,12 @@ public class CGB_LCD extends LCD {
      *            Pointer to an AddressBusCgb.
      */
     public CGB_LCD(CGB_AddressBus ram) {
-        super(ram);
-        this.ram = ram;
-        sat = new CGB_SpriteAttributeTable();
+    	super(ram);
+    	this.ram = ram;
         screen = new CGB_Screen( ram.getBackgroundPaletteMemory(), ram.getSpritePaletteMemory());
         bgm = new CGB_BackgroundMap();
         wnd = new CGB_WindowMap();
+        sat = new CGB_SpriteAttributeTable(ram, lcdc, ram.getVram(), screen, (CGB_Oam)ram.getOam() );
         
         // Generate color conversion table, to match colors on CGB displays
         conversionTable = new int[32];
@@ -69,6 +69,8 @@ public class CGB_LCD extends LCD {
         	c += step;
         }
         conversionTable[31] = endColor;
+        
+        reset();
     }
     
     /**
@@ -101,8 +103,7 @@ public class CGB_LCD extends LCD {
             
             // Read and draw Sprites behind background and window.
             if (lcdc.objSpriteDisplay) {
-                sat.readSpriteAttributes(ram);
-                sat.draw(screen, true, ram, lcdc, ram.getVram(), ly);
+                sat.draw(true, ly);
             }
 
             // Read and draw background if enabled.
@@ -120,7 +121,7 @@ public class CGB_LCD extends LCD {
             // Read and draw sprites that are above bg & window, if sprites
             // enabled.
             if (lcdc.objSpriteDisplay) {
-                sat.draw(screen, false, ram, lcdc, ram.getVram(), ly);
+                sat.draw(false, ly);
             }
             
             // Read and draw background tiles that overrides oam priority.

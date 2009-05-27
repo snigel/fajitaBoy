@@ -1,82 +1,55 @@
 package fajitaboy.gb.lcd;
 
-import static fajitaboy.constants.LCDConstants.*;
-import static fajitaboy.constants.HardwareConstants.*;
-
-import java.util.PriorityQueue;
-import java.util.Queue;
-
 import fajitaboy.gb.memory.MemoryInterface;
+import fajitaboy.gb.memory.Oam;
 import fajitaboy.gb.memory.Vram;
 
 public class SpriteAttributeTable {
     
-	/**
-	 * Collection of sprites to be rendered behind background.
-	 */
-    Queue<SpriteAttribute> behindBG = new PriorityQueue<SpriteAttribute>();
-    
-    /**
-     * Collection of sprites to be rendered above background.
-     */
-    Queue<SpriteAttribute> aboveBG = new PriorityQueue<SpriteAttribute>();
-    
-    /**
-     * Default constructor.
-     */
-	public SpriteAttributeTable() {
-	}
+	Vram vram;
+	MemoryInterface ram;
+	LCDC lcdc;
+	Screen screen;
+	Oam oam;
 	
-	/**
-	 * Reads the sprite attribute table from memory.
-	 * @param ram Pointer to memory
-	 */
-	public void readSpriteAttributes(MemoryInterface ram) {
-		// Read sprite attribute table
-        int spriteAttrAddr = 0xFE00;
-        behindBG.clear();
-        aboveBG.clear();
-		for ( int i = 0; i < GB_SPRITE_ATTRIBUTES; i++ ) {
-            int saa = spriteAttrAddr + i*4;
-            SpriteAttribute sa =  new SpriteAttribute();
-            sa.read(ram, saa);
-
-            if (sa.behindBG) {
-                behindBG.add(sa);
-            } else {
-                aboveBG.add(sa);
-            }
-            
-		}
+	public SpriteAttributeTable(MemoryInterface ram, LCDC lcdc, Vram vram, Screen screen, Oam oam) {
+		this.ram = ram;
+		this.lcdc = lcdc;
+		this.vram = vram;
+		this.screen = screen;
+		this.oam = oam;
 	}
 	
 	/**
 	 * Draws sprites onto screen.
-	 * @param screen Pointer to screen
 	 * @param drawBehindBG Whether to draw the sprites that are above or behind the background
-	 * @param ram Pointer to memory
-	 * @param lcdc Pointer to LCDC information
-	 * @param vram Pointer to VRAM
 	 * @param ly Screen line to blit at
 	 */
-	public void draw(Screen screen, boolean drawBehindBG, MemoryInterface ram, LCDC lcdc, Vram vram, int ly) {
-	    Queue<SpriteAttribute> toDraw;
+	public void draw(boolean drawBehindBG, int ly) {
+		// Refresh draw order arrays in OAM
+		oam.updateDrawOrder();
+		
+		// Retrieve correct draw order array
+	    Object[] sprAttr;
         if (drawBehindBG) {
-            toDraw = behindBG;
+            sprAttr = oam.behindBGArray;
         } else {
-            toDraw = aboveBG;
+        	sprAttr = oam.aboveBGArray;
         }
         
         Tile[] tiles = vram.getTiles();
-        
-        for (SpriteAttribute sa : toDraw) {
+
+        // Iterate through draw order array
+        SpriteAttribute sa;
+        for ( int i = 0; i < sprAttr.length; i++ ) {
+        	sa = (SpriteAttribute)sprAttr[i];
             int id = sa.patternNr;
             int palette = ram.read(sa.paletteAddr);
             
             if ( lcdc.objSpriteSize ) {
                 // 8x16 sprite
-                int idLo = id & 0xFE;
-                int idHi = id | 0x01;
+                int idLo = id & 0xFFFE;
+                int idHi = id | 0x0001;
                 if ( sa.flipY ) {
                 	screen.blitSprite(tiles[idLo], palette, sa.x - 8, sa.y - 8, ly, sa.flipX, sa.flipY);
                 	screen.blitSprite(tiles[idHi], palette, sa.x - 8, sa.y - 16, ly, sa.flipX, sa.flipY);

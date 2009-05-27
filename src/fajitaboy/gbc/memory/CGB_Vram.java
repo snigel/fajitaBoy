@@ -1,7 +1,6 @@
 package fajitaboy.gbc.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
-import static fajitaboy.constants.LCDConstants.*;
 import static fajitaboy.constants.HardwareConstants.*;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.MemoryBankInterface;

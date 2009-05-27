@@ -3,7 +3,6 @@ package fajitaboy.debugger;
 import java.util.LinkedList;
 import java.util.List;
 
-import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gbc.memory.CGB_AddressBus;
 
 /**

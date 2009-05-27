@@ -20,7 +20,7 @@ public class LCD implements StateMachine {
     /**
      * Pointer to MemoryInterface class.
      */
-    private AddressBus ram;
+    protected AddressBus ram;
 
     /**
      * Contains the Background.
@@ -35,7 +35,7 @@ public class LCD implements StateMachine {
     /**
      * Contains the Sprite Attribute Table.
      */
-    private SpriteAttributeTable sat = new SpriteAttributeTable();
+    private SpriteAttributeTable sat;
 
     /**
      * Contains the screen pixels.
@@ -82,10 +82,14 @@ public class LCD implements StateMachine {
     public LCD(AddressBus ram) {
         this.ram = ram;
         lcdc = new LCDC(ram);
+        sat = new SpriteAttributeTable(ram, lcdc, ram.getVram(), screen, ram.getOam() );
         reset();
     }
 
-    /**
+    public LCD() {
+	}
+
+	/**
      * Resets LCD to default state.
      */
     public void reset() {
@@ -125,8 +129,7 @@ public class LCD implements StateMachine {
              * x-position.
              */
             if (lcdc.objSpriteDisplay) {
-                sat.readSpriteAttributes(ram);
-                sat.draw(screen, true, ram, lcdc, ram.getVram(), ly);
+                sat.draw(true, ly);
             }
 
             // Read and draw background if enabled.
@@ -144,7 +147,7 @@ public class LCD implements StateMachine {
             // Read and draw sprites that are above bg & window, if sprites
             // enabled.
             if (lcdc.objSpriteDisplay) {
-                sat.draw(screen, false, ram, lcdc, ram.getVram(), ly);
+                sat.draw(false, ly);
             }
         }
     }

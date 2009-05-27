@@ -8,8 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import fajitaboy.FileIOStreamHelper;
-import fajitaboy.constants.CartridgeConstants;
 import fajitaboy.gb.StateMachine;
 import fajitaboy.gb.memory.DebugMemory;
 
@@ -246,6 +244,14 @@ public class AddressBus implements MemoryInterface, StateMachine {
 
 	public IO getIO() {
 		return io;
+	}
+
+	public void setOam(Oam oam) {
+		this.oam = oam;
+	}
+
+	public Oam getOam() {
+		return oam;
 	}
 
 	/**

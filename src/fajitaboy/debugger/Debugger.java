@@ -22,7 +22,6 @@ import fajitaboy.gb.Cpu;
 import fajitaboy.gb.Oscillator;
 import fajitaboy.gb.lcd.LCD;
 import fajitaboy.gb.memory.AddressBus;
-import fajitaboy.gb.memory.IO;
 import fajitaboy.gb.memory.RomWriteException;
 import fajitaboy.gbc.CGB_Cpu;
 import fajitaboy.gbc.CGB_Oscillator;
@@ -515,9 +514,10 @@ public final class Debugger implements VideoReciever {
     }
 
     private void toggleKey(String key) {
-        IO.JoyPad jp = addressBus.getJoyPad();
         // TODO Fix!
         /*
+         * IO.JoyPad jp = addressBus.getJoyPad();
+         * 
          * if (key.equals("a")) { jp.setA(!jp.isA()); } else if
          * (key.equals("b")) { jp.setB(!jp.isB()); } else if
          * (key.equals("start")) { jp.setStart(!jp.isStart()); } else if

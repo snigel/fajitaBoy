@@ -12,6 +12,7 @@ import fajitaboy.VideoReciever;
  * The panel in which the emulator screen will be shown.
  * 
  */
+@SuppressWarnings("serial")
 public class GamePanel extends JPanel implements VideoReciever {
     private int[] pixels;
     private int zoom;

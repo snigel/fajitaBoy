@@ -1,5 +1,6 @@
 package fajitaboy.debugger;
 
+@SuppressWarnings("serial")
 public class InterruptedStepException extends Exception {
     private String msg;
     private int cycles;

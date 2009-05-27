@@ -1,16 +1,11 @@
 package fajitaboy.gbc.lcd;
 
-import static fajitaboy.constants.AddressConstants.ADDRESS_PALETTE_BG_DATA;
-import static fajitaboy.constants.AddressConstants.ADDRESS_WX;
-import static fajitaboy.constants.AddressConstants.ADDRESS_WY;
-import static fajitaboy.constants.HardwareConstants.GB_TILES;
-import static fajitaboy.constants.LCDConstants.LCD_MAP_W;
-import static fajitaboy.constants.LCDConstants.LCD_W;
+import static fajitaboy.constants.AddressConstants.*;
+import static fajitaboy.constants.HardwareConstants.*;
+import static fajitaboy.constants.LCDConstants.*;
 import fajitaboy.gb.lcd.LCDC;
-import fajitaboy.gb.lcd.Screen;
 import fajitaboy.gb.lcd.Tile;
 import fajitaboy.gb.memory.MemoryInterface;
-import fajitaboy.gb.memory.Vram;
 import fajitaboy.gbc.memory.CGB_Vram;
 
 public class CGB_WindowMap {

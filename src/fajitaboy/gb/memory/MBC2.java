@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import fajitaboy.FileIOStreamHelper;
-import fajitaboy.gb.StateMachine;
 
 
 
