@@ -118,7 +118,7 @@ public class CGB_BackgroundMap {
 			datax = (firstTileX + x) % LCD_MAP_W;
 	        CGB_MapAttribute tileAttr = tileAttributes[datay][datax];
 	        if (tileAttr.aboveSprites == drawAboveSprite) {
-	            tileId = tileAddresses[datay][datax] + tileAttr.vramBank * GB_TILES;
+	            tileId = tileAddresses[datay][datax] + tileAttr.vramBank * CGB_TILES;
 	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, dx, dy, ly, tileAttr.flipX, tileAttr.flipY, false);
 	       	}
             

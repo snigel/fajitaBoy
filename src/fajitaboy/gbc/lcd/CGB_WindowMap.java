@@ -115,7 +115,7 @@ public class CGB_WindowMap {
         for (int x = scx, tx = 0; x < LCD_W; x += 8, tx++) {
         	CGB_MapAttribute tileAttr = tileAttributes[firstTileY][tx];
         	if (tileAttr.aboveSprites == drawAboveSprite) {
-	            int tileId = tileAddresses[firstTileY][tx] + tileAttr.vramBank * GB_TILES;
+	            int tileId = tileAddresses[firstTileY][tx] + tileAttr.vramBank * CGB_TILES;
 	            screen.blitTile(tiles[tileId], tileAttr.PaletteNo, x, sy, ly, tileAttr.flipX, tileAttr.flipY, true);
         	}
         }
