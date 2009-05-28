@@ -102,13 +102,12 @@ public class StartScreenPanel extends JPanel implements ActionListener {
 
     /** {@inheritDoc} */
     public final void actionPerformed(final ActionEvent e) {
-
         if (e.getSource() == singleplayerButton) {
-            fajitaBoy.changeGameState(GameState.SINGLEPLAYER_LOADSCREEN);
+            fajitaBoy.setMultiplayer(false);
+            fajitaBoy.changeGameState(GameState.LOADSCREEN);
         } else if (e.getSource() == multiplayerButton) {
-            fajitaBoy.changeGameState(GameState.MULTIPLAYER_LOADSCREEN);
-        } else if (e.getSource() == multiplayerButton) {
-            System.out.println("Not implemented! :<");
+            fajitaBoy.setMultiplayer(true);
+            fajitaBoy.changeGameState(GameState.LOADSCREEN);
         }
     }
 

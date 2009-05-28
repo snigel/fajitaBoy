@@ -72,7 +72,7 @@ public class IngameMenuMain extends JPanel implements ActionListener {
     public final void actionPerformed(final ActionEvent e) {
 
         if (e.getSource() == newRom) {
-            fajitaBoy.changeGameState(GameState.SINGLEPLAYER_LOADSCREEN);
+            fajitaBoy.changeGameState(GameState.LOADSCREEN);
         } else if (e.getSource() == reset) {
             fajitaBoy.getEmulator().reset();
             fajitaBoy.changeGameState(GameState.PLAYGAME);

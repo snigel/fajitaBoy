@@ -24,7 +24,7 @@ import static fajitaboy.constants.PanelConstants.*;
  * @author Peter Olsson, Marcus Johansson
  */
 @SuppressWarnings("serial")
-public class SingleplayerLoadPanel extends JPanel implements ActionListener {
+public class LoadPanel extends JPanel implements ActionListener {
 
     /** Input field for rom path. */
     private JTextField fileStringField;
@@ -38,14 +38,18 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
     private JFileChooser fileChooser;
     /** Reference to the parent FajitaBoy. */
     private FajitaBoy fajitaBoy;
+    /** Title text. */
+    private JLabel title;
 
     /**
      * Standard constructor.
      * 
      * @param fb Reference to the FajitaBoy
      * @param jfc Reference to the filechooser
+     * @param title Title
      */
-    public SingleplayerLoadPanel(final FajitaBoy fb, final JFileChooser jfc) {
+    public LoadPanel(final FajitaBoy fb, final JFileChooser jfc,
+            final String text) {
 
         fileChooser = jfc;
         fajitaBoy = fb;
@@ -66,7 +70,7 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
 
         fileStringField.setText("/tetris.gb");
 
-        JLabel title = new JLabel("Singleplayer Game");
+        title = new JLabel(text);
         JLabel loadText = new JLabel("Select a ROM path");
 
         title.setFont(new Font("Verdana", Font.BOLD, 20));
@@ -135,6 +139,15 @@ public class SingleplayerLoadPanel extends JPanel implements ActionListener {
         if (FajitaBoy.checkFile(file)) {
             fileChooser.setSelectedFile(file);
         }
+    }
+
+    /**
+     * Sets title text.
+     * @param text title
+     */
+    public final void setText(final String text) {
+        title.setText(text);
+        validate();
     }
 
     /** {@inheritDoc} */
