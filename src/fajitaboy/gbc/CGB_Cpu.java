@@ -60,9 +60,9 @@ public class CGB_Cpu extends Cpu {
                 speedSwitch.toggleSpeed();
                 
                 if (speedSwitch.getSpeed() == 2) {
-                    ram.write(0x80, ADDRESS_SPEED_SWITCH);
+                    ram.write(ADDRESS_SPEED_SWITCH, 0x80);
                 } else {
-                    ram.write(0x00, ADDRESS_SPEED_SWITCH);
+                    ram.write(ADDRESS_SPEED_SWITCH, 0x00);
                 }
                 stop = false;
                 
