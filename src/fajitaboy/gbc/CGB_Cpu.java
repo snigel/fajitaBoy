@@ -2,6 +2,11 @@ package fajitaboy.gbc;
 
 import static fajitaboy.constants.AddressConstants.*;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
 import fajitaboy.gb.Cpu;
 import fajitaboy.gb.memory.MemoryInterface;
 
@@ -95,4 +100,13 @@ public class CGB_Cpu extends Cpu {
         }
     }
 
+    public void readState(FileInputStream is) throws IOException {
+		super.readState(is);
+		speedSwitch.readState(is);
+	}
+
+	public void saveState(FileOutputStream os) throws IOException {
+		super.saveState(os);
+		speedSwitch.saveState(os);
+	}
 }

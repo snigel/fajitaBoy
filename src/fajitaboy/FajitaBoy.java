@@ -479,6 +479,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         try {
             FileInputStream fis = new FileInputStream(state);
             emulator.readState(fis);
+            fis.close();
         } catch (IOException e) {
             errorMsg("State count not be read. Sorry.");
             e.printStackTrace();

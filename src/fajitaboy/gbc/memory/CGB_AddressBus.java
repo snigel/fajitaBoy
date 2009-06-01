@@ -1,6 +1,11 @@
 package fajitaboy.gbc.memory;
 
 import static fajitaboy.constants.AddressConstants.*;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import fajitaboy.gb.memory.AddressBus;
 import fajitaboy.gb.memory.DebugMemory;
 import fajitaboy.gb.memory.Echo;
@@ -34,7 +39,7 @@ public class CGB_AddressBus extends AddressBus {
     
     protected void initializeModule(final int[] cartridge) {
         
-        // All modules must be initialized here
+        // All modules must be initialised here
         debug = new DebugMemory();
         initialize(debug, ADDRESS_DEBUG_START, ADDRESS_DEBUG_END);
 
@@ -108,4 +113,37 @@ public class CGB_AddressBus extends AddressBus {
         return spritePaletteMemory;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	interruptRegister.readState(fis);
+        raml.readState(fis);
+        echo.readState(fis);
+        ramh.readState(fis);
+        rom.readState(fis);
+        vram.readState(fis);
+        oam.readState(fis);
+        hram.readState(fis);
+        io.readState(fis);
+        backgroundPaletteMemory.readState(fis);
+        spritePaletteMemory.readState(fis);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	interruptRegister.saveState(fos);
+        raml.saveState(fos);
+        echo.saveState(fos);
+        ramh.saveState(fos);
+        rom.saveState(fos);
+        vram.saveState(fos);
+        oam.saveState(fos);
+        hram.saveState(fos);
+        io.saveState(fos);
+        backgroundPaletteMemory.saveState(fos);
+        spritePaletteMemory.saveState(fos);
+    }
 }

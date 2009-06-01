@@ -70,7 +70,7 @@ public class AddressBus implements MemoryInterface, StateMachine {
     /**
      * All the input/output addresses.
      */
-    private IO io;
+    protected IO io;
     
     protected MemoryBankController mbc;
 

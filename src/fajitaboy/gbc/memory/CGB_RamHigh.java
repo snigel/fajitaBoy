@@ -1,5 +1,10 @@
 package fajitaboy.gbc.memory;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
 import fajitaboy.gb.memory.RamHigh;
 
 /**
@@ -57,6 +62,31 @@ public class CGB_RamHigh extends RamHigh {
             throw new ArrayIndexOutOfBoundsException(String.format("MemoryComponent: could not write 0x%04x", address));
         }
         ram[addr + (length * (bank-1))] = data;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void readState( FileInputStream fis ) throws IOException {
+    	length = (int) FileIOStreamHelper.readData( fis, 4 );
+    	offset = (int) FileIOStreamHelper.readData( fis, 4 );
+    	bank = (int) FileIOStreamHelper.readData( fis, 1 );
+    	ram = new int[length*8];
+    	for ( int i = 0; i < length*8; i++ ) {
+    		ram[i] = (int) FileIOStreamHelper.readData( fis, 1 );
+    	}
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void saveState( FileOutputStream fos ) throws IOException {
+    	FileIOStreamHelper.writeData( fos, (long) length, 4 );
+    	FileIOStreamHelper.writeData( fos, (long) offset, 4 );
+    	FileIOStreamHelper.writeData( fos, (long) bank, 1 );
+    	for ( int i = 0; i < length*8; i++ ) {
+    		FileIOStreamHelper.writeData( fos, ram[i], 1 );
+    	}
     }
 
 }

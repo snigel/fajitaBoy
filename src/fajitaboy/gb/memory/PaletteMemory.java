@@ -4,9 +4,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.gb.StateMachine;
 import fajitaboy.gb.memory.MemoryInterface;
 
-public class PaletteMemory implements MemoryInterface {
+public class PaletteMemory implements MemoryInterface, StateMachine {
     
     /**
      * Palette Index address
@@ -131,14 +133,26 @@ public class PaletteMemory implements MemoryInterface {
 
     /** {@inheritDoc} */
 	public void readState(FileInputStream is) throws IOException {
-		// TODO Auto-generated method stub
+		index = (int)FileIOStreamHelper.readData(is, 4);
+		autoIncrement = FileIOStreamHelper.readBoolean(is);
 		
+		for ( int i = 0; i < 8; i++ ) {
+			for ( int j = 0; j < 4; j++ ) {
+				palettes[i][j] = (int)FileIOStreamHelper.readData(is, 4);
+			}
+		}
 	}
 
 	/** {@inheritDoc} */
 	public void saveState(FileOutputStream os) throws IOException {
-		// TODO Auto-generated method stub
+		FileIOStreamHelper.writeData(os, (long)index, 4);
+		FileIOStreamHelper.writeBoolean(os, autoIncrement);
 		
+		for ( int i = 0; i < 8; i++ ) {
+			for ( int j = 0; j < 4; j++ ) {
+				FileIOStreamHelper.writeData(os, (long)palettes[i][j], 4);
+			}
+		}
 	}
     
 }

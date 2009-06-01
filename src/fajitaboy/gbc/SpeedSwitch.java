@@ -1,9 +1,16 @@
 package fajitaboy.gbc;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import fajitaboy.FileIOStreamHelper;
+import fajitaboy.gb.StateMachine;
+
 /**
  * The SpeedSwitch should be used to know if which speed mode that is being used.
  */
-public class SpeedSwitch {
+public class SpeedSwitch implements StateMachine {
     
     private int speed;
     
@@ -38,5 +45,13 @@ public class SpeedSwitch {
     public void reset() {
         speed = 1;
     }
+
+	public void readState(FileInputStream is) throws IOException {
+		speed = (int)FileIOStreamHelper.readData(is, 1);
+	}
+
+	public void saveState(FileOutputStream os) throws IOException {
+		FileIOStreamHelper.writeData(os, (long)speed, 1);
+	}
 
 }

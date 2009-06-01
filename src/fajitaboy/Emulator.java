@@ -255,6 +255,8 @@ public class Emulator implements Runnable, StateMachine {
 			core1.saveState(fos);
 		if ( core2 != null )
 			core2.saveState(fos);
+		if ( gameLinkCable != null )
+			gameLinkCable.saveState(fos);
 	}
 
 	/** {@inheritDoc} */
@@ -263,6 +265,8 @@ public class Emulator implements Runnable, StateMachine {
 			core1.readState(fis);
 		if ( core2 != null )
 			core2.readState(fis);
+		if ( gameLinkCable != null )
+			gameLinkCable.readState(fis);
 	}
 	
 	public void setKey(Keys key, boolean pressed, Player player) {

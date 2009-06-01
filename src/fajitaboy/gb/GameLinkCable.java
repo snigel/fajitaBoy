@@ -1,8 +1,13 @@
 package fajitaboy.gb;
 
-import fajitaboy.EmulatorCoreGB;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-public class GameLinkCable {
+import fajitaboy.EmulatorCoreGB;
+import fajitaboy.FileIOStreamHelper;
+
+public class GameLinkCable implements StateMachine {
 	
 	EmulatorCoreGB core1;
 	EmulatorCoreGB core2;
@@ -69,5 +74,17 @@ public GameLinkCable() {
 		public void enableTransfer() {
 			glc.enableTransfer();
 		}
+	}
+
+	@Override
+	public void readState(FileInputStream is) throws IOException {
+		transfer = FileIOStreamHelper.readBoolean(is);
+		host = (int)FileIOStreamHelper.readData(is, 4);
+	}
+
+	@Override
+	public void saveState(FileOutputStream os) throws IOException {
+		FileIOStreamHelper.writeBoolean(os, transfer);
+		FileIOStreamHelper.writeData(os, (long)host, 4);
 	}
 }
