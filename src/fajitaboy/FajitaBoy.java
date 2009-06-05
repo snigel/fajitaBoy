@@ -194,6 +194,7 @@ public class FajitaBoy extends JApplet implements ComponentListener {
     /** {@inheritDoc} */
     public final void destroy() {
         if (emulator != null) {
+            emulator.stop();
             emulator.disableAudio();
         }
     }
