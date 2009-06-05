@@ -26,6 +26,11 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
     private MemoryInterface memInt;
     
     /**
+     * Data at position ADDRESS_VRAM_DMA_START
+     */
+    private int dmaStartData;
+    
+    /**
      * Creates a new Vram in CGB mode. 
      * @param start 
      * @param end
@@ -54,7 +59,9 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
     public int read(final int address) {
         
         int addr = (address - offset);
-        if (addr < 0 || addr > ram.length) {
+        if (address == ADDRESS_VRAM_DMA_START) {
+            return dmaStartData;
+        } else if (addr < 0 || addr > ram.length) {
             throw new ArrayIndexOutOfBoundsException("RamLow.java");
         } else if ( address < ADDRESS_TILE_DATA_END ) {
             return tiles[(addr / 16) + bank * 2 * GB_TILES].read(address);
@@ -125,7 +132,7 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
         }
         
         // bit 7 is 0 and shows that DMA is not Active
-        ram[ADDRESS_VRAM_DMA_START - offset] = (data & 0x7F);
+        dmaStartData = (data & 0x7F);
     }
     
     /**
@@ -151,6 +158,7 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
     	for ( int i = 0; i < length; i++ ) {
     		write(offset + i, (int) FileIOStreamHelper.readData( fis, 1 ));
     	}
+    	dmaStartData = (int) FileIOStreamHelper.readData( fis, 1 );
     }
     
     /**
@@ -168,5 +176,6 @@ public class CGB_Vram extends Vram implements MemoryBankInterface {
     	for ( int i = 0; i < length; i++ ) {
     		FileIOStreamHelper.writeData( fos, read(offset + i), 1 );
     	}
+    	FileIOStreamHelper.writeData( fos, dmaStartData, 1 );
     }
 }
