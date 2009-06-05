@@ -1,5 +1,7 @@
 package fajitaboy.applet;
 
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -19,7 +21,7 @@ import static fajitaboy.constants.PanelConstants.*;
 /**
  * Handles the key input.
  */
-public class KeyInputController {
+public class KeyInputController implements KeyEventDispatcher {
 
     /** Joypad object. */
     private Emulator emulator;
@@ -82,6 +84,9 @@ public class KeyInputController {
         initActions();
         initActionMap();
         initInputMap();
+        
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+            .addKeyEventDispatcher(this);
     }
 
     /**
@@ -564,4 +569,52 @@ public class KeyInputController {
     public void reset() {
         initInputMap();
     }
+
+
+    /**
+     * Makes sure all the pressed and released actions are executed,
+     * even for special keys like shift.
+     */
+	public boolean dispatchKeyEvent(KeyEvent e) {
+		if (fajitaBoy.getGameState() == GameState.PLAYGAME) {
+			
+			boolean pressed;
+			if (e.getID() == KeyEvent.KEY_PRESSED) {
+				pressed = true;
+			} else if (e.getID() == KeyEvent.KEY_RELEASED) {
+				pressed = false;
+			} else {
+				// treat as usual
+				return false;
+			}
+			ActionMap actionMap = gamePanel.getActionMap();
+	    	InputMap inputMap = gamePanel.getInputMap(JLayeredPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+	    	
+	    	KeyStroke keyStroke = KeyStroke.getKeyStroke(e.getKeyCode(), 0, !pressed);
+	    	Object binding = inputMap.get(keyStroke);
+	    	if (binding != null) {
+	    		Action action =  actionMap.get(binding);
+				
+		    	if(action != null) {
+		    		// Action found
+		    		ActionEvent actionEvent = new ActionEvent(e, 0, null);
+		    		action.actionPerformed(actionEvent);
+		    		e.consume();
+		    		return true;
+		    	}
+	    	}
+			
+		}
+    	// no action found, handle as usual
+		return false;
+	}
+	
+	/**
+	 * cleanup() should be called when a new KeyInputController is created.
+	 * Otherwise the keys will not work as they should in the new object.
+	 */
+	public void cleanup() {
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+        .removeKeyEventDispatcher(this);
+	}
 }
