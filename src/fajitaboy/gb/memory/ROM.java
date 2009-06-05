@@ -72,25 +72,27 @@ public class ROM implements MemoryInterface, MemoryBankInterface, StateMachine {
 
     public int getRomBanks() {
         switch (ram[ADDRESS_ROM_SIZE]) {
-        case 0:
+        case 0x00:
             return 2;
-        case 1:
+        case 0x01:
             return 4;
-        case 2:
+        case 0x02:
             return 8;
-        case 3:
+        case 0x03:
             return 16;
-        case 4:
+        case 0x04:
             return 32;
-        case 5:
+        case 0x05:
             return 64;
-        case 6:
+        case 0x06:
             return 128;
-        case 52:
+        case 0x07:
+            return 256;
+        case 0x52:
             return 72;
-        case 53:
+        case 0x53:
             return 80;
-        case 54:
+        case 0x54:
             return 96;
         default:
             return 0;
