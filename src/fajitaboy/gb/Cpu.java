@@ -26,10 +26,13 @@ public class Cpu implements StateMachine {
     protected int pc;
 
     /**
-     * Flag Register. ZNHC0000. This register is the same as register F.
-     * ZNHC0000
+     * Flags in the flag register. ZNHC0000. These flags represent
+     * the four upper bits in register F: ZNHC0000
      */
-    protected int cc;
+    private boolean flagZ;
+    private boolean flagN;
+    private boolean flagH;
+    private boolean flagC;
 
     /**
      * Stack Pointer 16bit register.
@@ -122,7 +125,10 @@ public class Cpu implements StateMachine {
      */
     public void reset() {
         pc = 0x0100;
-        cc = 0xB0;
+        flagZ = true;
+        flagN = false;
+        flagH = true;
+        flagC = true;
         a = 0x01;
         b = 0x00;
         c = 0x13;
@@ -260,15 +266,15 @@ public class Cpu implements StateMachine {
             cycleTime += 8;
             break;
         case 0x07: // RLCA
-            setZ(0);
-            setN(0);
-            setH(0);
+            flagZ = false;
+            flagN = false;
+            flagH = false;
             a = a << 1;
             if (a > 0xFF) {
-                setC(1);
+                flagC = true;
                 a = (a & 0xFF) + 1;
             } else {
-                setC(0);
+                flagC = false;
             }
             pc++;
             cycleTime += 4;
@@ -280,10 +286,10 @@ public class Cpu implements StateMachine {
             break;
         case 0x09: // ADD HL,BC
             temp = getHL() + getBC();
-            setH(((getHL() & 0x0FFF) + (getBC() & 0x0FFF)) > 0x0FFF);
+            flagH = (((getHL() & 0x0FFF) + (getBC() & 0x0FFF)) > 0x0FFF);
             setHL(temp);
-            setN(0);
-            setC(temp > 0xFFFF);
+            flagN = false;
+            flagC = temp > 0xFFFF;
             pc++;
             cycleTime += 8;
             break;
@@ -315,12 +321,15 @@ public class Cpu implements StateMachine {
         case 0x0f: // RRCA
             if ((a & 0x01) == 1) {
                 a = a | 0x0100;
-                setC(1);
+                flagC = true;
             } else {
-                setC(0);
+                flagC = false;
             }
             a = a >>> 1;
-            cc &= 0x1f;  // Performance!
+            //cc &= 0x1f;  // Performance!
+            flagZ = false;
+            flagN = false;
+            flagH = false;
             pc++;
             cycleTime += 4;
             break;
@@ -360,16 +369,18 @@ public class Cpu implements StateMachine {
             cycleTime += 8;
             break;
         case 0x17: // RLA
-            setZ(0);
-            setN(0);
-            setH(0);
+            flagZ = false;
+            flagN = false;
+            flagH = false;
             a = a << 1;
-            a += getC();
+            if (flagC) {
+                a++;
+            }
             if (a > 0xFF) {
-                setC(1);
+                flagC = true;
                 a = a & 0xFF;
             } else {
-                setC(0);
+                flagC = false;
             }
             pc++;
             cycleTime += 4;
@@ -380,10 +391,10 @@ public class Cpu implements StateMachine {
             break;
         case 0x19: // ADD HL,DE
             temp = getHL() + getDE();
-            setH(((getHL() & 0x0FFF) + (getDE() & 0x0FFF)) > 0x0FFF);
+            flagH = (((getHL() & 0x0FFF) + (getDE() & 0x0FFF)) > 0x0FFF);
             setHL(temp);
-            setN(0);
-            setC(temp > 0xFFFF);
+            flagN = false;
+            flagC = temp > 0xFFFF;
             pc++;
             cycleTime += 8;
             break;
@@ -413,20 +424,20 @@ public class Cpu implements StateMachine {
             cycleTime += 8;
             break;
         case 0x1f: // RRA
-            setZ(0);
-            setN(0);
-            setH(0);
-            if (getC() == 1) {
+            flagZ = false;
+            flagN = false;
+            flagH = false;
+            if (flagC) {
                 a = a | 0x100;
             }
-            setC(a & 0x01);
+            flagC = (a & 0x01) == 1;
             a = a >>> 1;
             pc++;
             cycleTime += 4;
             break;
 
         case 0x20: // JR NZ+e
-            if (getZ() == 0) {
+            if (!flagZ) {
                 pc += (byte) readn() + 2;
                 cycleTime += 12;
             } else {
@@ -468,29 +479,29 @@ public class Cpu implements StateMachine {
         case 0x27: // DAA - algorithm found at
             // http://www.worldofspectrum.org/faq/reference/z80reference.htm#DAA
             int correctionFactor;
-            if (a > 0x99 || getC() == 1) {
+            if (a > 0x99 || flagC) {
                 correctionFactor = 0x60;
-                setC(1);
+                flagC = true;
             } else {
                 correctionFactor = 0x00;
-                setC(0);
+                flagC = false;
             }
-            if ((a & 0x0F) > 0x09 || getH() == 1) {
+            if ((a & 0x0F) > 0x09 || flagH) {
                 correctionFactor |= 0x06;
             }
-            if (getN() == 0) {
+            if (!flagN) {
                 calcH(a, correctionFactor);
                 a = (a + correctionFactor) & 0xFF;
             } else {
                 calcHsub(a, correctionFactor);
                 a = (a - correctionFactor) & 0xFF;
             }
-            setZ(a == 0);
+            flagZ = a == 0;
             pc++;
             cycleTime += 4;
             break;
         case 0x28: // JR Z,d (Jump+n if Z=1)
-            if (getZ() == 1) {
+            if (flagZ) {
                 pc = pc + (byte) readn() + 2;
                 cycleTime += 12;
             } else {
@@ -501,9 +512,9 @@ public class Cpu implements StateMachine {
 
         case 0x29: // ADD HL,HL
             temp = getHL() + getHL();
-            setH(((getHL() & 0x0FFF) + (getHL() & 0x0FFF)) > 0x0FFF);
-            setN(0);
-            setC(temp > 0xFFFF);
+            flagH = (((getHL() & 0x0FFF) + (getHL() & 0x0FFF)) > 0x0FFF);
+            flagN = false;
+            flagC = temp > 0xFFFF;
             setHL(temp);
             pc++;
             cycleTime += 8;
@@ -536,14 +547,14 @@ public class Cpu implements StateMachine {
             break;
         case 0x2f: // CPL
             a = ~a & 0xff;
-            setN(1);
-            setH(1);
+            flagN = true;
+            flagH = true;
             pc++;
             cycleTime += 4;
             break;
 
         case 0x30: // JR NC,d
-            if (getC() == 0) {
+            if (!flagC) {
                 pc = pc + (byte) readn() + 2;
                 cycleTime += 12;
             } else {
@@ -583,14 +594,14 @@ public class Cpu implements StateMachine {
             cycleTime += 12;
             break;
         case 0x37: // SCF
-            setC(1);
-            setN(0);
-            setH(0);
+            flagC = true;
+            flagN = false;
+            flagH = false;
             pc++;
             cycleTime += 4;
             break;
         case 0x38: // JR C,d
-            if (getC() == 1) {
+            if (flagC) {
                 pc = pc + (byte) readn() + 2;
                 cycleTime += 12;
             } else {
@@ -600,10 +611,10 @@ public class Cpu implements StateMachine {
             break;
         case 0x39: // ADD HL,SP
             temp = getHL() + sp;
-            setH(((getHL() & 0x0FFF) + (sp & 0x0FFF)) > 0x0FFF);
+            flagH = ((getHL() & 0x0FFF) + (sp & 0x0FFF)) > 0x0FFF;
             setHL(temp);
-            setN(0);
-            setC(temp > 0xFFFF);
+            flagN = false;
+            flagC = temp > 0xFFFF;
             pc++;
             cycleTime += 8;
             break;
@@ -634,9 +645,9 @@ public class Cpu implements StateMachine {
             cycleTime += 8;
             break;
         case 0x3f: // CCF
-            setC(getC() == 0);
-            setN(0);
-            setH(0);
+            flagC = !flagC;
+            flagN = false;
+            flagH = false;
             pc++;
             cycleTime += 4;
             break;
@@ -1289,7 +1300,7 @@ public class Cpu implements StateMachine {
             break;
 
         case 0xc0: // RET NZ
-            if (getZ() == 0) {
+            if (!flagZ) {
                 ret();
                 cycleTime += 20;
             } else {
@@ -1303,7 +1314,7 @@ public class Cpu implements StateMachine {
             cycleTime += 12;
             break;
         case 0xc2: // JP NZ,nn
-            if (getZ() == 0) {
+            if (!flagZ) {
                 pc = readnn();
                 cycleTime += 16;
             } else {
@@ -1316,7 +1327,7 @@ public class Cpu implements StateMachine {
             cycleTime += 16;
             break;
         case 0xc4: // CALL NZ,nn
-            if (getZ() == 0) {
+            if (!flagZ) {
                 call();
                 cycleTime += 24;
             } else {
@@ -1340,7 +1351,7 @@ public class Cpu implements StateMachine {
             cycleTime += 16;
             break;
         case 0xc8: // RET Z
-            if (getZ() == 1) {
+            if (flagZ) {
                 ret();
                 cycleTime += 20;
             } else {
@@ -1353,7 +1364,7 @@ public class Cpu implements StateMachine {
             cycleTime += 16;
             break;
         case 0xca: // JP Z,nn
-            if (getZ() == 1) {
+            if (flagZ) {
                 pc = readnn();
                 cycleTime += 16;
             } else {
@@ -1407,7 +1418,7 @@ public class Cpu implements StateMachine {
             pc += 2;
             break;
         case 0xcc: // CALL Z,nn
-            if (getZ() == 1) {
+            if (flagZ) {
                 call();
                 cycleTime += 24;
             } else {
@@ -1430,7 +1441,7 @@ public class Cpu implements StateMachine {
             cycleTime += 16;
             break;
         case 0xd0: // RET NC
-            if (getC() == 0) {
+            if (!flagC) {
                 ret();
                 cycleTime += 20;
             } else {
@@ -1444,7 +1455,7 @@ public class Cpu implements StateMachine {
             cycleTime += 12;
             break;
         case 0xd2: // JP NC,nn
-            if (getC() == 0) {
+            if (!flagC) {
                 pc = readnn();
                 cycleTime += 16;
             } else {
@@ -1457,7 +1468,7 @@ public class Cpu implements StateMachine {
             cycleTime += 4;
             break;
         case 0xd4: // CALL NC,nn
-            if (getC() == 0) {
+            if (!flagC) {
                 call();
                 cycleTime += 24;
             } else {
@@ -1481,7 +1492,7 @@ public class Cpu implements StateMachine {
             cycleTime += 16;
             break;
         case 0xd8: // RET C
-            if (getC() == 1) {
+            if (flagC) {
                 ret();
                 cycleTime += 20;
             } else {
@@ -1495,7 +1506,7 @@ public class Cpu implements StateMachine {
             cycleTime += 16;
             break;
         case 0xda: // JP C,nn
-            if (getC() == 1) {
+            if (flagC) {
                 pc = readnn();
                 cycleTime += 16;
             } else {
@@ -1508,7 +1519,7 @@ public class Cpu implements StateMachine {
             cycleTime += 4;
             break;
         case 0xdc: // CALL C,nn
-            if (getC() == 1) {
+            if (flagC) {
                 call();
                 cycleTime += 24;
             } else {
@@ -1570,14 +1581,13 @@ public class Cpu implements StateMachine {
             break;
         case 0xe8: // ADD SP,dd
             temp = (byte) readn();
-            setZ(0);
-            setN(0);
+            flagZ = false;
+            flagN = false;
             if (temp < 0) { // Negative
-                setC((sp + temp) < 0);
+                flagC = (sp + temp) < 0;
                 calcHsub(sp, -temp);
-
             } else { // Positive
-                setC((sp + temp) > 0xFFFF);
+                flagC = (sp + temp) > 0xFFFF;
                 calcH(sp, temp);
             }
             sp = sp + temp;
@@ -1623,7 +1633,6 @@ public class Cpu implements StateMachine {
             break;
         case 0xF1: // POP AF
             setAF(pop());
-            cc = cc & 0xf0;
             pc++;
             cycleTime += 12;
             break;
@@ -1658,15 +1667,15 @@ public class Cpu implements StateMachine {
             break;
         case 0xf8: // LD HL,SP+dd
             temp = (byte) readn();
-            setZ(0);
-            setN(0);
+            flagZ = false;
+            flagN = false;
             setHL(sp + temp);
             if (temp < 0) { // Negative
-                setC((sp + temp) < 0);
+                flagC = (sp + temp) < 0;
                 calcHsub(sp, -temp);
 
             } else { // Positive
-                setC((sp + temp) > 0xFFFF);
+                flagC = (sp + temp) > 0xFFFF;
                 calcH(sp, temp);
             }
             pc += 2;
@@ -1731,88 +1740,88 @@ public class Cpu implements StateMachine {
         if (op < 0x40) {
             switch (op >>> 3) {
             case 0: // RLC
-                setN(0);
-                setH(0);
+                flagN = false;
+                flagH = false;
                 r = r << 1;
                 if (r > 0xFF) {
-                    setC(1);
+                    flagC = true;
                     r = (r & 0xFF) + 1;
                 } else {
-                    setC(0);
+                    flagC = false;
                 }
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 1: // RRC
-                setN(0);
-                setH(0);
-                setC((r & 0x01) == 1);
+                flagN = false;
+                flagH = false;
+                flagC = (r & 0x01) == 1;
                 r = r >>> 1;
-                if (getC() == 1) {
+                if (flagC) {
                     r = r | 0x80;
                 }
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 2: // RL
-                setN(0);
-                setH(0);
+                flagN = false;
+                flagH = false;
                 r = r << 1;
-                if (getC() == 1) {
+                if (flagC) {
                     r++;
                 }
                 if (r > 0xFF) {
-                    setC(1);
+                    flagC = true;
                     r = r & 0xFF;
                 } else {
-                    setC(0);
+                    flagC = false;
                 }
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 3: // RR
-                setN(0);
-                setH(0);
-                if (getC() == 1) {
+                flagN = false;
+                flagH = false;
+                if (flagC) {
                     r = r | 0x100;
                 }
-                setC((r & 0x01) == 1);
+                flagC = (r & 0x01) == 1;
                 r = r >>> 1;
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 4: // SLA
-                setN(0);
-                setH(0);
+                flagN = false;
+                flagH = false;
                 r = r << 1;
                 if (r > 0xFF) {
-                    setC(1);
+                    flagC = true;
                     r = r & 0xFF;
                 } else {
-                    setC(0);
+                    flagC = false;
                 }
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 5: // SRA
-                setN(0);
-                setH(0);
+                flagN = false;
+                flagH = false;
                 int b7 = r & 0x80;
-                setC((r & 0x01) == 1);
+                flagC = (r & 0x01) == 1;
                 r = r >>> 1;
                 r += b7;
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 6: // SWAP
-                setN(0);
-                setH(0);
-                setC(0);
+                flagN = false;
+                flagH = false;
+                flagC = false;
                 int highNibble = r >>> 4;
                 int lowNibble = r & 0x0F;
                 r = lowNibble * 0x10 + highNibble;
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             case 7: // SRL
-                setN(0);
-                setH(0);
-                setC((r & 0x01) == 1);
+                flagN = false;
+                flagH = false;
+                flagC = (r & 0x01) == 1;
                 r = r >>> 1;
-                setZ(r == 0);
+                flagZ = r == 0;
                 break;
             }
         } else {
@@ -1860,9 +1869,9 @@ public class Cpu implements StateMachine {
      */
     protected int inc(final int i) {
         int t = (i + 1) & 0xFF;
-        setZ(t == 0);
-        setN(0);
-        setH((t & 0x0F) == 0x00);
+        flagZ = t == 0;
+        flagN = false;
+        flagH = (t & 0x0F) == 0x00;
         return t;
     }
 
@@ -1874,9 +1883,9 @@ public class Cpu implements StateMachine {
      */
     protected int dec(final int i) {
         int t = (i - 1) & 0xFF;
-        setZ(t == 0);
-        setN(1);
-        setH((t & 0x0F) == 0x0F);
+        flagZ = t == 0;
+        flagN = true;
+        flagH = (t & 0x0F) == 0x0F;
         return t;
     }
 
@@ -1886,16 +1895,16 @@ public class Cpu implements StateMachine {
      *            The register value to add
      */
     protected void add(final int s) {
-        setN(0);
+        flagN = false;
         calcH(a, s);
         a += s;
         if (a > 0xFF) {
-            setC(1);
+            flagC = true;
             a = a & 0xFF;
         } else {
-            setC(0);
+            flagC = false;
         }
-        setZ(a == 0);
+        flagZ = a == 0;
     }
     
     /**
@@ -1903,16 +1912,24 @@ public class Cpu implements StateMachine {
      * @param s
      *            The register value to add
      */
-    // TODO Optimize this function
-    protected void adc(final int s) {
-        int carry = getC();
-        add(s);
-        if ( carry != 0 ) {  // Carry performed as separate operation ONLY if c=1
-            int flags = cc & 0x30;  // These flags ONLY should remain set...
-            add(1); 
-            cc = flags | cc;
-        }
-    }
+    protected void adc(final int s) {        
+         flagN = false;
+         calcH(a, s);
+         a += s;
+         if (flagC) {
+             if (!flagH) {
+            	 flagH = (a & 0x0F) == 0x0F;
+             }
+             a++;
+         }
+         if (a > 0xFF) {
+             flagC = true;
+             a = a & 0xFF;
+         } else {
+             flagC = false;
+         }
+         flagZ = a == 0;
+    }    
 
     /**
      * Operation SUB s (s is a 8bit value) (A <- A - s).
@@ -1920,16 +1937,16 @@ public class Cpu implements StateMachine {
      *            The register value to subtract
      */
     protected void sub(final int s) {
-        setN(1);
+        flagN = true;
         calcHsub(a, s);
         a -= s;
         if (a < 0) {
-            setC(1);
+            flagC = true;
             a = a & 0xFF;
         } else {
-            setC(0);
+            flagC = false;
         }
-        setZ(a == 0);
+        flagZ = a == 0;
     }
     
     /**
@@ -1937,15 +1954,23 @@ public class Cpu implements StateMachine {
      * @param s
      *            The register value to subtract
      */
-    // TODO Optimize function
     protected void sbc(final int s) {
-        int carry = getC();
-        sub(s);
-        if ( carry != 0 ) { // Carry performed as separate operation ONLY if c=1
-            int flags = cc & 0x30;  // These flags ONLY should remain set...
-            sub(1); 
-            cc = flags | cc;
+        flagN = true;
+        calcHsub(a, s);
+        a -= s;
+        if (flagC) {
+            if (!flagH) {
+            	flagH = (a & 0x0F) == 0;
+            }
+            a--;
         }
+        if (a < 0) {
+            flagC = true;
+            a = a & 0xFF;
+        } else {
+            flagC = false;
+        }
+        flagZ = a == 0;
     }
 
     /**
@@ -1954,11 +1979,11 @@ public class Cpu implements StateMachine {
      *            The register value.
      */
     protected void and(final int s) {
-        setN(0);
-        setH(1);
-        setC(0);
+        flagN = false;
+        flagH = true;
+        flagC = false;
         a = a & s;
-        setZ(a == 0);
+        flagZ = a == 0;
     }
 
     /**
@@ -1968,10 +1993,10 @@ public class Cpu implements StateMachine {
      */
     protected void xor(final int s) {
         a = (a ^ s) & 0xFF;
-        setZ(a == 0);
-        setN(0);
-        setH(0);
-        setC(0);
+        flagZ = a == 0;
+        flagN = false;
+        flagH = false;
+        flagC = false;
     }
 
     /**
@@ -1981,10 +2006,10 @@ public class Cpu implements StateMachine {
      */
     protected void or(final int s) {
         a = a | s;
-        setZ(a == 0);
-        setN(0);
-        setH(0);
-        setC(0);
+        flagZ = a == 0;
+        flagN = false;
+        flagH = false;
+        flagC = false;
     }
 
     /**
@@ -1994,10 +2019,10 @@ public class Cpu implements StateMachine {
      */
     protected void cp(final int s) {
         int t = a - s;
-        setN(1);
+        flagN = true;
         calcHsub(a, s);
-        setC(t < 0);
-        setZ(t == 0);
+        flagC = t < 0;
+        flagZ = t == 0;
     }
 
     /**
@@ -2045,12 +2070,12 @@ public class Cpu implements StateMachine {
      *            register value
      */
     protected void bit(final int bit, final int s) {
-        setN(0);
-        setH(1);
+        flagN = false;
+        flagH = true;
         if ( ((s >>> bit) & 0x01) == 0 ) {
-            setZ(1);
+            flagZ = true;
         } else {
-            setZ(0);
+            flagZ = false;
         }
     }
 
@@ -2078,99 +2103,6 @@ public class Cpu implements StateMachine {
         return s | (1 << bit);
     }
 
-    // Z
-    /**
-     * Changes the Z flag.
-     * @param value
-     *            If true the flag is set to 1, else the flag is set to 0.
-     */
-    protected void setZ(final boolean value) {
-        if (value) {
-            cc = cc | 0x80;
-        } else {
-            cc = cc & 0x7F;
-        }
-    }
-
-    /**
-     * Changes the Z flag.
-     * @param i
-     *            If 0 the flag is set to 0, else the flag is set to 1.
-     */
-    protected void setZ(final int i) {
-        setZ(i != 0);
-    }
-
-    /**
-     * Get value of flag Z.
-     * @return the value of Z.
-     */
-    protected int getZ() {
-        return (cc >>> 7) & 0x01;
-    }
-
-    // N
-    /**
-     * Changes the N flag.
-     * @param value
-     *            If true the flag is set to 1, else the flag is set to 0.
-     */
-    protected void setN(final boolean value) {
-        if (value) {
-            cc = cc | 0x40;
-        } else {
-            cc = cc & 0xBF;
-        }
-    }
-
-    /**
-     * Changes the N flag.
-     * @param i
-     *            If 0 the flag is set to 0, else the flag is set to 1.
-     */
-    protected void setN(final int i) {
-        setN(i != 0);
-    }
-
-    /**
-     * Get value of flag N.
-     * @return the value of N.
-     */
-    protected int getN() {
-        return (cc >>> 6) & 0x01;
-    }
-
-    // H
-    /**
-     * Changes the H flag.
-     * @param value
-     *            If true the flag is set to 1, else the flag is set to 0.
-     */
-    protected void setH(final boolean value) {
-        if (value) {
-            cc = cc | 0x20;
-        } else {
-            cc = cc & 0xDF;
-        }
-    }
-
-    /**
-     * Changes the H flag.
-     * @param i
-     *            If 0 the flag is set to 0, else the flag is set to 1.
-     */
-    protected void setH(final int i) {
-        setH(i != 0);
-    }
-
-    /**
-     * Get value of flag H.
-     * @return the value of H.
-     */
-    protected int getH() {
-        return (cc >>> 5) & 0x01;
-    }
-
     /**
      * Calculates the H flag for addition: v1 + v2.
      * @param v1
@@ -2179,7 +2111,7 @@ public class Cpu implements StateMachine {
      *            another value
      */
     protected void calcH(final int v1, final int v2) {
-        setH(((v1 & 0x0F) + (v2 & 0x0F)) > 0x0F);
+        flagH = ((v1 & 0x0F) + (v2 & 0x0F)) > 0x0F;
     }
 
     /**
@@ -2190,39 +2122,9 @@ public class Cpu implements StateMachine {
      *            value to subtract
      */
     protected void calcHsub(final int v1, final int v2) {
-        setH(((v1 & 0x0F) - (v2 & 0x0F)) < 0x00);
+        flagH = ((v1 & 0x0F) - (v2 & 0x0F)) < 0x00;
     }
 
-    // C
-    /**
-     * Changes the C flag.
-     * @param value
-     *            If true the flag is set to 1, else the flag is set to 0.
-     */
-    protected void setC(final boolean value) {
-        if (value) {
-            cc = cc | 0x10;
-        } else {
-            cc = cc & 0xEF;
-        }
-    }
-
-    /**
-     * Changes the C flag.
-     * @param i
-     *            If 0 the flag is set to 0, else the flag is set to 1.
-     */
-    protected void setC(final int i) {
-        setC(i != 0);
-    }
-
-    /**
-     * Get value of flag C.
-     * @return the value of C.
-     */
-    protected int getC() {
-        return (cc >>> 4) & 0x01;
-    }
 
     /**
      * Writes a 16bit value to memory.
@@ -2313,7 +2215,7 @@ public class Cpu implements StateMachine {
      */
     protected void setAF(final int largeInt) {
         a = (largeInt >> 8) & 0xFF;
-        cc = largeInt & 0xFF;
+        setF(largeInt & 0xFF);
     }
 
     /**
@@ -2322,7 +2224,7 @@ public class Cpu implements StateMachine {
      * @return The value of the AF register.
      */
     protected int getAF() {
-        return dblreg(a, cc);
+        return dblreg(a, getF());
     }
 
     /**
@@ -2348,7 +2250,10 @@ public class Cpu implements StateMachine {
      *            New 8bit value of F
      */
     public void setF(final int smallInt) {
-        cc = smallInt;
+        flagZ = (smallInt & 0x80) != 0;
+        flagN = (smallInt & 0x40) != 0;
+        flagH = (smallInt & 0x20) != 0;
+        flagC = (smallInt & 0x10) != 0;
     }
 
     /**
@@ -2356,7 +2261,8 @@ public class Cpu implements StateMachine {
      * @return Value of register F.
      */
     public int getF() {
-        return cc;
+        return (flagZ ? 0x80 : 0) | (flagN ? 0x40 : 0) | 
+               (flagH ? 0x20 : 0) | (flagC ? 0x10 : 0);
     }
 
     /**
@@ -2431,7 +2337,7 @@ public class Cpu implements StateMachine {
         os.write(c);
         os.write(d);
         os.write(e);
-        os.write(cc);
+        os.write(getF());
         os.write(h);
         os.write(l);
         
@@ -2454,7 +2360,7 @@ public class Cpu implements StateMachine {
         c = is.read();
         d = is.read();
         e = is.read();
-        cc = is.read();
+        setF(is.read());
         h = is.read();
         l = is.read();
         
@@ -2463,4 +2369,3 @@ public class Cpu implements StateMachine {
         stop = FileIOStreamHelper.readBoolean(is);
     }
 }
-
