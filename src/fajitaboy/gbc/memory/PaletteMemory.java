@@ -1,4 +1,4 @@
-package fajitaboy.gb.memory;
+package fajitaboy.gbc.memory;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -58,9 +58,9 @@ public class PaletteMemory implements MemoryInterface, StateMachine {
             int colorNo = (index & 7) >> 1;
             boolean evenIndex = (index & 0x01) == 0;
             if (evenIndex) {
-                return (palettes[paletteNo][colorNo] >>> 8); 
+                return (palettes[paletteNo][colorNo] & 0xFF); 
             } else {
-                return (palettes[paletteNo][colorNo] & 0xFF);
+                return (palettes[paletteNo][colorNo] >>> 8);
             }
         } 
         return -1;

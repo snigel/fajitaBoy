@@ -4,7 +4,7 @@ import static fajitaboy.constants.LCDConstants.LCD_H;
 import static fajitaboy.constants.LCDConstants.LCD_W;
 import fajitaboy.gb.lcd.Screen;
 import fajitaboy.gb.lcd.Tile;
-import fajitaboy.gb.memory.PaletteMemory;
+import fajitaboy.gbc.memory.PaletteMemory;
 
 public class CGB_Screen extends Screen {
 

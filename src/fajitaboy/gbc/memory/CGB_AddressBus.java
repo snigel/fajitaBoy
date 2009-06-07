@@ -11,7 +11,6 @@ import fajitaboy.gb.memory.DebugMemory;
 import fajitaboy.gb.memory.Echo;
 import fajitaboy.gb.memory.Hram;
 import fajitaboy.gb.memory.InterruptRegister;
-import fajitaboy.gb.memory.PaletteMemory;
 import fajitaboy.gb.memory.ROM;
 import fajitaboy.gb.memory.RamLow;
 
