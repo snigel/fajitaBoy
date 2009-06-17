@@ -76,13 +76,17 @@ public GameLinkCable() {
 		}
 	}
 
-	@Override
+	/**
+     * {@inheritDoc}
+     */
 	public void readState(FileInputStream is) throws IOException {
 		transfer = FileIOStreamHelper.readBoolean(is);
 		host = (int)FileIOStreamHelper.readData(is, 4);
 	}
 
-	@Override
+	/**
+     * {@inheritDoc}
+     */
 	public void saveState(FileOutputStream os) throws IOException {
 		FileIOStreamHelper.writeBoolean(os, transfer);
 		FileIOStreamHelper.writeData(os, (long)host, 4);

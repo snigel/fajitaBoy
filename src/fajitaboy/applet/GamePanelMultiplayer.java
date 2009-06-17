@@ -53,8 +53,7 @@ public class GamePanelMultiplayer extends GamePanel {
     	vr2 = new GPVideoReciever(this,2);
     	vr1updated = false;
     	vr2updated = false;
-    	
-        setIgnoreRepaint(true);
+
         setPreferredSize(new Dimension(LCD_W * zoom * 2, LCD_H * zoom));
 
         pixels = new int[160 * 144 * 2];

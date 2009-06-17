@@ -208,7 +208,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
         switch (gameState) {
         case PLAYGAME:
             emulator.stop();
-            gamePanel.setIgnoreRepaint(false);
             layeredGamePanel.setCursor(Cursor.getDefaultCursor());
             break;
         case INGAME_MENU:
@@ -255,7 +254,6 @@ public class FajitaBoy extends JApplet implements ComponentListener {
             if (multiplayer) {
                 executeJS("multiplayerSize()");
             }
-            gamePanel.setIgnoreRepaint(true);
 
             if (fullScreen != null) {
                 fullScreen.setContentPane(layeredGamePanel);

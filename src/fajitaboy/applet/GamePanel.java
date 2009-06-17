@@ -25,9 +25,7 @@ public class GamePanel extends JPanel implements VideoReciever {
     }
     
     public GamePanel(int zoom) {
-        setIgnoreRepaint(true);
         setPreferredSize(new Dimension(LCD_W * zoom, LCD_H * zoom));
-
         pixels = new int[160 * 144];
         this.zoom = zoom;
         colorModel = new DirectColorModel(24, 0x0000FF, 0x00FF00, 0xFF0000);
