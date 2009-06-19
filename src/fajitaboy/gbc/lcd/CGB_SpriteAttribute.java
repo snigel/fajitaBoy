@@ -46,27 +46,34 @@ public class CGB_SpriteAttribute implements Comparable<CGB_SpriteAttribute> {
     
     public int flags;
     
-    public CGB_SpriteAttribute() {
-    	x = 0;
-    	y = 0;
-    	patternNr = 0;
-    	behindBG = false;
-    	flipX = false;
-    	flipY = false;
-    	paletteNumber = 0;
-    	vramBank = 0;
+    /**
+     * Sprite positin in OAM
+     */
+    private int oamPosition;
+    
+    public CGB_SpriteAttribute(int oamPosition) {
+        this.oamPosition = oamPosition;
+        
+        x = 0;
+        y = 0;
+        patternNr = 0;
+        behindBG = false;
+        flipX = false;
+        flipY = false;
+        paletteNumber = 0;
+        vramBank = 0;
     }
     
     public void setX( int x ) {
-    	this.x = x;
+        this.x = x;
     }
     
     public void setY( int y ) {
-    	this.y = y;
+        this.y = y;
     }
     
     public void setPattern( int p ) {
-    	patternNr = p;
+        patternNr = p;
     }
     
     public void setFlags( int flags ) {
@@ -81,6 +88,6 @@ public class CGB_SpriteAttribute implements Comparable<CGB_SpriteAttribute> {
     }
     
     public int compareTo(CGB_SpriteAttribute other) {
-        return other.x - this.x;
+        return this.oamPosition - other.oamPosition;
     }
 }
